@@ -44,6 +44,107 @@ export type Database = {
         }
         Relationships: []
       }
+      collection_experiments: {
+        Row: {
+          added_at: string
+          collection_id: string
+          experiment_id: string
+          id: string
+        }
+        Insert: {
+          added_at?: string
+          collection_id: string
+          experiment_id: string
+          id?: string
+        }
+        Update: {
+          added_at?: string
+          collection_id?: string
+          experiment_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collection_experiments_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "collections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collection_experiments_experiment_id_fkey"
+            columns: ["experiment_id"]
+            isOneToOne: false
+            referencedRelation: "experiments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      collections: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_public: boolean
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      experiment_comments: {
+        Row: {
+          comment_text: string
+          created_at: string
+          experiment_id: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          comment_text: string
+          created_at?: string
+          experiment_id: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          comment_text?: string
+          created_at?: string
+          experiment_id?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experiment_comments_experiment_id_fkey"
+            columns: ["experiment_id"]
+            isOneToOne: false
+            referencedRelation: "experiments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       experiment_likes: {
         Row: {
           created_at: string
@@ -164,6 +265,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          display_name: string | null
+          github_handle: string | null
+          id: string
+          twitter_handle: string | null
+          updated_at: string
+          user_id: string
+          username: string | null
+          website_url: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          display_name?: string | null
+          github_handle?: string | null
+          id?: string
+          twitter_handle?: string | null
+          updated_at?: string
+          user_id: string
+          username?: string | null
+          website_url?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          display_name?: string | null
+          github_handle?: string | null
+          id?: string
+          twitter_handle?: string | null
+          updated_at?: string
+          user_id?: string
+          username?: string | null
+          website_url?: string | null
+        }
+        Relationships: []
       }
       user_activity: {
         Row: {
