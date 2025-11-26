@@ -92,7 +92,23 @@ const ExperimentComments = ({ experimentId }: ExperimentCommentsProps) => {
       return;
     }
 
-    if (!newComment.trim()) {
+    const trimmedComment = newComment.trim();
+
+    if (!trimmedComment) {
+      toast({
+        title: "Error",
+        description: "El comentario no puede estar vacío",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (trimmedComment.length > 2000) {
+      toast({
+        title: "Comentario muy largo",
+        description: "Máximo 2000 caracteres permitidos",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -103,7 +119,7 @@ const ExperimentComments = ({ experimentId }: ExperimentCommentsProps) => {
       .insert({
         experiment_id: experimentId,
         user_id: user.id,
-        comment_text: newComment.trim(),
+        comment_text: trimmedComment,
       });
 
     if (error) {
@@ -159,8 +175,14 @@ const ExperimentComments = ({ experimentId }: ExperimentCommentsProps) => {
             onChange={(e) => setNewComment(e.target.value)}
             placeholder="Escribe un comentario..."
             rows={3}
-            className="mb-3"
+            className="mb-2"
+            maxLength={2000}
           />
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs text-muted-foreground">
+              {newComment.length}/2000 caracteres
+            </span>
+          </div>
           <Button
             onClick={handleSubmitComment}
             disabled={loading || !newComment.trim()}
