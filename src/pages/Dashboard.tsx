@@ -8,6 +8,8 @@ import { ArrowLeft, TrendingUp, Clock, Target, Award, BarChart3 } from "lucide-r
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { millenniumProblems } from "@/data/millennium-problems";
+import BadgeDisplay from "@/components/BadgeDisplay";
+import { useBadgeChecker } from "@/hooks/useBadgeChecker";
 
 interface ActivityStats {
   totalTime: number;
@@ -21,6 +23,7 @@ interface ActivityStats {
 const Dashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { checkAndAwardBadges } = useBadgeChecker();
   const [stats, setStats] = useState<ActivityStats | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -31,7 +34,8 @@ const Dashboard = () => {
     }
     
     loadStats();
-  }, [user, navigate]);
+    checkAndAwardBadges();
+  }, [user, navigate, checkAndAwardBadges]);
 
   const loadStats = async () => {
     setLoading(true);
@@ -258,7 +262,17 @@ const Dashboard = () => {
             </motion.div>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-8">
+          {/* Badges Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="mt-8"
+          >
+            <BadgeDisplay />
+          </motion.div>
+
+          <div className="grid lg:grid-cols-2 gap-8 mt-8">
             {/* Time by Problem */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
