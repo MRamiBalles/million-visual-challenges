@@ -6,19 +6,43 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 import { checkRateLimit } from "../_shared/rateLimit.ts"
 
-const supabase = createClient(
-    Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-)
-
 const openaiKey = Deno.env.get("OPENAI_API_KEY")!
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
+
 serve(async (req) => {
+    if (req.method === 'OPTIONS') {
+        return new Response(null, { headers: corsHeaders })
+    }
+
     try {
-        const { question, problemId, userId } = await req.json()
-        if (!userId) {
-            return new Response(JSON.stringify({ error: "Unauthenticated" }), { status: 401 })
+        const authHeader = req.headers.get('Authorization')
+        if (!authHeader) {
+            return new Response(JSON.stringify({ error: "Unauthenticated" }), { 
+                status: 401, 
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+            })
         }
+
+        const supabase = createClient(
+            Deno.env.get("SUPABASE_URL")!,
+            Deno.env.get("SUPABASE_ANON_KEY")!,
+            { global: { headers: { Authorization: authHeader } } }
+        )
+
+        const { data: { user }, error: authError } = await supabase.auth.getUser()
+        if (authError || !user) {
+            return new Response(JSON.stringify({ error: "Unauthenticated" }), { 
+                status: 401, 
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+            })
+        }
+
+        const { question, problemId } = await req.json()
+        const userId = user.id
 
         // Rate limiting (10 per minute)
         await checkRateLimit(userId, "research-qa", 10)
@@ -49,7 +73,10 @@ serve(async (req) => {
 
         if (rpcError) {
             console.error("RAG RPC error:", rpcError)
-            return new Response(JSON.stringify({ error: "RAG lookup failed" }), { status: 500 })
+            return new Response(JSON.stringify({ error: "RAG lookup failed" }), { 
+                status: 500, 
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+            })
         }
 
         const context = relevantChunks
@@ -91,10 +118,13 @@ serve(async (req) => {
 
         // 5. Return answer with source metadata
         return new Response(JSON.stringify({ answer, sources: relevantChunks }), {
-            headers: { "Content-Type": "application/json" },
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         })
     } catch (e) {
         console.error(e)
-        return new Response(JSON.stringify({ error: "Internal server error" }), { status: 500 })
+        return new Response(JSON.stringify({ error: "Internal server error" }), { 
+            status: 500, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        })
     }
 })
