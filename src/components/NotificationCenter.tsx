@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Bell, Check, CheckCheck } from "lucide-react";
+import { Bell, Check, CheckCheck, X } from "lucide-react";
 import { useNotifications } from "@/hooks/useNotifications";
 import { useNavigate } from "react-router-dom";
 import {
@@ -14,7 +14,7 @@ import {
 
 const NotificationCenter = () => {
   const navigate = useNavigate();
-  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
+  const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification } = useNotifications();
   const [open, setOpen] = useState(false);
 
   const handleNotificationClick = (notification: any) => {
@@ -89,19 +89,32 @@ const NotificationCenter = () => {
                           })}
                         </p>
                       </div>
-                      {!notification.read && (
+                      <div className="flex gap-1">
+                        {!notification.read && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              markAsRead(notification.id);
+                            }}
+                          >
+                            <Check className="w-3 h-3" />
+                          </Button>
+                        )}
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-6 w-6"
+                          className="h-6 w-6 hover:text-destructive"
                           onClick={(e) => {
                             e.stopPropagation();
-                            markAsRead(notification.id);
+                            deleteNotification(notification.id);
                           }}
                         >
-                          <Check className="w-3 h-3" />
+                          <X className="w-3 h-3" />
                         </Button>
-                      )}
+                      </div>
                     </div>
                   </div>
                 ))}
