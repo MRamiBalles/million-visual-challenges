@@ -105,10 +105,29 @@ export const useNotifications = () => {
     }
   };
 
+  const deleteNotification = async (notificationId: string) => {
+    if (!user) return;
+
+    const { error } = await supabase
+      .from("notifications")
+      .delete()
+      .eq("id", notificationId)
+      .eq("user_id", user.id);
+
+    if (!error) {
+      setNotifications((prev) => prev.filter((n) => n.id !== notificationId));
+      setUnreadCount((prev) => {
+        const deletedNotif = notifications.find((n) => n.id === notificationId);
+        return deletedNotif && !deletedNotif.read ? Math.max(0, prev - 1) : prev;
+      });
+    }
+  };
+
   return {
     notifications,
     unreadCount,
     markAsRead,
     markAllAsRead,
+    deleteNotification,
   };
 };

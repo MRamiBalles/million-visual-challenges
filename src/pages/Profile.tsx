@@ -25,6 +25,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { millenniumProblems } from "@/data/millennium-problems";
+import { z } from "zod";
 
 interface Profile {
   id: string;
@@ -46,6 +47,29 @@ interface UserBadge {
     icon: string;
   };
 }
+
+const profileSchema = z.object({
+  display_name: z.string().trim().min(1, "El nombre es requerido").max(100, "Máximo 100 caracteres"),
+  bio: z.string().max(500, "Máximo 500 caracteres").optional().or(z.literal("")),
+  website_url: z.string().trim()
+    .refine((val) => !val || z.string().url().safeParse(val).success, {
+      message: "URL inválida"
+    })
+    .optional()
+    .or(z.literal("")),
+  twitter_handle: z.string().trim()
+    .refine((val) => !val || /^@?[A-Za-z0-9_]{1,15}$/.test(val), {
+      message: "Handle de Twitter inválido (máx 15 caracteres)"
+    })
+    .optional()
+    .or(z.literal("")),
+  github_handle: z.string().trim()
+    .refine((val) => !val || /^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i.test(val), {
+      message: "Usuario de GitHub inválido"
+    })
+    .optional()
+    .or(z.literal("")),
+});
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -183,6 +207,18 @@ const Profile = () => {
 
   const handleSaveProfile = async () => {
     if (!user || !profile) return;
+
+    // Validate form data
+    const validation = profileSchema.safeParse(editForm);
+    if (!validation.success) {
+      const firstError = validation.error.errors[0];
+      toast({
+        title: "Error de validación",
+        description: firstError.message,
+        variant: "destructive",
+      });
+      return;
+    }
 
     let avatarUrl = profile.avatar_url;
 
