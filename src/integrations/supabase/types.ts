@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_logs: {
+        Row: {
+          cost_usd: number | null
+          created_at: string | null
+          error_message: string | null
+          execution_time_ms: number | null
+          function_name: string
+          id: string
+          input_tokens: number | null
+          model: string | null
+          output_tokens: number | null
+          success: boolean | null
+          user_id: string | null
+        }
+        Insert: {
+          cost_usd?: number | null
+          created_at?: string | null
+          error_message?: string | null
+          execution_time_ms?: number | null
+          function_name: string
+          id?: string
+          input_tokens?: number | null
+          model?: string | null
+          output_tokens?: number | null
+          success?: boolean | null
+          user_id?: string | null
+        }
+        Update: {
+          cost_usd?: number | null
+          created_at?: string | null
+          error_message?: string | null
+          execution_time_ms?: number | null
+          function_name?: string
+          id?: string
+          input_tokens?: number | null
+          model?: string | null
+          output_tokens?: number | null
+          success?: boolean | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       badges: {
         Row: {
           created_at: string
@@ -332,6 +374,44 @@ export type Database = {
           },
         ]
       }
+      paper_embeddings: {
+        Row: {
+          chunk_index: number
+          chunk_text: string
+          created_at: string | null
+          embedding: string | null
+          id: string
+          paper_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          chunk_index: number
+          chunk_text: string
+          created_at?: string | null
+          embedding?: string | null
+          id?: string
+          paper_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          chunk_index?: number
+          chunk_text?: string
+          created_at?: string | null
+          embedding?: string | null
+          id?: string
+          paper_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "paper_embeddings_paper_id_fkey"
+            columns: ["paper_id"]
+            isOneToOne: false
+            referencedRelation: "research_papers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -374,6 +454,50 @@ export type Database = {
         }
         Relationships: []
       }
+      qa_history: {
+        Row: {
+          answer: string
+          context_papers: string[] | null
+          created_at: string | null
+          id: string
+          model: string | null
+          problem_id: number | null
+          question: string
+          tokens_used: number | null
+          user_id: string | null
+        }
+        Insert: {
+          answer: string
+          context_papers?: string[] | null
+          created_at?: string | null
+          id?: string
+          model?: string | null
+          problem_id?: number | null
+          question: string
+          tokens_used?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          answer?: string
+          context_papers?: string[] | null
+          created_at?: string | null
+          id?: string
+          model?: string | null
+          problem_id?: number | null
+          question?: string
+          tokens_used?: number | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "qa_history_problem_id_fkey"
+            columns: ["problem_id"]
+            isOneToOne: false
+            referencedRelation: "millennium_problems"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rate_limits: {
         Row: {
           action_type: string
@@ -398,6 +522,7 @@ export type Database = {
       research_papers: {
         Row: {
           abstract: string | null
+          ai_summary: Json | null
           arxiv_id: string | null
           authors: string[]
           citation_count: number | null
@@ -412,6 +537,7 @@ export type Database = {
         }
         Insert: {
           abstract?: string | null
+          ai_summary?: Json | null
           arxiv_id?: string | null
           authors: string[]
           citation_count?: number | null
@@ -426,6 +552,7 @@ export type Database = {
         }
         Update: {
           abstract?: string | null
+          ai_summary?: Json | null
           arxiv_id?: string | null
           authors?: string[]
           citation_count?: number | null
@@ -541,6 +668,21 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      match_paper_chunks: {
+        Args: {
+          match_count?: number
+          match_threshold?: number
+          problem_filter?: number
+          query_embedding: string
+        }
+        Returns: {
+          chunk_index: number
+          chunk_text: string
+          id: string
+          paper_id: string
+          similarity: number
+        }[]
       }
     }
     Enums: {
