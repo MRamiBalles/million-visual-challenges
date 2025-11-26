@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Brain, Infinity, Waves, Atom, Calculator, Network, CheckCircle2, Sparkles, LogOut } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import NotificationCenter from "@/components/NotificationCenter";
 
 const millenniumProblems = [
   {
@@ -115,6 +116,7 @@ const Index = () => {
             <div className="flex items-center gap-2">
               {user && (
                 <>
+                  <NotificationCenter />
                   <Button
                     variant="outline"
                     size="sm"
@@ -135,6 +137,13 @@ const Index = () => {
                     onClick={() => navigate("/community")}
                   >
                     Galería
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigate("/leaderboard")}
+                  >
+                    Leaderboard
                   </Button>
                 </>
               )}

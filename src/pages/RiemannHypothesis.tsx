@@ -11,11 +11,15 @@ import { PrimeDistributionVisualization } from "@/components/problems/riemann/Pr
 import { CriticalLineVisualization } from "@/components/problems/riemann/CriticalLineVisualization";
 import { millenniumProblems } from "@/data/millennium-problems";
 import { useAuth } from "@/hooks/useAuth";
+import { useActivityTracker } from "@/hooks/useActivityTracker";
 
 const RiemannHypothesis = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [explanationLevel, setExplanationLevel] = useState<"simple" | "intermediate" | "advanced">("simple");
+  const [activeTab, setActiveTab] = useState("zeta");
+  
+  useActivityTracker("riemann", activeTab);
   
   const problem = millenniumProblems.find(p => p.slug === "riemann")!;
 
@@ -117,7 +121,7 @@ const RiemannHypothesis = () => {
 
       {/* Main Content */}
       <section className="container mx-auto px-6 py-16">
-        <Tabs defaultValue="visualization" className="space-y-8">
+        <Tabs defaultValue="visualization" className="space-y-8" onValueChange={setActiveTab}>
           <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-3">
             <TabsTrigger value="visualization" className="gap-2">
               <Sparkles className="w-4 h-4" />
