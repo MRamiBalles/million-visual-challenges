@@ -1,36 +1,78 @@
-import { useState } from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Brain, BookOpen, Sparkles, ExternalLink } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ArrowLeft, Bookmark, BookmarkCheck } from "lucide-react";
+import {
+  ProblemHeader,
+  DifficultySelector,
+  ReferenceList,
+  VisualizationContainer,
+  type DifficultyLevel,
+} from "@/components/problem";
 import { ZetaFunctionVisualization } from "@/components/problems/riemann/ZetaFunctionVisualization";
 import { PrimeDistributionVisualization } from "@/components/problems/riemann/PrimeDistributionVisualization";
 import { CriticalLineVisualization } from "@/components/problems/riemann/CriticalLineVisualization";
-import { millenniumProblems } from "@/data/millennium-problems";
 import { useAuth } from "@/hooks/useAuth";
+import { useMillenniumProblem } from "@/hooks/useMillenniumProblem";
+import { useUserProgress } from "@/hooks/useUserProgress";
 import { useActivityTracker } from "@/hooks/useActivityTracker";
+import { millenniumProblems } from "@/data/millennium-problems";
 
 const RiemannHypothesis = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [explanationLevel, setExplanationLevel] = useState<"simple" | "intermediate" | "advanced">("simple");
-  const [activeTab, setActiveTab] = useState("zeta");
-  
-  useActivityTracker("riemann", activeTab);
-  
-  const problem = millenniumProblems.find(p => p.slug === "riemann")!;
+  const [difficulty, setDifficulty] = useState<DifficultyLevel>("simple");
+
+  // Fetch problem data from Supabase (fallback to local data during migration)
+  const { data: problemData, isLoading } = useMillenniumProblem("riemann");
+  const problem = problemData || millenniumProblems.find(p => p.slug === "riemann")!;
+
+  // User progress tracking
+  const problemId = problemData?.id || 2; // Fallback ID during migration
+  const {
+    updateLevel,
+    toggleBookmark,
+    isBookmarked,
+    updateTimeSpent
+  } = useUserProgress(problemId, user?.id);
+
+  // Track activity
+  useActivityTracker("riemann", "overview");
+
+  // Sync difficulty level with user progress
+  useEffect(() => {
+    if (user) {
+      updateLevel(difficulty);
+    }
+  }, [difficulty, user]);
+
+  // Track time spent (update every 30 seconds)
+  useEffect(() => {
+    if (!user) return;
+
+    const interval = setInterval(() => {
+      updateTimeSpent(30);
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [user, updateTimeSpent]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="container mx-auto px-6 py-16">
+          <Skeleton className="h-64 w-full mb-8" />
+          <Skeleton className="h-96 w-full" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <motion.header
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-gradient-header border-b border-border sticky top-0 z-50 backdrop-blur-sm"
-      >
+      {/* Navigation Header */}
+      <header className="border-b border-border sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <Button
@@ -41,316 +83,183 @@ const RiemannHypothesis = () => {
               <ArrowLeft className="w-4 h-4" />
               Problemas del Milenio
             </Button>
-            
-            <div className="flex items-center gap-2">
-              {!user && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => navigate("/auth")}
-                >
-                  Iniciar Sesión
-                </Button>
-              )}
-              <Badge variant="secondary" className="gap-2">
-                <Brain className="w-4 h-4" />
-                {problem.prize}
-              </Badge>
-            </div>
+
+            {user && (
+              <Button
+                variant={isBookmarked ? "default" : "outline"}
+                size="sm"
+                onClick={() => toggleBookmark()}
+                className="gap-2"
+              >
+                {isBookmarked ? (
+                  <>
+                    <BookmarkCheck className="w-4 h-4" />
+                    Guardado
+                  </>
+                ) : (
+                  <>
+                    <Bookmark className="w-4 h-4" />
+                    Guardar
+                  </>
+                )}
+              </Button>
+            )}
           </div>
         </div>
-      </motion.header>
+      </header>
 
-      {/* Hero Section */}
-      <section className="bg-gradient-primary border-b border-border">
-        <div className="container mx-auto px-6 py-16">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="max-w-4xl mx-auto text-center"
-          >
-            <Badge className="mb-4" style={{ backgroundColor: "hsl(195, 100%, 50%, 0.2)", color: "hsl(195, 100%, 50%)" }}>
-              {problem.field}
-            </Badge>
-            
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 text-foreground">
-              Hipótesis de Riemann
-            </h1>
-            
-            <p className="text-xl text-muted-foreground leading-relaxed mb-8">
-              {problem.description[explanationLevel]}
-            </p>
-
-            {/* Level Selector */}
-            <div className="flex items-center justify-center gap-2 mb-8">
-              {(["simple", "intermediate", "advanced"] as const).map((level) => (
-                <Button
-                  key={level}
-                  variant={explanationLevel === level ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setExplanationLevel(level)}
-                >
-                  {level === "simple" && "👋 Simple"}
-                  {level === "intermediate" && "🎓 Intermedio"}
-                  {level === "advanced" && "🔬 Avanzado"}
-                </Button>
-              ))}
-            </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto">
-              <Card className="p-4 bg-card/50 backdrop-blur">
-                <div className="text-2xl font-bold text-primary mb-1">1859</div>
-                <div className="text-sm text-muted-foreground">Bernhard Riemann</div>
-              </Card>
-              <Card className="p-4 bg-card/50 backdrop-blur">
-                <div className="text-2xl font-bold text-primary mb-1">$1M</div>
-                <div className="text-sm text-muted-foreground">Premio</div>
-              </Card>
-              <Card className="p-4 bg-card/50 backdrop-blur">
-                <div className="text-2xl font-bold text-primary mb-1">10¹³</div>
-                <div className="text-sm text-muted-foreground">Ceros verificados</div>
-              </Card>
-              <Card className="p-4 bg-card/50 backdrop-blur">
-                <div className="text-2xl font-bold text-destructive mb-1">Sin resolver</div>
-                <div className="text-sm text-muted-foreground">Estado</div>
-              </Card>
-            </div>
-          </motion.div>
-        </div>
-      </section>
+      {/* Problem Header */}
+      <ProblemHeader problem={problem} />
 
       {/* Main Content */}
       <section className="container mx-auto px-6 py-16">
-        <Tabs defaultValue="visualization" className="space-y-8" onValueChange={setActiveTab}>
-          <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-3">
-            <TabsTrigger value="visualization" className="gap-2">
-              <Sparkles className="w-4 h-4" />
-              Visualizaciones
-            </TabsTrigger>
-            <TabsTrigger value="explanation" className="gap-2">
-              <BookOpen className="w-4 h-4" />
-              Explicación
-            </TabsTrigger>
-            <TabsTrigger value="references" className="gap-2">
-              <ExternalLink className="w-4 h-4" />
-              Referencias
-            </TabsTrigger>
-          </TabsList>
-
-          {/* Visualizations Tab */}
-          <TabsContent value="visualization" className="space-y-12">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="space-y-8"
-            >
-              <div>
-                <h2 className="text-3xl font-bold mb-3 text-foreground">
-                  Distribución de Números Primos
-                </h2>
-                <p className="text-muted-foreground mb-6 max-w-3xl">
-                  Los números primos parecen distribuirse aleatoriamente, pero la función zeta de Riemann
-                  sugiere que hay un patrón oculto profundo.
-                </p>
-                <PrimeDistributionVisualization />
+        {/* Difficulty Selector with Explanations */}
+        <DifficultySelector
+          currentLevel={difficulty}
+          onLevelChange={setDifficulty}
+          className="mb-16"
+          simpleContent={
+            <div className="space-y-4">
+              <p className="text-lg leading-relaxed">
+                {problem.description?.simple || problem.description_simple}
+              </p>
+              <p className="leading-relaxed">
+                Los números primos (2, 3, 5, 7, 11, 13...) son los bloques fundamentales de todos los números.
+                Pero su distribución parece completamente aleatoria. ¿Hay algún patrón?
+              </p>
+              <p className="leading-relaxed">
+                Bernhard Riemann en 1859 descubrió una función matemática misteriosa (la función zeta)
+                que parece contener el secreto de cómo se distribuyen los primos.
+              </p>
+              <p className="leading-relaxed text-xl font-semibold text-primary mt-4">
+                La Hipótesis de Riemann predice exactamente dónde están los "ceros" de esta función,
+                lo que revelaría el patrón oculto de los números primos.
+              </p>
+            </div>
+          }
+          intermediateContent={
+            <div className="space-y-4">
+              <p className="text-lg leading-relaxed">
+                {problem.description?.intermediate || problem.description_intermediate}
+              </p>
+              <div className="bg-muted p-4 rounded-lg space-y-3">
+                <p><strong>Función Zeta:</strong> ζ(s) = 1 + 1/2ˢ + 1/3ˢ + 1/4ˢ + ...</p>
+                <p><strong>Ceros Triviales:</strong> En s = -2, -4, -6, ... (conocidos y aburridos)</p>
+                <p><strong>Ceros No Triviales:</strong> En el plano complejo, relacionados con distribución de primos</p>
+                <p><strong>La Hipótesis:</strong> Todos los ceros no triviales tienen Re(s) = 1/2</p>
               </div>
-
-              <div>
-                <h2 className="text-3xl font-bold mb-3 text-foreground">
-                  Función Zeta de Riemann ζ(s)
-                </h2>
-                <p className="text-muted-foreground mb-6 max-w-3xl">
-                  La función zeta mapea números complejos. Los "ceros no triviales" son donde ζ(s) = 0.
-                  La hipótesis dice que todos están en la línea Re(s) = 1/2.
-                </p>
-                <ZetaFunctionVisualization />
+              <p className="leading-relaxed">
+                Se han verificado más de <code className="bg-muted px-2 py-1 rounded">10¹³ ceros</code> y todos
+                están exactamente en la línea Re(s) = 1/2. Pero nadie ha probado que <em>todos infinitos ceros</em> están ahí.
+              </p>
+            </div>
+          }
+          advancedContent={
+            <div className="space-y-4">
+              <p className="text-lg font-mono leading-relaxed">
+                {problem.description?.advanced || problem.description_advanced}
+              </p>
+              <div className="bg-muted p-4 rounded-lg font-mono text-sm space-y-2">
+                <p>ζ(s) = Σ(n=1 to ∞) n⁻ˢ para Re(s) {'>'} 1</p>
+                <p>Continuación analítica a ℂ \ {'{'}1{'}'}</p>
+                <p>RH: ζ(s) = 0, s ∈ ℂ \ {'{ℝ'} {'⟹'} Re(s) = 1/2</p>
+                <p>Equivalente: |π(x) - Li(x)| = O(x^(1/2) log x)</p>
               </div>
+              <p className="leading-relaxed">
+                La RH es equivalente a múltiples conjeturas en teoría analítica de números. Su conexión con
+                matrices aleatorias (GUE) sugiere profundas relaciones con física cuántica. La función zeta
+                exhibe propiedades universales de sistemas cuánticos caóticos.
+              </p>
+            </div>
+          }
+        />
 
-              <div>
-                <h2 className="text-3xl font-bold mb-3 text-foreground">
-                  La Línea Crítica
-                </h2>
-                <p className="text-muted-foreground mb-6 max-w-3xl">
-                  Visualización de los primeros ceros no triviales en el plano complejo. 
-                  Todos los verificados están exactamente en Re(s) = 1/2.
-                </p>
-                <CriticalLineVisualization />
-              </div>
-            </motion.div>
-          </TabsContent>
+        {/* Visualizations Section */}
+        <div className="space-y-12">
+          <h2 className="text-4xl font-bold mb-8">Visualizaciones Interactivas</h2>
 
-          {/* Explanation Tab */}
-          <TabsContent value="explanation" className="space-y-8">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="max-w-4xl mx-auto"
-            >
-              <Card className="p-8">
-                <h2 className="text-3xl font-bold mb-6 text-foreground">
-                  ¿Qué es la Hipótesis de Riemann?
-                </h2>
-                
-                <div className="space-y-6 text-muted-foreground">
+          {/* Prime Distribution */}
+          <VisualizationContainer
+            title="Distribución de Números Primos"
+            description="Los números primos parecen aleatorios, pero la función zeta sugiere un patrón profundo"
+            fullscreenEnabled
+          >
+            <PrimeDistributionVisualization />
+          </VisualizationContainer>
+
+          {/* Zeta Function */}
+          <VisualizationContainer
+            title="Función Zeta de Riemann ζ(s)"
+            description="Visualización en el plano complejo. Los ceros no triviales están donde ζ(s) = 0"
+            fullscreenEnabled
+          >
+            <ZetaFunctionVisualization />
+          </VisualizationContainer>
+
+          {/* Critical Line */}
+          <VisualizationContainer
+            title="La Línea Crítica"
+            description="Todos los ceros verificados están exactamente en Re(s) = 1/2"
+            fullscreenEnabled
+          >
+            <CriticalLineVisualization />
+          </VisualizationContainer>
+        </div>
+
+        {/* References Section */}
+        <div className="mt-20">
+          <ReferenceList
+            title="Referencias Clave"
+            references={[
+              {
+                title: problem.clay_paper_author + " - The Riemann Hypothesis",
+                authors: [problem.clay_paper_author],
+                year: problem.clay_paper_year,
+                url: problem.clay_paper_url,
+                description: "Paper oficial del Clay Mathematics Institute",
+              },
+              ...(problem.keyReferences || []),
+            ]}
+          />
+
+          {/* Applications */}
+          <div className="mt-12 p-8 bg-gradient-to-br from-primary/5 to-accent/5 rounded-lg border border-primary/10">
+            <h3 className="text-2xl font-bold mb-6">Aplicaciones e Impacto</h3>
+            <div className="grid md::grid-cols-2 lg:grid-cols-3 gap-6">
+              {(problem.applications || []).map((app, index) => (
+                <div key={index} className="flex items-start gap-3">
+                  <div className="w-2 h-2 rounded-full bg-primary mt-2" />
                   <div>
-                    <h3 className="text-xl font-semibold text-foreground mb-3">Los Números Primos</h3>
-                    <p className="leading-relaxed">
-                      Los números primos (2, 3, 5, 7, 11, 13...) son los "átomos" de las matemáticas: 
-                      todo número se construye multiplicando primos. Pero su distribución parece caótica.
-                    </p>
-                  </div>
-
-                  <div className="bg-primary/5 border-l-4 border-primary p-4 rounded-r">
-                    <p className="text-foreground font-semibold mb-2">La pregunta fundamental:</p>
-                    <p>
-                      ¿Existe un patrón preciso que describa <strong>dónde aparecen los primos</strong>?
-                    </p>
-                  </div>
-
-                  <div>
-                    <h3 className="text-xl font-semibold text-foreground mb-3">La Función Zeta ζ(s)</h3>
-                    <p className="leading-relaxed mb-3">
-                      En 1859, Bernhard Riemann conectó los primos con una función misteriosa:
-                    </p>
-                    <div className="bg-muted/30 p-4 rounded font-mono text-center text-lg">
-                      ζ(s) = 1 + 1/2ˢ + 1/3ˢ + 1/4ˢ + ...
-                    </div>
-                    <p className="leading-relaxed mt-3">
-                      Esta función tiene "ceros" (puntos donde vale 0) que están misteriosamente 
-                      relacionados con la distribución de los primos.
-                    </p>
-                  </div>
-
-                  <div>
-                    <h3 className="text-xl font-semibold text-foreground mb-3">La Hipótesis</h3>
-                    <p className="leading-relaxed mb-3">
-                      Riemann propuso que todos los ceros no triviales de ζ(s) tienen parte real = 1/2.
-                      Es decir, están en la "línea crítica" Re(s) = 1/2 del plano complejo.
-                    </p>
-                    <div className="bg-accent/10 p-4 rounded">
-                      <p className="font-semibold text-foreground mb-2">Si es cierto:</p>
-                      <p className="text-sm">
-                        Tendríamos la descripción más precisa posible de cómo se distribuyen los primos.
-                        Impacto en criptografía, teoría de números, física cuántica.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3 className="text-xl font-semibold text-foreground mb-3">Estado Actual</h3>
-                    <p className="leading-relaxed">
-                      Se han verificado más de <strong>10 billones</strong> de ceros y todos están en la línea.
-                      Pero nadie ha podido demostrar que <strong>todos infinitos ceros</strong> están ahí.
-                      Es uno de los problemas más importantes y difíciles de las matemáticas.
-                    </p>
-                  </div>
-
-                  <div className="bg-muted/30 p-6 rounded-lg">
-                    <h3 className="text-xl font-semibold text-foreground mb-3">Conexiones sorprendentes</h3>
-                    <ul className="space-y-2 text-sm">
-                      <li className="flex items-start gap-2">
-                        <span className="text-primary">•</span>
-                        <span><strong>Física cuántica:</strong> Los ceros de zeta se comportan como niveles de energía de átomos pesados</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-primary">•</span>
-                        <span><strong>Criptografía:</strong> La seguridad RSA depende de que factorizar sea difícil, relacionado con primos</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-primary">•</span>
-                        <span><strong>Teoría del caos:</strong> Los primos exhiben patrones caóticos pero deterministas</span>
-                      </li>
-                    </ul>
+                    <p className="font-semibold">{app}</p>
                   </div>
                 </div>
-              </Card>
-            </motion.div>
-          </TabsContent>
+              ))}
+            </div>
 
-          {/* References Tab */}
-          <TabsContent value="references" className="space-y-8">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="max-w-4xl mx-auto"
-            >
-              <h2 className="text-3xl font-bold mb-6 text-foreground">
-                Referencias Académicas
-              </h2>
-
-              <div className="space-y-4">
-                <Card className="p-6 border-l-4 border-primary">
-                  <div className="flex items-start gap-4">
-                    <div className="bg-primary/10 p-3 rounded-lg">
-                      <BookOpen className="w-6 h-6 text-primary" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-bold text-lg mb-2 text-foreground">
-                        {problem.clayPaper.author} ({problem.clayPaper.year})
-                      </h3>
-                      <p className="text-muted-foreground mb-3">
-                        The Riemann Hypothesis - Clay Mathematics Institute Official Problem Statement
-                      </p>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => window.open(problem.clayPaper.url, "_blank")}
-                        className="gap-2"
-                      >
-                        <ExternalLink className="w-4 h-4" />
-                        Leer Paper
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
-
-                {problem.keyReferences.map((ref, index) => (
-                  <Card key={index} className="p-6">
-                    <div className="flex items-start gap-4">
-                      <div className="bg-muted p-3 rounded-lg">
-                        <BookOpen className="w-6 h-6 text-muted-foreground" />
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="font-bold text-lg mb-2 text-foreground">
-                          {ref.title}
-                        </h3>
-                        <p className="text-sm text-muted-foreground mb-2">
-                          {ref.authors.join(", ")} • {ref.year}
-                        </p>
-                        {ref.citations && (
-                          <Badge variant="secondary" className="mb-3">
-                            {ref.citations.toLocaleString()} citas
-                          </Badge>
-                        )}
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => window.open(ref.url, "_blank")}
-                          className="gap-2"
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                          Ver Fuente
-                        </Button>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-
-              <Card className="p-6 bg-muted/30 mt-8">
-                <h3 className="font-bold text-lg mb-4 text-foreground">Aplicaciones del Mundo Real</h3>
-                <div className="grid md:grid-cols-2 gap-4">
-                  {problem.applications.map((app, index) => (
-                    <div key={index} className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-primary" />
-                      <span className="text-muted-foreground">{app}</span>
-                    </div>
-                  ))}
-                </div>
-              </Card>
-            </motion.div>
-          </TabsContent>
-        </Tabs>
+            {/* Fun Facts */}
+            <div className="mt-8 p-6 bg-background/50 rounded-lg">
+              <h4 className="font-bold text-lg mb-4">Datos Sorprendentes</h4>
+              <ul className="space-y-3 text-sm">
+                <li className="flex items-start gap-2">
+                  <span className="text-primary">🔢</span>
+                  <span>Se han verificado más de <strong>10,000,000,000,000</strong> ceros y todos están en la línea crítica</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-primary">⚛️</span>
+                  <span>Los ceros de zeta se comportan como niveles de energía de núcleos atómicos pesados (Random Matrix Theory)</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-primary">🔐</span>
+                  <span>La seguridad RSA depende de que factorizar números grandes sea difícil, conectado con la distribución de primos</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-primary">💰</span>
+                  <span>Problema abierto desde 1859 (165+ años) con premio de $1,000,000 USD</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
       </section>
     </div>
   );
