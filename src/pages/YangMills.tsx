@@ -293,9 +293,8 @@ const YangMills = () => {
                         </p>
                     </div>
                 </div>
+            </section>
         </div>
-            </section >
-        </div >
     );
 };
 

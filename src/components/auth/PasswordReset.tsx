@@ -123,7 +123,7 @@ export const PasswordReset = () => {
                 {isResetMode ? (
                     <form onSubmit={handleUpdatePassword} className="space-y-4">
                         <div className="space-y-2">
-                            <Labelhtml htmlFor="newPassword">Nueva Contraseña</Label>
+                            <Label htmlFor="newPassword">Nueva Contraseña</Label>
                             <div className="relative">
                                 <Input
                                     id="newPassword"
