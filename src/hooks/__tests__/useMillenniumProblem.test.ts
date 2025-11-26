@@ -18,10 +18,10 @@ const createWrapper = () => {
         },
     });
     return ({ children }: { children: React.ReactNode }) => (
-        <QueryClientProvider client= { queryClient } >
-        { children }
+        <QueryClientProvider client={queryClient}>
+            {children}
         </QueryClientProvider>
-  );
+    );
 };
 
 describe('useMillenniumProblem', () => {
