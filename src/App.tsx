@@ -6,6 +6,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import AIVisualChallenges from "./pages/AIVisualChallenges";
 import PvsNP from "./pages/PvsNP";
+import RiemannHypothesis from "./pages/RiemannHypothesis";
+import ExperimentsGallery from "./pages/ExperimentsGallery";
 import ComingSoon from "./pages/ComingSoon";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
@@ -18,27 +20,28 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/ai-challenges" element={<AIVisualChallenges />} />
-          
-          {/* Millennium Problems */}
-          <Route path="/pvsnp" element={<PvsNP />} />
-          
-          {/* Coming Soon */}
-          <Route path="/riemann" element={<ComingSoon />} />
-          <Route path="/navier-stokes" element={<ComingSoon />} />
-          <Route path="/yang-mills" element={<ComingSoon />} />
-          <Route path="/hodge" element={<ComingSoon />} />
-          <Route path="/birch-sd" element={<ComingSoon />} />
-          <Route path="/poincare" element={<ComingSoon />} />
-          
-          {/* Auth */}
-          <Route path="/auth" element={<Auth />} />
-          
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/ai-challenges" element={<AIVisualChallenges />} />
+            
+            {/* Millennium Problems */}
+            <Route path="/pvsnp" element={<PvsNP />} />
+            <Route path="/riemann" element={<RiemannHypothesis />} />
+            
+            {/* Coming Soon */}
+            <Route path="/navier-stokes" element={<ComingSoon />} />
+            <Route path="/yang-mills" element={<ComingSoon />} />
+            <Route path="/hodge" element={<ComingSoon />} />
+            <Route path="/birch-sd" element={<ComingSoon />} />
+            <Route path="/poincare" element={<ComingSoon />} />
+            
+            {/* Auth & User */}
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/experiments" element={<ExperimentsGallery />} />
+            
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

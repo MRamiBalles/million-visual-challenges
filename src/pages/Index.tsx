@@ -112,16 +112,27 @@ const Index = () => {
 
         <div className="container mx-auto px-6 py-20 relative z-10">
           <div className="absolute top-4 right-6">
-            {user ? (
-              <Button variant="outline" size="sm" onClick={signOut} className="gap-2">
-                <LogOut className="w-4 h-4" />
-                Cerrar Sesión
-              </Button>
-            ) : (
-              <Button variant="outline" size="sm" onClick={() => navigate("/auth")}>
-                Iniciar Sesión
-              </Button>
-            )}
+            <div className="flex items-center gap-2">
+              {user && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate("/experiments")}
+                >
+                  Mis Experimentos
+                </Button>
+              )}
+              {user ? (
+                <Button variant="outline" size="sm" onClick={signOut} className="gap-2">
+                  <LogOut className="w-4 h-4" />
+                  Cerrar Sesión
+                </Button>
+              ) : (
+                <Button variant="outline" size="sm" onClick={() => navigate("/auth")}>
+                  Iniciar Sesión
+                </Button>
+              )}
+            </div>
           </div>
 
           <motion.div
