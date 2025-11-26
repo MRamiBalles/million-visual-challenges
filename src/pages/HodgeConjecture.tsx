@@ -15,6 +15,8 @@ import { useMillenniumProblem } from "@/hooks/useMillenniumProblem";
 import { useUserProgress } from "@/hooks/useUserProgress";
 import { useActivityTracker } from "@/hooks/useActivityTracker";
 import { millenniumProblems } from "@/data/millennium-problems";
+import { AlgebraicCyclesVisualization } from "@/components/problems/hodge/AlgebraicCyclesVisualization";
+import { CohomologyRing } from "@/components/problems/hodge/CohomologyRing";
 
 const HodgeConjecture = () => {
     const navigate = useNavigate();
@@ -128,6 +130,27 @@ const HodgeConjecture = () => {
                         </div>
                     }
                 />
+
+                {/* Visualizations Section */}
+                <div className="space-y-12 my-20">
+                    <h2 className="text-4xl font-bold mb-8">Visualizaciones Interactivas</h2>
+
+                    <VisualizationContainer
+                        title="Ciclos Algebraicos"
+                        description="Visualización de ciclos algebraicos en una variedad compleja"
+                        fullscreenEnabled
+                    >
+                        <AlgebraicCyclesVisualization />
+                    </VisualizationContainer>
+
+                    <VisualizationContainer
+                        title="Anillo de Cohomología"
+                        description="Estructura del anillo de cohomología de Hodge"
+                        fullscreenEnabled
+                    >
+                        <CohomologyRing />
+                    </VisualizationContainer>
+                </div>
 
                 <div className="mt-20">
                     <ReferenceList

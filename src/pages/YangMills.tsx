@@ -15,6 +15,9 @@ import { useMillenniumProblem } from "@/hooks/useMillenniumProblem";
 import { useUserProgress } from "@/hooks/useUserProgress";
 import { useActivityTracker } from "@/hooks/useActivityTracker";
 import { millenniumProblems } from "@/data/millennium-problems";
+import { GaugeFieldVisualization } from "@/components/problems/yang-mills/GaugeFieldVisualization";
+import { ConfinementVisualization } from "@/components/problems/yang-mills/ConfinementVisualization";
+import { MassGapVisualization } from "@/components/problems/yang-mills/MassGapVisualization";
 
 const YangMills = () => {
     const navigate = useNavigate();
@@ -178,158 +181,121 @@ const YangMills = () => {
                 />
 
                 {/* Visualizations Section */}
-                <div className="space-y-12">
+                <div className="space-y-12 my-20">
                     <h2 className="text-4xl font-bold mb-8">Visualizaciones Interactivas</h2>
 
-                    {/* Gauge Field Visualization */}
                     <VisualizationContainer
                         title="Campo de Gauge SU(3)"
-                        description="Visualización del campo de gluones que conecta quarks en QCD"
+                        description="Visualización del campo de gluones que conectan quarks en QCD"
+                        fullscreenEnabled
                     >
-                        <div className="h-96 flex items-center justify-center bg-gradient-to-br from-red-900/20 to-yellow-900/20 rounded-lg border border-red-500/20">
-                            <div className="text-center p-8">
-                                <div className="text-6xl mb-4">🔴🟢🔵</div>
-                                <h3 className="text-2xl font-bold mb-2">Campo de Gluones</h3>
-                                <p className="text-muted-foreground mb-4">
-                                    Visualización interactiva próximamente
-                                </p>
-                                <p className="text-sm text-muted-foreground max-w-md">
-                                    Representación de las líneas de fuerza entre quarks con carga de color (rojo, verde, azul).
-                                    Los gluones son los portadores de la fuerza nuclear fuerte.
-                                </p>
-                            </div>
-                        </div>
+                        <GaugeFieldVisualization />
                     </VisualizationContainer>
 
-                    {/* Confinamiento */}
                     <VisualizationContainer
                         title="Confinamiento de Quarks"
                         description="Demostración de por qué los quarks nunca existen aislados"
+                        fullscreenEnabled
                     >
-                        <div className="h-96 flex items-center justify-center bg-gradient-to-br from-purple-900/20 to-indigo-900/20 rounded-lg border border-purple-500/20">
-                            <div className="text-center p-8">
-                                <div className="text-6xl mb-4">⛓️</div>
-                                <h3 className="text-2xl font-bold mb-2">Confinamiento de Color</h3>
-                                <p className="text-muted-foreground mb-4">
-                                    Visualización interactiva próximamente
-                                </p>
-                                <p className="text-sm text-muted-foreground max-w-md">
-                                    Simulación mostrando cómo la energía aumenta al intentar separar quarks,
-                                    eventualmente creando nuevos pares quark-antiquark.
-                                </p>
-                            </div>
-                        </div>
+                        <ConfinementVisualization />
                     </VisualizationContainer>
 
-                    {/* Mass Gap */}
                     <VisualizationContainer
                         title="Espectro de Masa"
                         description="Visualización del mass gap en la teoría cuántica de campos"
+                        fullscreenEnabled
                     >
-                        <div className="h-96 flex items-center justify-center bg-gradient-to-br from-cyan-900/20 to-blue-900/20 rounded-lg border border-cyan-500/20">
-                            <div className="text-center p-8">
-                                <div className="text-6xl mb-4">📊</div>
-                                <h3 className="text-2xl font-bold mb-2">Mass Gap Spectrum</h3>
-                                <p className="text-muted-foreground mb-4">
-                                    Visualización interactiva próximamente
-                                </p>
-                                <p className="text-sm text-muted-foreground max-w-md">
-                                    Gráfico del espectro de energía mostrando la brecha de masa entre
-                                    el vacío y el primer estado excitado.
-                                </p>
-                            </div>
-                        </div>
+                        <MassGapVisualization />
                     </VisualizationContainer>
                 </div>
 
                 {/* References Section */}
-                <div className="mt-20">
-                    <ReferenceList
-                        title="Referencias Clave"
-                        references={[
-                            {
-                                title: problem.clay_paper_author + " - Quantum Yang-Mills Theory",
-                                authors: [problem.clay_paper_author],
-                                year: problem.clay_paper_year,
-                                url: problem.clay_paper_url,
-                                description: "Paper oficial del Clay Mathematics Institute",
-                            },
-                            ...(problem.keyReferences || []),
-                        ]}
-                    />
+                <ReferenceList
+                    title="Referencias Clave"
+                    references={[
+                        {
+                            title: problem.clay_paper_author + " - Quantum Yang-Mills Theory",
+                            authors: [problem.clay_paper_author],
+                            year: problem.clay_paper_year,
+                            url: problem.clay_paper_url,
+                            description: "Paper oficial del Clay Mathematics Institute",
+                        },
+                        ...(problem.keyReferences || []),
+                    ]}
+                />
 
-                    {/* Applications */}
-                    <div className="mt-12 p-8 bg-gradient-to-br from-primary/5 to-accent/5 rounded-lg border border-primary/10">
-                        <h3 className="text-2xl font-bold mb-6">Importancia y Aplicaciones</h3>
-                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {(problem.applications || [
-                                "Comprensión de la fuerza nuclear fuerte",
-                                "Física de partículas en aceleradores (LHC)",
-                                "Estructura interna de protones y neutrones",
-                                "Energía de fusión nuclear",
-                                "Evolución del universo temprano",
-                                "Cromodinámica Cuántica en lattice",
-                                "Teoría de campos gauge en física teórica",
-                                "Conexión con teoría de cuerdas",
-                            ]).map((app, index) => (
-                                <div key={index} className="flex items-start gap-3">
-                                    <div className="w-2 h-2 rounded-full bg-primary mt-2" />
-                                    <div>
-                                        <p className="font-semibold">{app}</p>
-                                    </div>
+                {/* Applications */}
+                <div className="mt-12 p-8 bg-gradient-to-br from-primary/5 to-accent/5 rounded-lg border border-primary/10">
+                    <h3 className="text-2xl font-bold mb-6">Importancia y Aplicaciones</h3>
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {(problem.applications || [
+                            "Comprensión de la fuerza nuclear fuerte",
+                            "Física de partículas en aceleradores (LHC)",
+                            "Estructura interna de protones y neutrones",
+                            "Energía de fusión nuclear",
+                            "Evolución del universo temprano",
+                            "Cromodinámica Cuántica en lattice",
+                            "Teoría de campos gauge en física teórica",
+                            "Conexión con teoría de cuerdas",
+                        ]).map((app, index) => (
+                            <div key={index} className="flex items-start gap-3">
+                                <div className="w-2 h-2 rounded-full bg-primary mt-2" />
+                                <div>
+                                    <p className="font-semibold">{app}</p>
                                 </div>
-                            ))}
-                        </div>
+                            </div>
+                        ))}
+                    </div>
 
-                        {/* Key Facts */}
-                        <div className="mt-8 p-6 bg-background/50 rounded-lg">
-                            <h4 className="font-bold text-lg mb-4">Datos Fascinantes</h4>
-                            <ul className="space-y-3 text-sm">
-                                <li className="flex items-start gap-2">
-                                    <span className="text-primary">🏆</span>
-                                    <span><strong>Chen Ning Yang</strong> y <strong>Robert Mills</strong> propusieron la teoría en 1954</span>
-                                </li>
-                                <li className="flex items-start gap-2">
-                                    <span className="text-primary">🎨</span>
-                                    <span>Los quarks tienen <strong>"carga de color"</strong> (rojo, verde, azul) - no tiene nada que ver con colores reales</span>
-                                </li>
-                                <li className="flex items-start gap-2">
-                                    <span className="text-primary">🔬</span>
-                                    <span>Nunca hemos visto un quark aislado en ningún experimento</span>
-                                </li>
-                                <li className="flex items-start gap-2">
-                                    <span className="text-primary">⚡</span>
-                                    <span>Los <strong>gluones</strong> son las partículas que transmiten la fuerza fuerte (como los fotones para electromagnetismo)</span>
-                                </li>
-                                <li className="flex items-start gap-2">
-                                    <span className="text-primary">🧮</span>
-                                    <span>QCD es extremadamente precisa: predice masas de hadrones con error {'<'} 1%</span>
-                                </li>
-                                <li className="flex items-start gap-2">
-                                    <span className="text-primary">🌌</span>
-                                    <span>El <strong>99% de la masa</strong> de protones/neutrones viene de la energía del campo de gluones, no de los quarks</span>
-                                </li>
-                                <li className="flex items-start gap-2">
-                                    <span className="text-primary">💰</span>
-                                    <span>Premio de <strong>$1,000,000 USD</strong> por demostración rigurosa del mass gap</span>
-                                </li>
-                            </ul>
-                        </div>
+                    {/* Key Facts */}
+                    <div className="mt-8 p-6 bg-background/50 rounded-lg">
+                        <h4 className="font-bold text-lg mb-4">Datos Fascinantes</h4>
+                        <ul className="space-y-3 text-sm">
+                            <li className="flex items-start gap-2">
+                                <span className="text-primary">🏆</span>
+                                <span><strong>Chen Ning Yang</strong> y <strong>Robert Mills</strong> propusieron la teoría en 1954</span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                                <span className="text-primary">🎨</span>
+                                <span>Los quarks tienen <strong>"carga de color"</strong> (rojo, verde, azul) - no tiene nada que ver con colores reales</span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                                <span className="text-primary">🔬</span>
+                                <span>Nunca hemos visto un quark aislado en ningún experimento</span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                                <span className="text-primary">⚡</span>
+                                <span>Los <strong>gluones</strong> son las partículas que transmiten la fuerza fuerte (como los fotones para electromagnetismo)</span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                                <span className="text-primary">🧮</span>
+                                <span>QCD es extremadamente precisa: predice masas de hadrones con error {'<'} 1%</span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                                <span className="text-primary">🌌</span>
+                                <span>El <strong>99% de la masa</strong> de protones/neutrones viene de la energía del campo de gluones, no de los quarks</span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                                <span className="text-primary">💰</span>
+                                <span>Premio de <strong>$1,000,000 USD</strong> por demostración rigurosa del mass gap</span>
+                            </li>
+                        </ul>
+                    </div>
 
-                        {/* Physics Context */}
-                        <div className="mt-8 p-6 bg-primary/5 rounded-lg border-l-4 border-primary">
-                            <h4 className="font-bold text-lg mb-3">Contexto en Física de Partículas</h4>
-                            <p className="text-sm leading-relaxed">
-                                Yang-Mills es el fundamento del <strong>Modelo Estándar</strong> de física de partículas.
-                                Tres de las cuatro fuerzas fundamentales (fuerte, débil, electromagnética) se describen
-                                mediante teorías de Yang-Mills. Solo la gravedad queda fuera. Resolver este problema
-                                matemáticamente podría revelar profundas conexiones entre física cuántica y geometría.
-                            </p>
-                        </div>
+                    {/* Physics Context */}
+                    <div className="mt-8 p-6 bg-primary/5 rounded-lg border-l-4 border-primary">
+                        <h4 className="font-bold text-lg mb-3">Contexto en Física de Partículas</h4>
+                        <p className="text-sm leading-relaxed">
+                            Yang-Mills es el fundamento del <strong>Modelo Estándar</strong> de física de partículas.
+                            Tres de las cuatro fuerzas fundamentales (fuerte, débil, electromagnética) se describen
+                            mediante teorías de Yang-Mills. Solo la gravedad queda fuera. Resolver este problema
+                            matemáticamente podría revelar profundas conexiones entre física cuántica y geometría.
+                        </p>
                     </div>
                 </div>
-            </section>
         </div>
+            </section >
+        </div >
     );
 };
 

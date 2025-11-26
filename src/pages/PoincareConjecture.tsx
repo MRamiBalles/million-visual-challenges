@@ -14,6 +14,9 @@ import { useMillenniumProblem } from "@/hooks/useMillenniumProblem";
 import { useUserProgress } from "@/hooks/useUserProgress";
 import { useActivityTracker } from "@/hooks/useActivityTracker";
 import { millenniumProblems } from "@/data/millennium-problems";
+import { VisualizationContainer } from "@/components/problem";
+import { RicciFlowVisualization } from "@/components/problems/poincare/RicciFlowVisualization";
+import { TopologicalSphere } from "@/components/problems/poincare/TopologicalSphere";
 
 const PoincareConjecture = () => {
     const navigate = useNavigate();
@@ -140,6 +143,27 @@ const PoincareConjecture = () => {
                         </div>
                     }
                 />
+
+                {/* Visualizations Section */}
+                <div className="space-y-12 my-20">
+                    <h2 className="text-4xl font-bold mb-8">Visualizaciones Interactivas</h2>
+
+                    <VisualizationContainer
+                        title="Flujo de Ricci"
+                        description="Observa cómo el flujo suaviza la curvatura de la variedad"
+                        fullscreenEnabled
+                    >
+                        <RicciFlowVisualization />
+                    </VisualizationContainer>
+
+                    <VisualizationContainer
+                        title="3-Esfera Topológica"
+                        description="Proyección de una 3-esfera simplemente conexa"
+                        fullscreenEnabled
+                    >
+                        <TopologicalSphere />
+                    </VisualizationContainer>
+                </div>
 
                 <div className="mt-20">
                     <ReferenceList

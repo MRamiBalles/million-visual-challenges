@@ -14,6 +14,9 @@ import { useMillenniumProblem } from "@/hooks/useMillenniumProblem";
 import { useUserProgress } from "@/hooks/useUserProgress";
 import { useActivityTracker } from "@/hooks/useActivityTracker";
 import { millenniumProblems } from "@/data/millennium-problems";
+import { VisualizationContainer } from "@/components/problem";
+import { EllipticCurvePlotter } from "@/components/problems/birch-sd/EllipticCurvePlotter";
+import { LFunctionPlot } from "@/components/problems/birch-sd/LFunctionPlot";
 
 const BirchSwinnertonDyer = () => {
     const navigate = useNavigate();
@@ -124,6 +127,27 @@ const BirchSwinnertonDyer = () => {
                         </div>
                     }
                 />
+
+                {/* Visualizations Section */}
+                <div className="space-y-12 my-20">
+                    <h2 className="text-4xl font-bold mb-8">Visualizaciones Interactivas</h2>
+
+                    <VisualizationContainer
+                        title="Curva Elíptica Interactiva"
+                        description="Explora curvas elípticas ajustando parámetros a y b"
+                        fullscreenEnabled
+                    >
+                        <EllipticCurvePlotter />
+                    </VisualizationContainer>
+
+                    <VisualizationContainer
+                        title="L-Function y Rango"
+                        description="Visualización de la L-function y su cero en s=1"
+                        fullscreenEnabled
+                    >
+                        <LFunctionPlot />
+                    </VisualizationContainer>
+                </div>
 
                 <div className="mt-20">
                     <ReferenceList
