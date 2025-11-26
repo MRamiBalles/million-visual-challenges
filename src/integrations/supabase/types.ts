@@ -14,7 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      experiments: {
+        Row: {
+          created_at: string
+          description: string | null
+          experiment_data: Json
+          experiment_type: string
+          id: string
+          problem_slug: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          experiment_data: Json
+          experiment_type: string
+          id?: string
+          problem_slug: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          experiment_data?: Json
+          experiment_type?: string
+          id?: string
+          problem_slug?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
