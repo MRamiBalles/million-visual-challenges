@@ -17,6 +17,11 @@ import CollectionView from "./pages/CollectionView";
 import ComingSoon from "./pages/ComingSoon";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import UserManagement from "./pages/admin/UserManagement";
+import ContentModeration from "./pages/admin/ContentModeration";
+import NotificationManagement from "./pages/admin/NotificationManagement";
+import Analytics from "./pages/admin/Analytics";
 
 const queryClient = new QueryClient();
 
@@ -50,6 +55,15 @@ const App = () => (
             <Route path="/leaderboard" element={<Leaderboard />} />
             <Route path="/profile/:username" element={<Profile />} />
             <Route path="/collections/:collectionId" element={<CollectionView />} />
+            
+            {/* Admin */}
+            <Route path="/admin" element={<AdminDashboard />}>
+              <Route index element={<Analytics />} />
+              <Route path="users" element={<UserManagement />} />
+              <Route path="content" element={<ContentModeration />} />
+              <Route path="notifications" element={<NotificationManagement />} />
+              <Route path="analytics" element={<Analytics />} />
+            </Route>
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
