@@ -222,6 +222,72 @@ export type Database = {
         }
         Relationships: []
       }
+      millennium_problems: {
+        Row: {
+          clay_paper_author: string
+          clay_paper_url: string
+          clay_paper_year: number
+          cover_image_url: string | null
+          created_at: string | null
+          description_advanced: string
+          description_intermediate: string
+          description_simple: string
+          field: string
+          id: number
+          prize: string | null
+          short_title: string
+          slug: string
+          solver: string | null
+          solver_year: number | null
+          status: string
+          title: string
+          updated_at: string | null
+          year: number
+        }
+        Insert: {
+          clay_paper_author: string
+          clay_paper_url: string
+          clay_paper_year: number
+          cover_image_url?: string | null
+          created_at?: string | null
+          description_advanced: string
+          description_intermediate: string
+          description_simple: string
+          field: string
+          id?: number
+          prize?: string | null
+          short_title: string
+          slug: string
+          solver?: string | null
+          solver_year?: number | null
+          status?: string
+          title: string
+          updated_at?: string | null
+          year?: number
+        }
+        Update: {
+          clay_paper_author?: string
+          clay_paper_url?: string
+          clay_paper_year?: number
+          cover_image_url?: string | null
+          created_at?: string | null
+          description_advanced?: string
+          description_intermediate?: string
+          description_simple?: string
+          field?: string
+          id?: number
+          prize?: string | null
+          short_title?: string
+          slug?: string
+          solver?: string | null
+          solver_year?: number | null
+          status?: string
+          title?: string
+          updated_at?: string | null
+          year?: number
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
@@ -328,6 +394,59 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      research_papers: {
+        Row: {
+          abstract: string | null
+          arxiv_id: string | null
+          authors: string[]
+          citation_count: number | null
+          created_at: string | null
+          id: string
+          pdf_url: string | null
+          problem_id: number | null
+          published_date: string | null
+          relevance_score: number | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          abstract?: string | null
+          arxiv_id?: string | null
+          authors: string[]
+          citation_count?: number | null
+          created_at?: string | null
+          id?: string
+          pdf_url?: string | null
+          problem_id?: number | null
+          published_date?: string | null
+          relevance_score?: number | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          abstract?: string | null
+          arxiv_id?: string | null
+          authors?: string[]
+          citation_count?: number | null
+          created_at?: string | null
+          id?: string
+          pdf_url?: string | null
+          problem_id?: number | null
+          published_date?: string | null
+          relevance_score?: number | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "research_papers_problem_id_fkey"
+            columns: ["problem_id"]
+            isOneToOne: false
+            referencedRelation: "millennium_problems"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_activity: {
         Row: {
