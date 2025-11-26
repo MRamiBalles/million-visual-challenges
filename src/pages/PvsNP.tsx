@@ -13,6 +13,7 @@ import { VerificationDemo } from "@/components/problems/pvsnp/VerificationDemo";
 import { millenniumProblems } from "@/data/millennium-problems";
 import { useAuth } from "@/hooks/useAuth";
 import { ExperimentSaver } from "@/components/ExperimentSaver";
+import { useActivityTracker } from "@/hooks/useActivityTracker";
 
 const PvsNP = () => {
   const navigate = useNavigate();
@@ -20,6 +21,9 @@ const PvsNP = () => {
   const [explanationLevel, setExplanationLevel] = useState<"simple" | "intermediate" | "advanced">("simple");
   
   const problem = millenniumProblems.find(p => p.slug === "pvsnp")!;
+
+  // Track time spent on this page
+  useActivityTracker("pvsnp", "overview");
 
   return (
     <div className="min-h-screen bg-background">

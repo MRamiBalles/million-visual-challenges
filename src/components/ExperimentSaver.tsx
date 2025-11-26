@@ -4,7 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
-import { Save, Loader2, CheckCircle, AlertCircle } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Save, Loader2, CheckCircle, AlertCircle, Share2, Copy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -24,8 +26,10 @@ export const ExperimentSaver = ({
   const [isOpen, setIsOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [isPublic, setIsPublic] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [shareToken, setShareToken] = useState<string | null>(null);
   const { toast } = useToast();
 
   const handleSave = async () => {
@@ -53,14 +57,29 @@ export const ExperimentSaver = ({
       return;
     }
 
-    const { error } = await supabase.from("experiments").insert({
+    // Generate share token if experiment is public
+    let token = null;
+    if (isPublic) {
+      const { data: tokenData, error: tokenError } = await supabase
+        .rpc("generate_share_token");
+      
+      if (tokenError) {
+        console.error("Error generating token:", tokenError);
+      } else {
+        token = tokenData;
+      }
+    }
+
+    const { data, error } = await supabase.from("experiments").insert({
       user_id: session.user.id,
       problem_slug: problemSlug,
       experiment_type: experimentType,
       experiment_data: experimentData,
       title: title.trim(),
       description: description.trim() || null,
-    });
+      is_public: isPublic,
+      share_token: token,
+    }).select().single();
 
     setIsSaving(false);
 
@@ -75,9 +94,13 @@ export const ExperimentSaver = ({
     }
 
     setSaved(true);
+    if (data?.share_token) {
+      setShareToken(data.share_token);
+    }
+
     toast({
       title: "¡Experimento guardado!",
-      description: "Tu experimento se guardó correctamente.",
+      description: isPublic ? "Tu experimento es público y compartible." : "Tu experimento se guardó correctamente.",
     });
 
     setTimeout(() => {
@@ -85,8 +108,21 @@ export const ExperimentSaver = ({
       setSaved(false);
       setTitle("");
       setDescription("");
+      setIsPublic(false);
+      setShareToken(null);
       onSaved?.();
-    }, 2000);
+    }, 3000);
+  };
+
+  const copyShareLink = () => {
+    if (shareToken) {
+      const url = `${window.location.origin}/shared/${shareToken}`;
+      navigator.clipboard.writeText(url);
+      toast({
+        title: "Enlace copiado",
+        description: "El enlace se copió al portapapeles.",
+      });
+    }
   };
 
   return (
@@ -148,6 +184,23 @@ export const ExperimentSaver = ({
                       />
                     </div>
 
+                    <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
+                      <div className="space-y-0.5">
+                        <Label htmlFor="public-switch" className="text-sm font-medium">
+                          Hacer público
+                        </Label>
+                        <p className="text-xs text-muted-foreground">
+                          Permitir que otros vean este experimento en la galería comunitaria
+                        </p>
+                      </div>
+                      <Switch
+                        id="public-switch"
+                        checked={isPublic}
+                        onCheckedChange={setIsPublic}
+                        disabled={isSaving}
+                      />
+                    </div>
+
                     <div className="flex gap-2 justify-end">
                       <Button
                         variant="outline"
@@ -185,6 +238,31 @@ export const ExperimentSaver = ({
                     <p className="text-lg font-semibold text-foreground">
                       ¡Guardado correctamente!
                     </p>
+                    
+                    {shareToken && (
+                      <div className="w-full mt-4 space-y-3">
+                        <div className="bg-muted/50 p-4 rounded-lg">
+                          <p className="text-sm text-muted-foreground mb-2">
+                            Enlace para compartir:
+                          </p>
+                          <div className="flex gap-2">
+                            <Input
+                              value={`${window.location.origin}/shared/${shareToken}`}
+                              readOnly
+                              className="text-sm"
+                            />
+                            <Button
+                              onClick={copyShareLink}
+                              variant="outline"
+                              size="sm"
+                              className="gap-2"
+                            >
+                              <Copy className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </motion.div>
                 )}
               </Card>

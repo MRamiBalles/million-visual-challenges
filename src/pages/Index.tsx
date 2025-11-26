@@ -114,13 +114,29 @@ const Index = () => {
           <div className="absolute top-4 right-6">
             <div className="flex items-center gap-2">
               {user && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => navigate("/experiments")}
-                >
-                  Mis Experimentos
-                </Button>
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigate("/dashboard")}
+                  >
+                    Dashboard
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigate("/experiments")}
+                  >
+                    Mis Experimentos
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigate("/community")}
+                  >
+                    Galería
+                  </Button>
+                </>
               )}
               {user ? (
                 <Button variant="outline" size="sm" onClick={signOut} className="gap-2">
