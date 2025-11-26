@@ -4,16 +4,14 @@ import { useToast } from '@/hooks/use-toast';
 
 export interface UserProfile {
     id: string;
+    user_id: string;
     username: string | null;
     display_name: string | null;
     avatar_url: string | null;
     bio: string | null;
-    website: string | null;
-    location: string | null;
-    education_level: string | null;
-    research_interests: string[] | null;
-    preferences: Record<string, any>;
-    role: 'user' | 'researcher' | 'admin';
+    website_url: string | null;
+    twitter_handle: string | null;
+    github_handle: string | null;
     created_at: string;
     updated_at: string;
 }
@@ -22,10 +20,9 @@ export interface UpdateProfileData {
     display_name?: string;
     username?: string;
     bio?: string;
-    website?: string;
-    location?: string;
-    education_level?: string;
-    research_interests?: string[];
+    website_url?: string;
+    twitter_handle?: string;
+    github_handle?: string;
 }
 
 export const useUserProfile = (userId?: string) => {
@@ -39,9 +36,9 @@ export const useUserProfile = (userId?: string) => {
             if (!userId) return null;
 
             const { data, error } = await supabase
-                .from('user_profiles')
+                .from('profiles')
                 .select('*')
-                .eq('id', userId)
+                .eq('user_id', userId)
                 .single();
 
             if (error) throw error;
@@ -57,9 +54,9 @@ export const useUserProfile = (userId?: string) => {
             if (!userId) throw new Error('No user ID provided');
 
             const { data, error } = await supabase
-                .from('user_profiles')
+                .from('profiles')
                 .update(updates)
-                .eq('id', userId)
+                .eq('user_id', userId)
                 .select()
                 .single();
 
@@ -105,9 +102,9 @@ export const useUserProfile = (userId?: string) => {
 
             // Update profile with new avatar URL
             const { data, error: updateError } = await supabase
-                .from('user_profiles')
+                .from('profiles')
                 .update({ avatar_url: publicUrl })
-                .eq('id', userId)
+                .eq('user_id', userId)
                 .select()
                 .single();
 
