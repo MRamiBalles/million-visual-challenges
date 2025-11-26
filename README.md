@@ -1,73 +1,189 @@
-# Welcome to your Lovable project
+# Million Visual Challenges
+## Plataforma Interactiva para los Problemas del Milenio
 
-## Project info
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-18.3-61DAFB)](https://react.dev/)
+[![Supabase](https://img.shields.io/badge/Supabase-Backend-3ECF8E)](https://supabase.com/)
 
-**URL**: https://lovable.dev/projects/5c23daba-a983-4ecf-b7be-a5a3649e43a3
+**Por**: Manuel Ramírez Ballesteros  
+**Proyecto Académico** - Universidad / Investigación Independiente
 
-## How can I edit this code?
+---
 
-There are several ways of editing your application.
+## 📖 Descripción
 
-**Use Lovable**
+Plataforma académica interactiva dedicada a los **7 Problemas del Milenio** del Clay Mathematics Institute. Combina visualizaciones 3D interactivas, contenido didáctico multinivel, integración con IA para actualización automática de papers, y herramientas colaborativas de investigación.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/5c23daba-a983-4ecf-b7be-a5a3649e43a3) and start prompting.
+### Problemas Incluidos
 
-Changes made via Lovable will be committed automatically to this repo.
+1. **P vs NP** - Ciencias de la Computación
+2. **Hipótesis de Riemann** - Teoría de Números  
+3. **Navier-Stokes** - Ecuaciones Diferenciales
+4. **Yang-Mills** - Física Matemática
+5. **Conjetura de Hodge** - Geometría Algebraica
+6. **Birch & Swinnerton-Dyer** - Teoría de Números
+7. **Conjetura de Poincaré** ✅ (RESUELTO)
 
-**Use your preferred IDE**
+---
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## 🚀 Quick Start
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+```bash
+# 1. Instalar dependencias
+npm install
 
-Follow these steps:
+# 2. Configurar Supabase (ver SETUP.md)
+supabase link --project-ref vjskpckixgukiffaxypl
+supabase db push
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# 3. Ejecutar en desarrollo
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+**Ver [SETUP.md](./SETUP.md) para instrucciones completas de configuración.**
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+---
 
-**Use GitHub Codespaces**
+## ✨ Características
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### Actuales (MVP)
+- ✅ Visualizaciones interactivas básicas
+- ✅ Sistema de usuarios y autenticación
+- ✅ Base de datos completa (9 tablas)
+- ✅ Perfiles de usuario con badges
+- ✅ Sistema de likes y comentarios
 
-## What technologies are used for this project?
+### En Desarrollo (Sprint 0-1)
+- 🔄 Integración con arXiv API
+- 🔄 Resúmenes automáticos con GPT-4
+- 🔄 7 páginas de problemas completas
+- 🔄 Visualizaciones 3D avanzadas (Three.js)
 
-This project is built with:
+### Roadmap (2-3 meses)
+- 📍 Foros de discusión con LaTeX
+- 📍 Editor colaborativo de pruebas
+- 📍 Q&A con IA (RAG)
+- 📍 Timeline de investigación
+- 📍 Análisis de redes de citaciones
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+---
 
-## How can I deploy this project?
+## 🛠️ Stack Tecnológico
 
-Simply open [Lovable](https://lovable.dev/projects/5c23daba-a983-4ecf-b7be-a5a3649e43a3) and click on Share -> Publish.
+### Frontend
+- **React 18** + **TypeScript 5.8** + **Vite**
+- **TailwindCSS** + **shadcn/ui** (components)
+- **Three.js** / React Three Fiber (visualizaciones 3D)
+- **D3.js** (gráficos y visualizaciones)
+- **MathJax** (renderizado matemático)
+- **Framer Motion** (animaciones)
 
-## Can I connect a custom domain to my Lovable project?
+### Backend
+- **Supabase** (PostgreSQL + Auth + Storage + Edge Functions)
+- **OpenAI API** (GPT-4 para summaries)
+- **arXiv API** (papers académicos)
+- **Semantic Scholar API** (citaciones)
 
-Yes, you can!
+### DevOps
+- **GitHub Actions** (CI/CD)
+- **Lovable** (deployment)
+- **Sentry** (error tracking - planned)
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+---
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## 📁 Estructura del Proyecto
+
+```
+million-visual-challenges/
+├── src/
+│   ├── components/       # React components
+│   │   ├── ui/          # shadcn/ui components
+│   │   ├── layout/      # Layout components
+│   │   └── problem/     # Problem-specific components
+│   ├── pages/           # Page components (routes)
+│   ├── hooks/           # Custom React hooks
+│   ├── lib/             # Utilities
+│   ├── types/           # TypeScript types
+│   └── data/            # Static data
+├── supabase/
+│   ├── migrations/      # Database migrations
+│   └── functions/       # Edge Functions
+├── public/              # Static assets
+├── implementation_plan.md  # 📋 Plan completo
+├── SETUP.md            # 🔧 Guía de configuración
+└── .agent/workflows/   # Development workflows
+```
+
+---
+
+## 📚 Documentación
+
+| Documento | Descripción |
+|-----------|-------------|
+| **[SETUP.md](./SETUP.md)** | Guía completa de configuración inicial |
+| **[implementation_plan.md](./.gemini/artifacts/implementation_plan.md)** | Plan de desarrollo detallado (8 sprints) |
+| **[task.md](./.gemini/artifacts/task.md)** | Lista de tareas del proyecto |
+| **[development-workflow.md](./.agent/workflows/development-workflow.md)** | Workflow de desarrollo |
+
+---
+
+## 🎯 Objetivos del Proyecto
+
+### Educativo
+- Democratizar el acceso a matemáticas avanzadas
+- Explicaciones en 3 niveles (simple, intermedio, avanzado)
+- Visualizaciones interactivas de conceptos abstractos
+
+### Investigación
+- Herramientas colaborativas para investigadores
+- Actualización automática con publicaciones nuevas
+- Foro académico con revisión por pares
+
+### Tecnológico
+- Probar integración IA + educación
+- RAG (Retrieval Augmented Generation) para Q&A
+- Visualizaciones WebGL/Three.js de alto rendimiento
+
+---
+
+## 👤 Autor
+
+**Manuel Ramírez Ballesteros**  
+Proyecto académico independiente
+
+---
+
+## 🤝 Contribuciones
+
+Este es un proyecto académico open-source. Las contribuciones son bienvenidas.
+
+Ver [CONTRIBUTING.md](./CONTRIBUTING.md) (próximamente)
+
+---
+
+## 📝 Licencia
+
+MIT License - Ver [LICENSE](./LICENSE)
+
+---
+
+## 🔗 Enlaces
+
+- **Lovable Project**: https://lovable.dev/projects/5c23daba-a983-4ecf-b7be-a5a3649e43a3
+- **Supabase Dashboard**: https://supabase.com/dashboard/project/vjskpckixgukiffaxypl
+- **Clay Mathematics Institute**: https://www.claymath.org/millennium-problems/
+
+---
+
+## 📊 Estado del Proyecto
+
+**Fase Actual**: Sprint 0 - Foundation & Architecture  
+**Progreso MVP**: ~15%  
+**Timeline**: MVP en 1 mes | Completo en 3 meses  
+**Última actualización**: Noviembre 2025
+
+---
+
+**¿Preguntas o sugerencias?**  
+Abre un issue o contacta al desarrollador.
