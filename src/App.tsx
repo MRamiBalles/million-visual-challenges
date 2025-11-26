@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import AIVisualChallenges from "./pages/AIVisualChallenges";
+import PvsNP from "./pages/PvsNP";
 import ComingSoon from "./pages/ComingSoon";
 import NotFound from "./pages/NotFound";
 
@@ -20,8 +21,10 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/ai-challenges" element={<AIVisualChallenges />} />
           
-          {/* Millennium Problems - Coming Soon */}
-          <Route path="/pvsnp" element={<ComingSoon />} />
+          {/* Millennium Problems */}
+          <Route path="/pvsnp" element={<PvsNP />} />
+          
+          {/* Coming Soon */}
           <Route path="/riemann" element={<ComingSoon />} />
           <Route path="/navier-stokes" element={<ComingSoon />} />
           <Route path="/yang-mills" element={<ComingSoon />} />
