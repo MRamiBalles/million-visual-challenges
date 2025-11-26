@@ -14,6 +14,35 @@ export type Database = {
   }
   public: {
     Tables: {
+      experiment_likes: {
+        Row: {
+          created_at: string
+          experiment_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          experiment_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          experiment_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experiment_likes_experiment_id_fkey"
+            columns: ["experiment_id"]
+            isOneToOne: false
+            referencedRelation: "experiments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       experiments: {
         Row: {
           created_at: string
@@ -21,10 +50,14 @@ export type Database = {
           experiment_data: Json
           experiment_type: string
           id: string
+          is_public: boolean | null
+          likes_count: number | null
           problem_slug: string
+          share_token: string | null
           title: string
           updated_at: string
           user_id: string
+          view_count: number | null
         }
         Insert: {
           created_at?: string
@@ -32,10 +65,14 @@ export type Database = {
           experiment_data: Json
           experiment_type: string
           id?: string
+          is_public?: boolean | null
+          likes_count?: number | null
           problem_slug: string
+          share_token?: string | null
           title: string
           updated_at?: string
           user_id: string
+          view_count?: number | null
         }
         Update: {
           created_at?: string
@@ -43,10 +80,44 @@ export type Database = {
           experiment_data?: Json
           experiment_type?: string
           id?: string
+          is_public?: boolean | null
+          likes_count?: number | null
           problem_slug?: string
+          share_token?: string | null
           title?: string
           updated_at?: string
           user_id?: string
+          view_count?: number | null
+        }
+        Relationships: []
+      }
+      user_activity: {
+        Row: {
+          created_at: string
+          duration_seconds: number
+          id: string
+          problem_slug: string
+          session_date: string
+          user_id: string
+          visualization_type: string
+        }
+        Insert: {
+          created_at?: string
+          duration_seconds: number
+          id?: string
+          problem_slug: string
+          session_date?: string
+          user_id: string
+          visualization_type: string
+        }
+        Update: {
+          created_at?: string
+          duration_seconds?: number
+          id?: string
+          problem_slug?: string
+          session_date?: string
+          user_id?: string
+          visualization_type?: string
         }
         Relationships: []
       }
@@ -55,7 +126,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_share_token: { Args: never; Returns: string }
     }
     Enums: {
       [_ in never]: never
