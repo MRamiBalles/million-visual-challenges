@@ -12,6 +12,8 @@ import Dashboard from "./pages/Dashboard";
 import CommunityGallery from "./pages/CommunityGallery";
 import SharedExperiment from "./pages/SharedExperiment";
 import Leaderboard from "./pages/Leaderboard";
+import Profile from "./pages/Profile";
+import CollectionView from "./pages/CollectionView";
 import ComingSoon from "./pages/ComingSoon";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
@@ -46,6 +48,8 @@ const App = () => (
             <Route path="/community" element={<CommunityGallery />} />
             <Route path="/shared/:token" element={<SharedExperiment />} />
             <Route path="/leaderboard" element={<Leaderboard />} />
+            <Route path="/profile/:username" element={<Profile />} />
+            <Route path="/collections/:collectionId" element={<CollectionView />} />
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

@@ -23,6 +23,11 @@ interface PublicExperiment {
   likes_count: number;
   share_token: string;
   user_id: string;
+  profiles?: {
+    username: string;
+    display_name: string;
+    avatar_url: string | null;
+  };
 }
 
 const CommunityGallery = () => {
@@ -56,7 +61,7 @@ const CommunityGallery = () => {
       query = query.order("likes_count", { ascending: false });
     }
 
-    const { data, error } = await query.limit(50);
+    const { data: experimentsData, error } = await query.limit(50);
 
     if (error) {
       console.error("Error loading experiments:", error);
@@ -65,8 +70,29 @@ const CommunityGallery = () => {
         description: "No se pudieron cargar los experimentos.",
         variant: "destructive",
       });
-    } else {
-      setExperiments(data || []);
+      setLoading(false);
+      return;
+    }
+
+    if (experimentsData) {
+      // Load profiles for all experiments
+      const userIds = [...new Set(experimentsData.map(exp => exp.user_id))];
+      const { data: profilesData } = await supabase
+        .from("profiles")
+        .select("user_id, username, display_name, avatar_url")
+        .in("user_id", userIds);
+
+      // Merge profiles with experiments
+      const profilesMap = new Map(
+        profilesData?.map(profile => [profile.user_id, profile]) || []
+      );
+
+      const enrichedExperiments = experimentsData.map(exp => ({
+        ...exp,
+        profiles: profilesMap.get(exp.user_id),
+      }));
+
+      setExperiments(enrichedExperiments as any);
     }
     
     setLoading(false);
@@ -286,6 +312,34 @@ const CommunityGallery = () => {
                         <p className="text-sm text-muted-foreground mb-4 flex-1 line-clamp-3">
                           {experiment.description}
                         </p>
+                      )}
+
+                      {/* User Info */}
+                      {experiment.profiles && (
+                        <div
+                          className="flex items-center gap-2 mb-3 p-2 rounded-lg hover:bg-secondary/50 transition-colors"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/profile/${experiment.profiles!.username}`);
+                          }}
+                        >
+                          <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center overflow-hidden">
+                            {experiment.profiles.avatar_url ? (
+                              <img
+                                src={experiment.profiles.avatar_url}
+                                alt={experiment.profiles.display_name}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <span className="text-xs font-bold text-primary">
+                                {experiment.profiles.display_name?.charAt(0) || "U"}
+                              </span>
+                            )}
+                          </div>
+                          <span className="text-xs text-muted-foreground">
+                            @{experiment.profiles.username}
+                          </span>
+                        </div>
                       )}
 
                       <div className="space-y-3 pt-4 border-t border-border">

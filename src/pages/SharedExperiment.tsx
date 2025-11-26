@@ -4,11 +4,13 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Heart, Eye, Share2, ExternalLink } from "lucide-react";
+import { ArrowLeft, Heart, Eye, Share2, ExternalLink, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { millenniumProblems } from "@/data/millennium-problems";
+import ExperimentComments from "@/components/ExperimentComments";
+import CollectionManager from "@/components/CollectionManager";
 
 interface SharedExperimentData {
   id: string;
@@ -24,12 +26,19 @@ interface SharedExperimentData {
   user_id: string;
 }
 
+interface UserProfile {
+  username: string;
+  display_name: string;
+  avatar_url: string | null;
+}
+
 const SharedExperiment = () => {
   const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
   const [experiment, setExperiment] = useState<SharedExperimentData | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [isLiked, setIsLiked] = useState(false);
 
@@ -66,6 +75,17 @@ const SharedExperiment = () => {
     }
 
     setExperiment(data);
+    
+    // Load user profile
+    const { data: profileData } = await supabase
+      .from("profiles")
+      .select("username, display_name, avatar_url")
+      .eq("user_id", data.user_id)
+      .single();
+    
+    if (profileData) {
+      setUserProfile(profileData);
+    }
     
     // Increment view count
     const { data: current } = await supabase
@@ -271,6 +291,47 @@ const SharedExperiment = () => {
               </div>
             </div>
           </Card>
+
+          {/* User Info */}
+          {userProfile && (
+            <Card className="p-6 mb-8">
+              <h3 className="text-sm font-semibold text-muted-foreground mb-3">
+                Creado por
+              </h3>
+              <div
+                className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
+                onClick={() => navigate(`/profile/${userProfile.username}`)}
+              >
+                <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center overflow-hidden">
+                  {userProfile.avatar_url ? (
+                    <img
+                      src={userProfile.avatar_url}
+                      alt={userProfile.display_name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <User className="w-6 h-6 text-primary" />
+                  )}
+                </div>
+                <div>
+                  <p className="font-semibold">{userProfile.display_name}</p>
+                  <p className="text-sm text-muted-foreground">@{userProfile.username}</p>
+                </div>
+              </div>
+            </Card>
+          )}
+
+          {/* Collection Manager */}
+          {user && (
+            <div className="mb-8">
+              <CollectionManager experimentId={experiment.id} />
+            </div>
+          )}
+
+          {/* Comments */}
+          <div className="mb-8">
+            <ExperimentComments experimentId={experiment.id} />
+          </div>
 
           <div className="mt-8 flex gap-4 justify-center">
             <Button
