@@ -130,35 +130,39 @@ const SharedExperiment = () => {
 
     if (!experiment) return;
 
-    if (isLiked) {
-      const { error } = await supabase
-        .from("experiment_likes")
-        .delete()
-        .eq("experiment_id", experiment.id)
-        .eq("user_id", user.id);
+    try {
+      const { data, error } = await supabase.functions.invoke('toggle-like', {
+        body: {
+          experimentId: experiment.id,
+        },
+      });
 
-      if (!error) {
-        setIsLiked(false);
+      if (error || data?.error) {
+        const errorMessage = data?.error || error?.message || 'No se pudo procesar el like';
+        toast({
+          title: errorMessage.includes('Rate limit') ? "Espera un momento" : "Error",
+          description: errorMessage,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (data?.liked !== undefined) {
+        setIsLiked(data.liked);
         setExperiment({
           ...experiment,
-          likes_count: Math.max(0, experiment.likes_count - 1),
+          likes_count: data.liked 
+            ? experiment.likes_count + 1 
+            : Math.max(0, experiment.likes_count - 1),
         });
       }
-    } else {
-      const { error } = await supabase
-        .from("experiment_likes")
-        .insert({
-          experiment_id: experiment.id,
-          user_id: user.id,
-        });
-
-      if (!error) {
-        setIsLiked(true);
-        setExperiment({
-          ...experiment,
-          likes_count: experiment.likes_count + 1,
-        });
-      }
+    } catch (err) {
+      console.error('Toggle like error:', err);
+      toast({
+        title: "Error",
+        description: "No se pudo procesar el like",
+        variant: "destructive",
+      });
     }
   };
 

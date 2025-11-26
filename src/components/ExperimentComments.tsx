@@ -114,25 +114,34 @@ const ExperimentComments = ({ experimentId }: ExperimentCommentsProps) => {
 
     setLoading(true);
 
-    const { error } = await supabase
-      .from("experiment_comments")
-      .insert({
-        experiment_id: experimentId,
-        user_id: user.id,
-        comment_text: trimmedComment,
+    try {
+      const { data, error } = await supabase.functions.invoke('add-comment', {
+        body: {
+          experimentId,
+          commentText: trimmedComment,
+        },
       });
 
-    if (error) {
+      if (error || data?.error) {
+        const errorMessage = data?.error || error?.message || 'No se pudo publicar el comentario';
+        toast({
+          title: errorMessage.includes('Rate limit') ? "Espera un momento" : "Error",
+          description: errorMessage,
+          variant: "destructive",
+        });
+      } else {
+        setNewComment("");
+        toast({
+          title: "Comentario publicado",
+          description: "Tu comentario se ha agregado correctamente",
+        });
+      }
+    } catch (err) {
+      console.error('Comment submission error:', err);
       toast({
         title: "Error",
         description: "No se pudo publicar el comentario",
         variant: "destructive",
-      });
-    } else {
-      setNewComment("");
-      toast({
-        title: "Comentario publicado",
-        description: "Tu comentario se ha agregado correctamente",
       });
     }
 
