@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      achievements: {
+        Row: {
+          category: string
+          created_at: string
+          criteria: Json
+          description: string | null
+          icon: string | null
+          id: string
+          name: string
+          points: number
+          slug: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          criteria?: Json
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name: string
+          points?: number
+          slug: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          criteria?: Json
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name?: string
+          points?: number
+          slug?: string
+        }
+        Relationships: []
+      }
       ai_logs: {
         Row: {
           cost_usd: number | null
@@ -575,6 +611,38 @@ export type Database = {
           },
         ]
       }
+      user_achievements: {
+        Row: {
+          achievement_id: string
+          id: string
+          progress: Json
+          unlocked_at: string
+          user_id: string
+        }
+        Insert: {
+          achievement_id: string
+          id?: string
+          progress?: Json
+          unlocked_at?: string
+          user_id: string
+        }
+        Update: {
+          achievement_id?: string
+          id?: string
+          progress?: Json
+          unlocked_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_achievements_achievement_id_fkey"
+            columns: ["achievement_id"]
+            isOneToOne: false
+            referencedRelation: "achievements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_activity: {
         Row: {
           created_at: string
@@ -634,6 +702,56 @@ export type Database = {
           },
         ]
       }
+      user_progress: {
+        Row: {
+          bookmarked: boolean
+          completed_sections: Json
+          completion_percentage: number
+          created_at: string
+          current_level: string
+          id: string
+          last_visited_at: string
+          problem_id: number
+          total_time_spent: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          bookmarked?: boolean
+          completed_sections?: Json
+          completion_percentage?: number
+          created_at?: string
+          current_level?: string
+          id?: string
+          last_visited_at?: string
+          problem_id: number
+          total_time_spent?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          bookmarked?: boolean
+          completed_sections?: Json
+          completion_percentage?: number
+          created_at?: string
+          current_level?: string
+          id?: string
+          last_visited_at?: string
+          problem_id?: number
+          total_time_spent?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_progress_problem_id_fkey"
+            columns: ["problem_id"]
+            isOneToOne: false
+            referencedRelation: "millennium_problems"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -657,7 +775,18 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      user_statistics: {
+        Row: {
+          achievements_count: number | null
+          bookmarks_count: number | null
+          last_active_at: string | null
+          problems_visited: number | null
+          total_points: number | null
+          total_time_seconds: number | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       cleanup_old_rate_limits: { Args: never; Returns: undefined }
