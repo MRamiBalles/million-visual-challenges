@@ -1,156 +1,334 @@
-import { useState } from "react";
 import { motion } from "framer-motion";
-import { ProblemNav } from "@/components/ProblemNav";
-import { ProblemCard } from "@/components/ProblemCard";
-import { ConsistencyDemo } from "@/components/problems/ConsistencyDemo";
-import { CreativityDemo } from "@/components/problems/CreativityDemo";
-import { PromptComplexityDemo } from "@/components/problems/PromptComplexityDemo";
-import { BrandDilutionDemo } from "@/components/problems/BrandDilutionDemo";
-import { BiasDemo } from "@/components/problems/BiasDemo";
-import { ScalabilityDemo } from "@/components/problems/ScalabilityDemo";
-import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Brain, Infinity, Waves, Atom, Calculator, Network, CheckCircle2, Sparkles } from "lucide-react";
 
-const problems = [
+const millenniumProblems = [
   {
-    title: "Maintaining Visual Consistency",
-    definition: "AI models produce divergent styles across generations, breaking brand identity.",
-    insights: [
-      "Use reference images + style-tokens to anchor visual output",
-      "Post-process with style-transfer pipelines for unified aesthetics",
-      "Implement feedback loops to refine consistency over iterations",
-    ],
-    demo: <ConsistencyDemo />,
+    id: 1,
+    title: "P vs NP",
+    shortDesc: "¿Es verificar tan difícil como resolver?",
+    field: "Ciencias de la Computación",
+    icon: Brain,
+    color: "hsl(280, 100%, 70%)",
+    status: "unsolved",
+    route: "/pvsnp",
+    prize: "$1,000,000",
   },
   {
-    title: "Lack of Genuine Creativity & Human Touch",
-    definition: "AI outputs can feel generic, lacking emotional nuance and cultural depth.",
-    insights: [
-      "Blend AI suggestions with human-curated edits for authenticity",
-      "Use creativity-boost prompts that inject cultural context",
-      "Maintain human oversight for final creative decisions",
-    ],
-    demo: <CreativityDemo />,
+    id: 2,
+    title: "Hipótesis de Riemann",
+    shortDesc: "El patrón oculto de los números primos",
+    field: "Teoría de Números",
+    icon: Infinity,
+    color: "hsl(195, 100%, 50%)",
+    status: "unsolved",
+    route: "/riemann",
+    prize: "$1,000,000",
   },
   {
-    title: "Complexity & Ambiguity of Prompt Engineering",
-    definition: "Vague or overly complex prompts lead to irrelevant or unpredictable outputs.",
-    insights: [
-      "Adopt a Prompt-Template hierarchy: Goal → Style → Constraints",
-      "Validate prompts with a preview sandbox before full generation",
-      "Document successful prompt patterns for team consistency",
-    ],
-    demo: <PromptComplexityDemo />,
+    id: 3,
+    title: "Navier-Stokes",
+    shortDesc: "¿Existe solución suave para todo fluido?",
+    field: "Ecuaciones Diferenciales",
+    icon: Waves,
+    color: "hsl(210, 100%, 60%)",
+    status: "unsolved",
+    route: "/navier-stokes",
+    prize: "$1,000,000",
   },
   {
-    title: "Generic Output & Brand Dilution",
-    definition: "Without strict guidelines, AI produces bland designs that erode brand voice.",
-    insights: [
-      "Encode brand assets (color palette, typography) as style-guides",
-      "Use brand-lock tokens to enforce visual constraints",
-      "Regularly audit outputs for brand alignment",
-    ],
-    demo: <BrandDilutionDemo />,
+    id: 4,
+    title: "Yang-Mills & Mass Gap",
+    shortDesc: "Teoría cuántica de campos gauge",
+    field: "Física Matemática",
+    icon: Atom,
+    color: "hsl(30, 100%, 60%)",
+    status: "unsolved",
+    route: "/yang-mills",
+    prize: "$1,000,000",
   },
   {
-    title: "Ethical Biases & Flawed Data",
-    definition: "Training data biases can surface as stereotypical or inappropriate visuals.",
-    insights: [
-      "Pre-filter datasets for representation and diversity",
-      "Apply bias-mitigation layers in generation pipeline",
-      "Provide safety-check scores for content review",
-    ],
-    demo: <BiasDemo />,
+    id: 5,
+    title: "Conjetura de Hodge",
+    shortDesc: "Geometría algebraica vs topología",
+    field: "Geometría Algebraica",
+    icon: Network,
+    color: "hsl(340, 100%, 65%)",
+    status: "unsolved",
+    route: "/hodge",
+    prize: "$1,000,000",
   },
   {
-    title: "Challenges in Scaling & Adaptability",
-    definition: "Large-scale generation strains model memory, context-window, and regional compliance.",
-    insights: [
-      "Chunk prompts and reuse memory-tokens for efficiency",
-      "Deploy region-specific style presets for localization",
-      "Monitor resource usage and optimize batch processing",
-    ],
-    demo: <ScalabilityDemo />,
+    id: 6,
+    title: "Birch & Swinnerton-Dyer",
+    shortDesc: "Curvas elípticas y funciones L",
+    field: "Teoría de Números",
+    icon: Calculator,
+    color: "hsl(120, 60%, 50%)",
+    status: "unsolved",
+    route: "/birch-sd",
+    prize: "$1,000,000",
   },
-];
-
-const citations = [
-  { name: "AISTudios", url: "https://www.aistudios.com" },
-  { name: "Venngage", url: "https://venngage.com" },
-  { name: "Unite.ai", url: "https://unite.ai" },
-  { name: "SurgeGrowth", url: "https://surgegrowth.ai" },
-  { name: "GodofPrompt.ai", url: "https://godofprompt.ai" },
-  { name: "Lovable.dev", url: "https://lovable.dev" },
+  {
+    id: 7,
+    title: "Conjetura de Poincaré",
+    shortDesc: "Clasificación de 3-variedades",
+    field: "Topología",
+    icon: CheckCircle2,
+    color: "hsl(160, 84%, 39%)",
+    status: "solved",
+    route: "/poincare",
+    prize: "✓ Resuelto 2003",
+  },
 ];
 
 const Index = () => {
-  const [activeSection, setActiveSection] = useState(0);
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-background">
-      <motion.header
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-gradient-header border-b border-border py-12"
+      {/* Hero Section */}
+      <motion.section
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="relative overflow-hidden bg-gradient-header border-b border-border"
       >
-        <div className="container mx-auto px-6 text-center">
-          <motion.h1
-            initial={{ scale: 0.9 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 0.5 }}
-            className="text-5xl md:text-6xl font-bold mb-4 bg-gradient-accent bg-clip-text text-transparent"
-          >
-            The Six Problems of the Million
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="text-xl text-muted-foreground max-w-3xl mx-auto"
-          >
-            Exploring the canonical challenges that arise when scaling AI-generated visual content to a million outputs
-          </motion.p>
+        {/* Animated background pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" strokeWidth="1"/>
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#grid)" />
+          </svg>
         </div>
-      </motion.header>
 
-      <ProblemNav activeSection={activeSection} onSectionChange={setActiveSection} />
+        <div className="container mx-auto px-6 py-20 relative z-10">
+          <motion.div
+            initial={{ y: 30, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="text-center max-w-4xl mx-auto"
+          >
+            <Badge className="mb-6 text-base px-4 py-2" variant="secondary">
+              Clay Mathematics Institute • Año 2000
+            </Badge>
+            
+            <h1 className="text-6xl md:text-8xl font-bold mb-6">
+              <span className="bg-gradient-accent bg-clip-text text-transparent">
+                Los Problemas
+              </span>
+              <br />
+              <span className="text-foreground">del Milenio</span>
+            </h1>
+            
+            <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+              Siete desafíos matemáticos monumentales. Cada uno con un premio de{" "}
+              <span className="text-primary font-bold">$1 millón de dólares</span>.
+              Solo uno ha sido resuelto en 25 años.
+            </p>
 
-      <main>
-        <ProblemCard {...problems[activeSection]} />
-      </main>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.6 }}
+              className="mt-8 flex items-center justify-center gap-3 text-sm text-muted-foreground"
+            >
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-primary animate-pulse" />
+                <span>6 sin resolver</span>
+              </div>
+              <div className="w-1 h-1 rounded-full bg-muted-foreground" />
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-green-500" />
+                <span>1 resuelto</span>
+              </div>
+              <div className="w-1 h-1 rounded-full bg-muted-foreground" />
+              <span>$7M en premios</span>
+            </motion.div>
+          </motion.div>
+        </div>
+      </motion.section>
 
-      <motion.footer
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        viewport={{ once: true }}
-        className="bg-gradient-header border-t border-border py-12"
-      >
-        <div className="container mx-auto px-6">
-          <div className="text-center space-y-6">
-            <h3 className="text-2xl font-semibold text-foreground">Sources & References</h3>
-            <div className="flex flex-wrap justify-center gap-4">
-              {citations.map((citation, index) => (
-                <motion.a
-                  key={index}
-                  href={citation.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-4 py-2 bg-card rounded-lg border border-border hover:border-primary transition-colors"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+      {/* Problems Grid */}
+      <section className="container mx-auto px-6 py-20">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+        >
+          {millenniumProblems.map((problem, index) => {
+            const Icon = problem.icon;
+            
+            return (
+              <motion.div
+                key={problem.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 + index * 0.1 }}
+              >
+                <Card
+                  className="group relative overflow-hidden bg-card border-border hover:border-primary/50 transition-all duration-300 cursor-pointer h-full"
+                  onClick={() => navigate(problem.route)}
                 >
-                  <span className="text-sm text-foreground">{citation.name}</span>
-                </motion.a>
-              ))}
-            </div>
-            <Button size="lg" className="shadow-glow">
-              <Download className="w-5 h-5 mr-2" />
-              Download Prompt Guide
-            </Button>
-          </div>
+                  {/* Gradient overlay */}
+                  <motion.div
+                    className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity"
+                    style={{
+                      background: `linear-gradient(135deg, ${problem.color} 0%, transparent 100%)`,
+                    }}
+                  />
+
+                  <div className="p-6 relative z-10">
+                    {/* Icon */}
+                    <motion.div
+                      className="mb-4"
+                      whileHover={{ scale: 1.1, rotate: 5 }}
+                      transition={{ type: "spring", stiffness: 300 }}
+                    >
+                      <div
+                        className="w-16 h-16 rounded-xl flex items-center justify-center"
+                        style={{ backgroundColor: `${problem.color}20` }}
+                      >
+                        <Icon
+                          className="w-8 h-8"
+                          style={{ color: problem.color }}
+                        />
+                      </div>
+                    </motion.div>
+
+                    {/* Status Badge */}
+                    <Badge
+                      variant={problem.status === "solved" ? "default" : "secondary"}
+                      className="mb-3"
+                    >
+                      {problem.status === "solved" ? "✓ Resuelto" : problem.prize}
+                    </Badge>
+
+                    {/* Title */}
+                    <h3 className="text-2xl font-bold mb-2 text-foreground group-hover:text-primary transition-colors">
+                      {problem.title}
+                    </h3>
+
+                    {/* Description */}
+                    <p className="text-muted-foreground mb-4 leading-relaxed">
+                      {problem.shortDesc}
+                    </p>
+
+                    {/* Field */}
+                    <div className="flex items-center gap-2 text-sm">
+                      <div
+                        className="w-2 h-2 rounded-full"
+                        style={{ backgroundColor: problem.color }}
+                      />
+                      <span className="text-muted-foreground">{problem.field}</span>
+                    </div>
+                  </div>
+
+                  {/* Hover effect */}
+                  <motion.div
+                    className="absolute bottom-0 left-0 right-0 h-1"
+                    style={{ backgroundColor: problem.color }}
+                    initial={{ scaleX: 0 }}
+                    whileHover={{ scaleX: 1 }}
+                    transition={{ duration: 0.3 }}
+                  />
+                </Card>
+              </motion.div>
+            );
+          })}
+
+          {/* Bonus Card - AI Visual Challenges */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.2 }}
+          >
+            <Card
+              className="group relative overflow-hidden bg-gradient-primary border-2 border-primary/30 hover:border-primary transition-all duration-300 cursor-pointer h-full"
+              onClick={() => navigate("/ai-challenges")}
+            >
+              <div className="p-6 relative z-10">
+                <motion.div
+                  className="mb-4"
+                  whileHover={{ scale: 1.1, rotate: -5 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                >
+                  <div className="w-16 h-16 rounded-xl bg-primary/20 flex items-center justify-center">
+                    <Sparkles className="w-8 h-8 text-primary" />
+                  </div>
+                </motion.div>
+
+                <Badge variant="outline" className="mb-3 border-primary text-primary">
+                  Bonus • Problema Moderno
+                </Badge>
+
+                <h3 className="text-2xl font-bold mb-2 text-foreground group-hover:text-primary transition-colors">
+                  Desafíos de IA Visual
+                </h3>
+
+                <p className="text-muted-foreground mb-4 leading-relaxed">
+                  Los 6 problemas al escalar contenido visual generado por IA a un millón
+                </p>
+
+                <div className="flex items-center gap-2 text-sm">
+                  <div className="w-2 h-2 rounded-full bg-primary" />
+                  <span className="text-muted-foreground">Inteligencia Artificial</span>
+                </div>
+              </div>
+            </Card>
+          </motion.div>
+        </motion.div>
+      </section>
+
+      {/* Info Section */}
+      <motion.section
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        className="bg-card border-y border-border py-16"
+      >
+        <div className="container mx-auto px-6 max-w-4xl text-center">
+          <h2 className="text-3xl font-bold mb-6 text-foreground">
+            Sobre los Problemas del Milenio
+          </h2>
+          <p className="text-lg text-muted-foreground leading-relaxed mb-6">
+            En el año 2000, el Clay Mathematics Institute seleccionó siete problemas matemáticos
+            fundamentales que habían resistido solución durante décadas o incluso siglos. Cada problema
+            representa un desafío profundo en su campo y su resolución tendría implicaciones
+            revolucionarias para las matemáticas y la ciencia.
+          </p>
+          <p className="text-muted-foreground">
+            Solo <span className="text-primary font-semibold">Grigori Perelman</span> ha resuelto uno:
+            la Conjetura de Poincaré en 2003 (rechazó el premio).
+          </p>
         </div>
-      </motion.footer>
+      </motion.section>
+
+      {/* Footer */}
+      <footer className="bg-gradient-header border-t border-border py-12">
+        <div className="container mx-auto px-6 text-center">
+          <p className="text-muted-foreground mb-4">
+            Basado en los problemas oficiales del{" "}
+            <a
+              href="https://www.claymath.org/millennium-problems/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
+              Clay Mathematics Institute
+            </a>
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Visualizaciones interactivas • Explicaciones multinivel • Referencias académicas
+          </p>
+        </div>
+      </footer>
     </div>
   );
 };
