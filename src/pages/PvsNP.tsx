@@ -9,10 +9,14 @@ import { ArrowLeft, Brain, BookOpen, Sparkles, ExternalLink } from "lucide-react
 import { TSPVisualization } from "@/components/problems/pvsnp/TSPVisualization";
 import { ComplexityGraph } from "@/components/problems/pvsnp/ComplexityGraph";
 import { TuringMachineDemo } from "@/components/problems/pvsnp/TuringMachineDemo";
+import { VerificationDemo } from "@/components/problems/pvsnp/VerificationDemo";
 import { millenniumProblems } from "@/data/millennium-problems";
+import { useAuth } from "@/hooks/useAuth";
+import { ExperimentSaver } from "@/components/ExperimentSaver";
 
 const PvsNP = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [explanationLevel, setExplanationLevel] = useState<"simple" | "intermediate" | "advanced">("simple");
   
   const problem = millenniumProblems.find(p => p.slug === "pvsnp")!;
@@ -36,10 +40,21 @@ const PvsNP = () => {
               Problemas del Milenio
             </Button>
             
-            <Badge variant="secondary" className="gap-2">
-              <Brain className="w-4 h-4" />
-              {problem.prize}
-            </Badge>
+            <div className="flex items-center gap-2">
+              {!user && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate("/auth")}
+                >
+                  Iniciar Sesión
+                </Button>
+              )}
+              <Badge variant="secondary" className="gap-2">
+                <Brain className="w-4 h-4" />
+                {problem.prize}
+              </Badge>
+            </div>
           </div>
         </div>
       </motion.header>
@@ -129,8 +144,27 @@ const PvsNP = () => {
             >
               <div>
                 <h2 className="text-3xl font-bold mb-3 text-foreground">
-                  El Problema del Viajante (TSP)
+                  Verificar vs Resolver
                 </h2>
+                <p className="text-muted-foreground mb-6 max-w-3xl">
+                  La esencia de P vs NP: es fácil verificar una solución, pero ¿es igual de fácil encontrarla?
+                </p>
+                <VerificationDemo />
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+                  <h2 className="text-3xl font-bold text-foreground">
+                    El Problema del Viajante (TSP)
+                  </h2>
+                  {user && (
+                    <ExperimentSaver
+                      problemSlug="pvsnp"
+                      experimentType="tsp"
+                      experimentData={{ cities: 8 }}
+                    />
+                  )}
+                </div>
                 <p className="text-muted-foreground mb-6 max-w-3xl">
                   Un ejemplo clásico de problema NP-Complete. Intenta encontrar la ruta más corta
                   visitando todas las ciudades exactamente una vez.

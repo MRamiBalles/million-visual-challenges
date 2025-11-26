@@ -2,7 +2,9 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Brain, Infinity, Waves, Atom, Calculator, Network, CheckCircle2, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Brain, Infinity, Waves, Atom, Calculator, Network, CheckCircle2, Sparkles, LogOut } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 const millenniumProblems = [
   {
@@ -86,6 +88,7 @@ const millenniumProblems = [
 
 const Index = () => {
   const navigate = useNavigate();
+  const { user, signOut } = useAuth();
 
   return (
     <div className="min-h-screen bg-background">
@@ -108,6 +111,19 @@ const Index = () => {
         </div>
 
         <div className="container mx-auto px-6 py-20 relative z-10">
+          <div className="absolute top-4 right-6">
+            {user ? (
+              <Button variant="outline" size="sm" onClick={signOut} className="gap-2">
+                <LogOut className="w-4 h-4" />
+                Cerrar Sesión
+              </Button>
+            ) : (
+              <Button variant="outline" size="sm" onClick={() => navigate("/auth")}>
+                Iniciar Sesión
+              </Button>
+            )}
+          </div>
+
           <motion.div
             initial={{ y: 30, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}

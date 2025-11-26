@@ -8,6 +8,7 @@ import AIVisualChallenges from "./pages/AIVisualChallenges";
 import PvsNP from "./pages/PvsNP";
 import ComingSoon from "./pages/ComingSoon";
 import NotFound from "./pages/NotFound";
+import Auth from "./pages/Auth";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +32,9 @@ const App = () => (
           <Route path="/hodge" element={<ComingSoon />} />
           <Route path="/birch-sd" element={<ComingSoon />} />
           <Route path="/poincare" element={<ComingSoon />} />
+          
+          {/* Auth */}
+          <Route path="/auth" element={<Auth />} />
           
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
