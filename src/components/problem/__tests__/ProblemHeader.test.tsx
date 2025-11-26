@@ -7,10 +7,12 @@ const mockProblem = {
     id: 1,
     slug: 'test-problem',
     title: 'Test Problem',
-    shortTitle: 'Test',
+    short_title: 'Test',
     field: 'Mathematics',
     year: 2000,
     status: 'unsolved' as const,
+    solver: '',
+    solver_year: 0,
     prize: '$1,000,000',
     description_simple: 'Simple description',
     description_intermediate: 'Intermediate description',
@@ -18,6 +20,9 @@ const mockProblem = {
     clay_paper_author: 'Test Author',
     clay_paper_year: 2000,
     clay_paper_url: 'https://example.com',
+    cover_image_url: null,
+    created_at: '2024-01-01T00:00:00Z',
+    updated_at: '2024-01-01T00:00:00Z',
 };
 
 describe('ProblemHeader', () => {
