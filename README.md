@@ -152,6 +152,46 @@ million-visual-challenges/
 **Manuel Ramírez Ballesteros**  
 Proyecto académico independiente
 
+**Contacto y Colaboración**: ramiballes96@gmail.com
+
+---
+
+## 💰 Apoyo y Financiación
+
+Este proyecto es completamente **open-source y gratuito**. Si encuentras valor en esta plataforma y deseas contribuir a su desarrollo continuo, hay varias formas de colaborar:
+
+### Formas de Apoyar el Proyecto
+
+1. **💻 Contribución de Código**  
+   Ver [CONTRIBUTING.md](./CONTRIBUTING.md) para guías de contribución
+
+2. **💵 Financiación Directa**  
+   Apoyo vía **PayPal**: [ramiballes96@gmail.com](mailto:ramiballes96@gmail.com)  
+   *Toda donación, por pequeña que sea, ayuda a mantener y mejorar el proyecto*
+
+3. **🐛 Reporte de Bugs**  
+   [GitHub Issues](https://github.com/MRamiBalles/million-visual-challenges/issues)
+
+4. **💡 Sugerencias y Feedback**  
+   [GitHub Discussions](https://github.com/MRamiBalles/million-visual-challenges/discussions)
+
+5. **📚 Propuestas Académicas**  
+   Colaboraciones de investigación, papers conjuntos, o implementación de nuevas features
+
+### Transparencia en el Uso de Fondos
+
+Las donaciones se utilizan para:
+- 💻 **Infraestructura**: Servidor y hosting (Supabase, bases de datos)
+- 🤖 **APIs de IA**: Costos de OpenAI GPT-4, embeddings (~$24-50/mes)
+- 📚 **Recursos Académicos**: Acceso a papers, journals, y bases de datos
+- 🚀 **Desarrollo**: Nuevas funcionalidades y mejoras
+- 📖 **Documentación**: Creación de tutoriales y materiales educativos
+
+### Patrocinadores y Colaboradores
+
+*¿Interesado en patrocinar este proyecto?*  
+Contacta: **ramiballes96@gmail.com**
+
 ---
 
 ## 🤝 Contribuciones

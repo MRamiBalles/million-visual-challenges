@@ -4,13 +4,20 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
-import { checkRateLimit } from "../_shared/rateLimit.ts"
+import { checkRateLimit, RateLimitError } from "../_shared/rateLimit.ts"
 
-const openaiKey = Deno.env.get("OPENAI_API_KEY")!
+// Validate OPENAI_API_KEY is configured
+const openaiKey = Deno.env.get("OPENAI_API_KEY")
+if (!openaiKey) {
+    console.error('[research-qa] FATAL: OPENAI_API_KEY not configured')
+    throw new Error('OPENAI_API_KEY environment variable is required')
+}
+
+console.log('[research-qa] Initialized successfully')
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
 serve(async (req) => {
@@ -21,9 +28,9 @@ serve(async (req) => {
     try {
         const authHeader = req.headers.get('Authorization')
         if (!authHeader) {
-            return new Response(JSON.stringify({ error: "Unauthenticated" }), { 
-                status: 401, 
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+            return new Response(JSON.stringify({ error: "Unauthenticated" }), {
+                status: 401,
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             })
         }
 
@@ -35,17 +42,23 @@ serve(async (req) => {
 
         const { data: { user }, error: authError } = await supabase.auth.getUser()
         if (authError || !user) {
-            return new Response(JSON.stringify({ error: "Unauthenticated" }), { 
-                status: 401, 
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+            return new Response(JSON.stringify({ error: "Unauthenticated" }), {
+                status: 401,
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             })
         }
 
         const { question, problemId } = await req.json()
         const userId = user.id
 
-        // Rate limiting (10 per minute)
-        await checkRateLimit(userId, "research-qa", 10)
+        console.log('[research-qa] Request:', {
+            userId: userId.substring(0, 8) + '...',
+            problemId,
+            questionLength: question?.length || 0
+        })
+
+        // Rate limiting (10 per minute) - returns info about current usage
+        const limitInfo = await checkRateLimit(userId, "research-qa", 10)
 
         // 1. Create embedding for the question
         const embedResp = await fetch("https://api.openai.com/v1/embeddings", {
@@ -73,9 +86,9 @@ serve(async (req) => {
 
         if (rpcError) {
             console.error("RAG RPC error:", rpcError)
-            return new Response(JSON.stringify({ error: "RAG lookup failed" }), { 
-                status: 500, 
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+            return new Response(JSON.stringify({ error: "RAG lookup failed" }), {
+                status: 500,
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             })
         }
 
@@ -113,18 +126,53 @@ serve(async (req) => {
             context_papers: relevantChunks.map((c: any) => c.paper_id),
         })
         if (insertError) {
-            console.error("Failed to log QA history:", insertError)
+            console.warn('[research-qa] Failed to log QA history:', insertError)
         }
 
-        // 5. Return answer with source metadata
-        return new Response(JSON.stringify({ answer, sources: relevantChunks }), {
+        console.log('[research-qa] Success:', {
+            userId: userId.substring(0, 8) + '...',
+            problemId,
+            sourcesCount: relevantChunks.length
+        })
+
+        // 5. Return answer with source metadata and rate limit info
+        return new Response(JSON.stringify({
+            answer,
+            sources: relevantChunks,
+            rateLimit: {
+                remaining: limitInfo.remaining,
+                limit: limitInfo.limit,
+                resetAt: limitInfo.resetAt
+            }
+        }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         })
     } catch (e) {
-        console.error(e)
-        return new Response(JSON.stringify({ error: "Internal server error" }), { 
-            status: 500, 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        // Handle rate limit errors with 429 status
+        if (e instanceof RateLimitError) {
+            console.warn('[research-qa] Rate limit exceeded:', e.info)
+            return new Response(JSON.stringify({
+                error: "Rate limit exceeded",
+                message: e.message,
+                rateLimit: {
+                    current: e.info.current,
+                    limit: e.info.limit,
+                    resetAt: e.info.resetAt
+                }
+            }), {
+                status: 429,
+                headers: {
+                    ...corsHeaders,
+                    'Content-Type': 'application/json',
+                    'Retry-After': Math.ceil((e.info.resetAt.getTime() - Date.now()) / 1000).toString()
+                }
+            })
+        }
+
+        console.error('[research-qa] Error:', e)
+        return new Response(JSON.stringify({ error: "Internal server error" }), {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         })
     }
 })

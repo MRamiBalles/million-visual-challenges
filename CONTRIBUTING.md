@@ -161,7 +161,23 @@ Al contribuir, aceptas que tus contribuciones se licencien bajo MIT License.
 
 - **Issues**: [GitHub Issues](https://github.com/MRamiBalles/million-visual-challenges/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/MRamiBalles/million-visual-challenges/discussions)
-- **Email**: [tu-email@ejemplo.com]
+- **Email/Colaboración**: **ramiballes96@gmail.com**
+- **Financiación/PayPal**: **ramiballes96@gmail.com**
+
+### Propuestas de Colaboración
+
+Si estás interesado en:
+- 🎓 Colaboración académica o investigación conjunta
+- 💰 Financiación o patrocinio del proyecto
+- 🚀 Implementación de nuevas features o problemas específicos
+- 📚 Desarrollo de contenido educativo o visualizaciones
+- 🤝 Partnerships institucionales
+
+No dudes en contactar directamente a **ramiballes96@gmail.com**
+
+Todas las propuestas son bienvenidas y se responden en 24-48 horas.
+
+---
 
 ## 🙏 Reconocimientos
 
