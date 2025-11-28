@@ -12,6 +12,10 @@ export interface UserProfile {
     website_url: string | null;
     twitter_handle: string | null;
     github_handle: string | null;
+    location: string | null;
+    education_level: string | null;
+    research_interests: string[] | null;
+    preferences: Record<string, any> | null;
     created_at: string;
     updated_at: string;
 }
@@ -23,6 +27,9 @@ export interface UpdateProfileData {
     website_url?: string;
     twitter_handle?: string;
     github_handle?: string;
+    location?: string;
+    education_level?: string;
+    research_interests?: string[];
 }
 
 export const useUserProfile = (userId?: string) => {

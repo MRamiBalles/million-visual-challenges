@@ -121,7 +121,7 @@ const YangMills = () => {
                     simpleContent={
                         <div className="space-y-4">
                             <p className="text-lg leading-relaxed">
-                                {problem.description?.simple || problem.description_simple}
+                                {problem.description.simple}
                             </p>
                             <p className="leading-relaxed">
                                 Imagina que quieres entender de qué están hechas las partículas más pequeñas del universo:
@@ -141,7 +141,7 @@ const YangMills = () => {
                     intermediateContent={
                         <div className="space-y-4">
                             <p className="text-lg leading-relaxed">
-                                {problem.description?.intermediate || problem.description_intermediate}
+                                {problem.description.intermediate}
                             </p>
                             <div className="bg-muted p-4 rounded-lg space-y-3">
                                 <p><strong>Teoría de Gauge:</strong> Marco matemático para describir fuerzas fundamentales</p>
@@ -159,11 +159,11 @@ const YangMills = () => {
                     advancedContent={
                         <div className="space-y-4">
                             <p className="text-lg font-mono leading-relaxed">
-                                {problem.description?.advanced || problem.description_advanced}
+                                {problem.description.advanced}
                             </p>
                             <div className="bg-muted p-4 rounded-lg font-mono text-sm space-y-2">
-                                <p>ℒ_YM = -¼ F^a_μν F^{aμν}</p>
-                                <p>F^a_μν = ∂_μ A^a_ν - ∂_ν A^a_μ + g f^{abc} A^b_μ A^c_ν</p>
+                                <p>ℒ_YM = -¼ F^a_μν F^aμν</p>
+                                <p>F^a_μν = ∂_μ A^a_ν - ∂_ν A^a_μ + g f^abc A^b_μ A^c_ν</p>
                                 <p>Grupo de gauge: SU(3) para QCD</p>
                                 <p>Mass gap: m = inf{'{'}E : E eigenvalue of H, E {'>'} 0{'}'} {'>'} 0</p>
                             </div>
@@ -214,10 +214,10 @@ const YangMills = () => {
                     title="Referencias Clave"
                     references={[
                         {
-                            title: problem.clay_paper_author + " - Quantum Yang-Mills Theory",
-                            authors: [problem.clay_paper_author],
-                            year: problem.clay_paper_year,
-                            url: problem.clay_paper_url,
+                            title: problem.clayPaper.author + " - Quantum Yang-Mills Theory",
+                            authors: [problem.clayPaper.author],
+                            year: problem.clayPaper.year,
+                            url: problem.clayPaper.url,
                             description: "Paper oficial del Clay Mathematics Institute",
                         },
                         ...(problem.keyReferences || []),

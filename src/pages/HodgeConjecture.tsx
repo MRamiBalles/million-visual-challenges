@@ -157,10 +157,10 @@ const HodgeConjecture = () => {
                         title="Referencias Clave"
                         references={[
                             {
-                                title: problem.clay_paper_author + " - The Hodge Conjecture",
-                                authors: [problem.clay_paper_author],
-                                year: problem.clay_paper_year,
-                                url: problem.clay_paper_url,
+                                title: problem.clayPaper.author + " - The Hodge Conjecture",
+                                authors: [problem.clayPaper.author],
+                                year: problem.clayPaper.year,
+                                url: problem.clayPaper.url,
                                 description: "Paper oficial del Clay Mathematics Institute",
                             },
                             ...(problem.keyReferences || []),

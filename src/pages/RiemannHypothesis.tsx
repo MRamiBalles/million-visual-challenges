@@ -121,7 +121,7 @@ const RiemannHypothesis = () => {
           simpleContent={
             <div className="space-y-4">
               <p className="text-lg leading-relaxed">
-                {problem.description?.simple || problem.description_simple}
+                {problem.description.simple}
               </p>
               <p className="leading-relaxed">
                 Los números primos (2, 3, 5, 7, 11, 13...) son los bloques fundamentales de todos los números.
@@ -140,7 +140,7 @@ const RiemannHypothesis = () => {
           intermediateContent={
             <div className="space-y-4">
               <p className="text-lg leading-relaxed">
-                {problem.description?.intermediate || problem.description_intermediate}
+                {problem.description.intermediate}
               </p>
               <div className="bg-muted p-4 rounded-lg space-y-3">
                 <p><strong>Función Zeta:</strong> ζ(s) = 1 + 1/2ˢ + 1/3ˢ + 1/4ˢ + ...</p>
@@ -157,7 +157,7 @@ const RiemannHypothesis = () => {
           advancedContent={
             <div className="space-y-4">
               <p className="text-lg font-mono leading-relaxed">
-                {problem.description?.advanced || problem.description_advanced}
+                {problem.description.advanced}
               </p>
               <div className="bg-muted p-4 rounded-lg font-mono text-sm space-y-2">
                 <p>ζ(s) = Σ(n=1 to ∞) n⁻ˢ para Re(s) {'>'} 1</p>
@@ -212,10 +212,10 @@ const RiemannHypothesis = () => {
             title="Referencias Clave"
             references={[
               {
-                title: problem.clay_paper_author + " - The Riemann Hypothesis",
-                authors: [problem.clay_paper_author],
-                year: problem.clay_paper_year,
-                url: problem.clay_paper_url,
+                title: problem.clayPaper.author + " - The Riemann Hypothesis",
+                authors: [problem.clayPaper.author],
+                year: problem.clayPaper.year,
+                url: problem.clayPaper.url,
                 description: "Paper oficial del Clay Mathematics Institute",
               },
               ...(problem.keyReferences || []),

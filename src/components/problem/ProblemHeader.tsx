@@ -4,7 +4,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Calendar, Award, User } from "lucide-react";
-import type { MillenniumProblem } from "@/types/database";
+import type { MillenniumProblem } from "@/data/millennium-problems";
 
 interface ProblemHeaderProps {
     problem: MillenniumProblem;
@@ -34,9 +34,9 @@ export const ProblemHeader = ({ problem, className = "" }: ProblemHeaderProps) =
                     </h1>
 
                     {/* Subtitle */}
-                    {problem.short_title && problem.short_title !== problem.title && (
+                    {problem.shortTitle && problem.shortTitle !== problem.title && (
                         <p className="text-2xl md:text-3xl text-purple-200 mb-8">
-                            {problem.short_title}
+                            {problem.shortTitle}
                         </p>
                     )}
 
@@ -81,8 +81,8 @@ export const ProblemHeader = ({ problem, className = "" }: ProblemHeaderProps) =
                                     <p className="font-semibold">
                                         {isSolved ? problem.solver : problem.prize}
                                     </p>
-                                    {isSolved && problem.solver_year && (
-                                        <p className="text-xs text-purple-200">({problem.solver_year})</p>
+                                    {isSolved && problem.solverYear && (
+                                        <p className="text-xs text-purple-200">({problem.solverYear})</p>
                                     )}
                                 </div>
                             </div>
@@ -93,10 +93,10 @@ export const ProblemHeader = ({ problem, className = "" }: ProblemHeaderProps) =
                     <div className="mt-8 p-4 bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg">
                         <p className="text-sm text-purple-200 mb-1">Paper Oficial - Clay Mathematics Institute</p>
                         <p className="font-medium">
-                            {problem.clay_paper_author} ({problem.clay_paper_year})
+                            {problem.clayPaper.author} ({problem.clayPaper.year})
                         </p>
                         <a
-                            href={problem.clay_paper_url}
+                            href={problem.clayPaper.url}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-sm text-blue-300 hover:text-blue-200 underline mt-2 inline-block"

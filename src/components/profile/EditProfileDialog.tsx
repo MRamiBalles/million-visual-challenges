@@ -30,7 +30,7 @@ export const EditProfileDialog = ({ profile, open, onOpenChange }: EditProfileDi
         display_name: profile.display_name || '',
         username: profile.username || '',
         bio: profile.bio || '',
-        website: profile.website || '',
+        website_url: profile.website_url || '',
         location: profile.location || '',
         education_level: profile.education_level || '',
     });
@@ -156,12 +156,12 @@ export const EditProfileDialog = ({ profile, open, onOpenChange }: EditProfileDi
 
                         {/* Website */}
                         <div className="space-y-2">
-                            <Label htmlFor="website">Sitio web</Label>
+                            <Label htmlFor="website_url">Sitio web</Label>
                             <Input
-                                id="website"
+                                id="website_url"
                                 type="url"
-                                value={formData.website}
-                                onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+                                value={formData.website_url}
+                                onChange={(e) => setFormData({ ...formData, website_url: e.target.value })}
                                 placeholder="https://tuwebsite.com"
                             />
                         </div>

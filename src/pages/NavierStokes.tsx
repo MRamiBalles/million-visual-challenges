@@ -121,7 +121,7 @@ const NavierStokes = () => {
                     simpleContent={
                         <div className="space-y-4">
                             <p className="text-lg leading-relaxed">
-                                {problem.description?.simple || problem.description_simple}
+                                {problem.description.simple}
                             </p>
                             <p className="leading-relaxed">
                                 Imagina que intentas predecir exactamente cómo se moverá el agua en un río, el aire alrededor
@@ -142,7 +142,7 @@ const NavierStokes = () => {
                     intermediateContent={
                         <div className="space-y-4">
                             <p className="text-lg leading-relaxed">
-                                {problem.description?.intermediate || problem.description_intermediate}
+                                {problem.description.intermediate}
                             </p>
                             <div className="bg-muted p-4 rounded-lg space-y-3">
                                 <p><strong>Problema de Existencia:</strong> ¿Existen soluciones para cualquier condición inicial?</p>
@@ -159,7 +159,7 @@ const NavierStokes = () => {
                     advancedContent={
                         <div className="space-y-4">
                             <p className="text-lg font-mono leading-relaxed">
-                                {problem.description?.advanced || problem.description_advanced}
+                                {problem.description.advanced}
                             </p>
                             <div className="bg-muted p-4 rounded-lg font-mono text-sm space-y-2">
                                 <p>∂u/∂t + (u·∇)u = -∇p/ρ + ν∇²u + f</p>
@@ -214,10 +214,10 @@ const NavierStokes = () => {
                         title="Referencias Clave"
                         references={[
                             {
-                                title: problem.clay_paper_author + " - Existence and Smoothness of the Navier-Stokes Equation",
-                                authors: [problem.clay_paper_author],
-                                year: problem.clay_paper_year,
-                                url: problem.clay_paper_url,
+                                title: problem.clayPaper.author + " - Existence and Smoothness of the Navier-Stokes Equation",
+                                authors: [problem.clayPaper.author],
+                                year: problem.clayPaper.year,
+                                url: problem.clayPaper.url,
                                 description: "Paper oficial del Clay Mathematics Institute",
                             },
                             ...(problem.keyReferences || []),
