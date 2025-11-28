@@ -54,9 +54,6 @@ export const ProfileHeader = ({ profile, isOwnProfile, onEdit }: ProfileHeaderPr
                             <h1 className="text-3xl font-bold">
                                 {profile.display_name || 'Usuario Anónimo'}
                             </h1>
-                            <Badge className={roleColors[profile.role]}>
-                                {roleLabels[profile.role]}
-                            </Badge>
                         </div>
 
                         {profile.username && (
@@ -75,9 +72,9 @@ export const ProfileHeader = ({ profile, isOwnProfile, onEdit }: ProfileHeaderPr
                                 </div>
                             )}
 
-                            {profile.website && (
+                            {profile.website_url && (
                                 <a
-                                    href={profile.website}
+                                    href={profile.website_url}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="flex items-center gap-1 hover:text-primary"

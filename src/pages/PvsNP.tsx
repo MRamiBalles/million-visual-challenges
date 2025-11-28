@@ -122,7 +122,7 @@ const PvsNP = () => {
           simpleContent={
             <div className="space-y-4">
               <p className="text-lg leading-relaxed">
-                {problem.description?.simple || problem.description_simple}
+                {problem.description.simple}
               </p>
               <p className="leading-relaxed">
                 Imagina que te dan un sudoku completo. Es fácil verificar si está bien resuelto:
@@ -141,7 +141,7 @@ const PvsNP = () => {
           intermediateContent={
             <div className="space-y-4">
               <p className="text-lg leading-relaxed">
-                {problem.description?.intermediate || problem.description_intermediate}
+                {problem.description.intermediate}
               </p>
               <div className="bg-muted p-4 rounded-lg space-y-3">
                 <p><strong>Clase P:</strong> Problemas resolubles en tiempo polinomial (n², n³, etc.)</p>
@@ -157,7 +157,7 @@ const PvsNP = () => {
           advancedContent={
             <div className="space-y-4">
               <p className="text-lg font-mono leading-relaxed">
-                {problem.description?.advanced || problem.description_advanced}
+                {problem.description.advanced}
               </p>
               <div className="bg-muted p-4 rounded-lg font-mono text-sm space-y-2">
                 <p>P = {"{"} problemas decidibles por DTM en tiempo O(n^k) {"}"}</p>
@@ -217,10 +217,10 @@ const PvsNP = () => {
             title="Referencias Clave"
             references={[
               {
-                title: problem.clay_paper_author + " - The P versus NP Problem",
-                authors: [problem.clay_paper_author],
-                year: problem.clay_paper_year,
-                url: problem.clay_paper_url,
+                title: problem.clayPaper.author + " - The P versus NP Problem",
+                authors: [problem.clayPaper.author],
+                year: problem.clayPaper.year,
+                url: problem.clayPaper.url,
                 description: "Paper oficial del Clay Mathematics Institute",
               },
               ...(problem.keyReferences || []),

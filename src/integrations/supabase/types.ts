@@ -454,8 +454,12 @@ export type Database = {
           bio: string | null
           created_at: string
           display_name: string | null
+          education_level: string | null
           github_handle: string | null
           id: string
+          location: string | null
+          preferences: Json | null
+          research_interests: string[] | null
           twitter_handle: string | null
           updated_at: string
           user_id: string
@@ -467,8 +471,12 @@ export type Database = {
           bio?: string | null
           created_at?: string
           display_name?: string | null
+          education_level?: string | null
           github_handle?: string | null
           id?: string
+          location?: string | null
+          preferences?: Json | null
+          research_interests?: string[] | null
           twitter_handle?: string | null
           updated_at?: string
           user_id: string
@@ -480,8 +488,12 @@ export type Database = {
           bio?: string | null
           created_at?: string
           display_name?: string | null
+          education_level?: string | null
           github_handle?: string | null
           id?: string
+          location?: string | null
+          preferences?: Json | null
+          research_interests?: string[] | null
           twitter_handle?: string | null
           updated_at?: string
           user_id?: string
