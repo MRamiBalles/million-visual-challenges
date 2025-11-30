@@ -1,5 +1,6 @@
 // Supabase Edge Function: arxiv-scraper
 // Fetches new papers from arXiv related to Millennium Problems
+// RESTRICTED: Admin users only
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -28,12 +29,71 @@ serve(async (req) => {
     }
 
     try {
+        // AUTHENTICATION CHECK
+        const authHeader = req.headers.get("Authorization");
+        if (!authHeader) {
+            console.error("No authorization header provided");
+            return new Response(
+                JSON.stringify({ success: false, error: "Authentication required" }),
+                { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
+        }
+
+        // Create client with user's auth to verify identity
+        const supabaseAuth = createClient(
+            Deno.env.get("SUPABASE_URL") ?? "",
+            Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+            { global: { headers: { Authorization: authHeader } } }
+        );
+
+        // Verify user is authenticated
+        const { data: { user }, error: authError } = await supabaseAuth.auth.getUser();
+        if (authError || !user) {
+            console.error("Authentication failed:", authError?.message);
+            return new Response(
+                JSON.stringify({ success: false, error: "Invalid or expired token" }),
+                { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
+        }
+
+        console.log(`User ${user.id} attempting to access arxiv-scraper`);
+
+        // ADMIN CHECK - Verify user has admin role
+        const { data: roleData, error: roleError } = await supabaseAuth
+            .from("user_roles")
+            .select("role")
+            .eq("user_id", user.id)
+            .eq("role", "admin")
+            .maybeSingle();
+
+        if (roleError) {
+            console.error("Error checking admin role:", roleError.message);
+            return new Response(
+                JSON.stringify({ success: false, error: "Error verifying permissions" }),
+                { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
+        }
+
+        if (!roleData) {
+            console.warn(`User ${user.id} attempted admin-only operation without admin role`);
+            return new Response(
+                JSON.stringify({ success: false, error: "Admin access required" }),
+                { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
+        }
+
+        console.log(`Admin user ${user.id} authorized for arxiv-scraper`);
+
+        // Use service role for database operations (admin verified above)
         const supabase = createClient(
             Deno.env.get("SUPABASE_URL") ?? "",
             Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
         );
 
         const { problemSlug, maxResults = 10 } = await req.json();
+
+        // Validate maxResults to prevent abuse
+        const safeMaxResults = Math.min(Math.max(1, maxResults), 50);
 
         // Define search queries for each problem
         const searchQueries: Record<string, string> = {
@@ -49,7 +109,10 @@ serve(async (req) => {
         const query = problemSlug ? searchQueries[problemSlug] : null;
 
         if (!query) {
-            throw new Error("Invalid problem slug");
+            return new Response(
+                JSON.stringify({ success: false, error: "Invalid problem slug" }),
+                { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
         }
 
         // Get problem_id from slug
@@ -59,23 +122,27 @@ serve(async (req) => {
             .eq("slug", problemSlug)
             .single();
 
-        if (problemError) throw problemError;
+        if (problemError) {
+            console.error("Error finding problem:", problemError.message);
+            return new Response(
+                JSON.stringify({ success: false, error: "Problem not found" }),
+                { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
+        }
 
         // Fetch from arXiv API
         const arxivUrl = `http://export.arxiv.org/api/query?search_query=all:${encodeURIComponent(
             query
-        )}&start=0&max_results=${maxResults}&sortBy=submittedDate&sortOrder=descending`;
+        )}&start=0&max_results=${safeMaxResults}&sortBy=submittedDate&sortOrder=descending`;
 
-        console.log("Fetching from arXiv:", arxivUrl);
+        console.log(`Fetching from arXiv: ${arxivUrl}`);
 
         const response = await fetch(arxivUrl);
         const xmlText = await response.text();
 
-        // Parse XML (basic parsing for demonstration)
-        // In production, use a proper XML parser
+        // Parse XML
         const entries = parseArxivXML(xmlText);
-
-        console.log(`Found ${entries.length} papers`);
+        console.log(`Found ${entries.length} papers from arXiv`);
 
         const newPapers = [];
 
@@ -101,7 +168,7 @@ serve(async (req) => {
             const pdfLink = entry.link?.find((l) => l.$?.type === "application/pdf");
             const pdf_url = pdfLink?.$?.href || null;
 
-            // Insert paper (without AI summary for now)
+            // Insert paper
             const { data: paper, error: insertError } = await supabase
                 .from("research_papers")
                 .insert({
@@ -110,11 +177,8 @@ serve(async (req) => {
                     authors,
                     abstract: entry.summary.trim(),
                     arxiv_id: arxivId,
-                    year: new Date(entry.published).getFullYear(),
+                    published_date: entry.published,
                     pdf_url,
-                    source_url: entry.id,
-                    is_verified: false,
-                    added_by: null, // System-added
                 })
                 .select()
                 .single();
@@ -127,6 +191,8 @@ serve(async (req) => {
             newPapers.push(paper);
         }
 
+        console.log(`Successfully added ${newPapers.length} new papers`);
+
         return new Response(
             JSON.stringify({
                 success: true,
@@ -135,9 +201,7 @@ serve(async (req) => {
                 totalSearched: entries.length,
                 papers: newPapers,
             }),
-            {
-                headers: { ...corsHeaders, "Content-Type": "application/json" },
-            }
+            { headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
     } catch (error) {
         console.error("Error:", error);
@@ -146,10 +210,7 @@ serve(async (req) => {
                 success: false,
                 error: error instanceof Error ? error.message : "Unknown error",
             }),
-            {
-                status: 500,
-                headers: { ...corsHeaders, "Content-Type": "application/json" },
-            }
+            { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
     }
 });
@@ -157,8 +218,6 @@ serve(async (req) => {
 // Basic XML parser for arXiv response
 function parseArxivXML(xmlText: string): ArxivEntry[] {
     const entries: ArxivEntry[] = [];
-
-    // Very basic regex-based parsing (use proper XML parser in production)
     const entryMatches = xmlText.matchAll(/<entry>([\s\S]*?)<\/entry>/g);
 
     for (const entryMatch of entryMatches) {
