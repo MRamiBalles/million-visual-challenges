@@ -29,6 +29,8 @@ import Analytics from "./pages/admin/Analytics";
 import AIOpsDashboard from "./pages/admin/AIOpsDashboard";
 
 import GlassRoom from "./pages/GlassRoom";
+import Careers from "./pages/Careers";
+import WeeklyChallenge from "./pages/WeeklyChallenge";
 
 const queryClient = new QueryClient();
 
@@ -61,6 +63,8 @@ const App = () => (
           <Route path="/profile/:username" element={<Profile />} />
           <Route path="/collections/:collectionId" element={<CollectionView />} />
           <Route path="/glass-room" element={<GlassRoom />} />
+          <Route path="/careers" element={<Careers />} />
+          <Route path="/weekly" element={<WeeklyChallenge />} />
 
           {/* Admin */}
           <Route path="/admin" element={<AdminDashboard />}>
