@@ -126,7 +126,7 @@ const MarketCard = ({ market }: { market: Market }) => {
                             <span className="text-green-500">YES {yesPercent}%</span>
                             <span className="text-red-500">{100 - yesPercent}% NO</span>
                         </div>
-                        <Progress value={yesPercent} className="h-2 bg-red-900/30" indicatorClassName="bg-green-500" />
+                        <Progress value={yesPercent} className="h-2 bg-red-900/30 [&>div]:bg-green-500" />
                     </div>
 
                     {/* Actions */}

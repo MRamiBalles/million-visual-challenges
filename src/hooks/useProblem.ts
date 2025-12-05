@@ -38,10 +38,23 @@ export const useProblem = (slug: string): UseProblemData => {
                 .from("research_papers")
                 .select("*")
                 .eq("problem_id", problem.id)
-                .order("year", { ascending: false });
+                .order("created_at", { ascending: false });
 
             if (error) throw error;
-            return data as ResearchPaper[];
+            // Map database fields to expected type
+            return (data || []).map(p => ({
+                ...p,
+                year: p.published_date ? new Date(p.published_date).getFullYear() : null,
+                doi: null,
+                source_url: p.pdf_url,
+                citations_count: p.citation_count || 0,
+                ai_key_insights: null,
+                is_ai_verified: false,
+                is_verified: false,
+                verified_by: null,
+                verified_at: null,
+                added_by: null,
+            })) as ResearchPaper[];
         },
         enabled: !!problem?.id,
     });

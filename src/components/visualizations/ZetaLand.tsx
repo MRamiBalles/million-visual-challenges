@@ -2,6 +2,7 @@ import { useRef, useMemo, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Stars, Text } from "@react-three/drei";
 import * as THREE from "three";
+import type { Points as ThreePoints } from "three";
 import { Button } from "@/components/ui/button";
 import { Volume2, VolumeX } from "lucide-react";
 
@@ -9,7 +10,7 @@ import { Volume2, VolumeX } from "lucide-react";
 // |zeta(0.5 + it)| is the critical line.
 // We'll generate a terrain where x = real part, z = imaginary part (scaled), y = magnitude.
 const ZetaTerrain = () => {
-    const meshRef = useRef<THREE.Mesh>(null);
+    const pointsRef = useRef<ThreePoints>(null);
 
     // Generate geometry data
     const { positions, colors } = useMemo(() => {
@@ -53,14 +54,14 @@ const ZetaTerrain = () => {
         };
     }, []);
 
-    useFrame((state) => {
-        if (meshRef.current) {
-            meshRef.current.rotation.y += 0.001;
+    useFrame(() => {
+        if (pointsRef.current) {
+            pointsRef.current.rotation.y += 0.001;
         }
     });
 
     return (
-        <points ref={meshRef}>
+        <points ref={pointsRef}>
             <bufferGeometry>
                 <bufferAttribute
                     attach="attributes-position"
