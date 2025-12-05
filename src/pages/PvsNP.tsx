@@ -5,15 +5,18 @@ import { TuringMachineDemo } from "@/components/problems/pvsnp/TuringMachineDemo
 import { VerificationDemo } from "@/components/problems/pvsnp/VerificationDemo";
 import { useActivityTracker } from "@/hooks/useActivityTracker";
 import { Card } from "@/components/ui/card";
+import { useSearchParams } from "react-router-dom";
 
 const PvsNP = () => {
   // Track page view
   useActivityTracker("pvsnp", "overview");
+  const [searchParams] = useSearchParams();
+  const seed = searchParams.get("seed") || undefined;
 
   return (
     <ProblemLayout
       slug="pvsnp"
-      visualizer={<TSPVisualizer />}
+      visualizer={<TSPVisualizer seed={seed} />}
     >
       <div className="space-y-16 mt-16 border-t border-border pt-16">
 

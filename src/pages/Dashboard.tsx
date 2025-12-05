@@ -16,6 +16,7 @@ import {
   Bookmark
 } from "lucide-react";
 import { EmailVerification } from "@/components/auth/EmailVerification";
+import { DailyChallengeCard } from "@/components/daily/DailyChallengeCard";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -194,6 +195,8 @@ const Dashboard = () => {
 
           {/* Sidebar */}
           <div className="space-y-6">
+            <DailyChallengeCard />
+
             {/* Recent Achievements */}
             <Card>
               <CardHeader>

@@ -19,6 +19,28 @@ interface TSPVisualizerProps {
 export const TSPVisualizer = ({ seed }: TSPVisualizerProps) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [cities, setCities] = useState<Point[]>([]);
+    const [path, setPath] = useState<number[]>([]);
+    const [isComputing, setIsComputing] = useState(false);
+    const [algorithm, setAlgorithm] = useState<"brute" | "nearest" | null>(null);
+    const [stats, setStats] = useState({ distance: 0, operations: 0, time: 0 });
+
+    // Init with some random cities or seed
+    useEffect(() => {
+        if (cities.length === 0) {
+            if (seed) {
+                const gen = new ProblemGenerator(seed);
+                const newCities = gen.generateTSP(12, 800, 500);
+                setCities(newCities);
+            } else {
+                generateRandomCities(6);
+            }
+        }
+    }, [seed]);
+
+    useEffect(() => {
+        draw();
+    }, [cities, path]);
+
     const generateRandomCities = (count: number) => {
         const newCities: Point[] = [];
         for (let i = 0; i < count; i++) {
