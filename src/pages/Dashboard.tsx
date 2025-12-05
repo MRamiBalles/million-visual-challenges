@@ -52,8 +52,6 @@ const Dashboard = () => {
           </p>
         </div>
       </header>
-
-      {/* Main Content */}
       <div className="container mx-auto px-6 py-8">
         {/* Email Verification Alert */}
         <div className="mb-6">
@@ -196,6 +194,33 @@ const Dashboard = () => {
           {/* Sidebar */}
           <div className="space-y-6">
             <DailyChallengeCard />
+
+            {/* Advanced Features (Sprint 3) */}
+            <Card>
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-2">
+                  <Trophy className="w-4 h-4 text-orange-500" />
+                  <CardTitle className="text-sm uppercase tracking-wide text-muted-foreground">Compete & Grow</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="grid gap-2">
+                <Button
+                  className="w-full bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white border-0"
+                  onClick={() => navigate('/weekly')}
+                >
+                  <Trophy className="w-4 h-4 mr-2" />
+                  Weekly Boss Fight
+                </Button>
+                <Button
+                  variant="secondary"
+                  className="w-full justify-start"
+                  onClick={() => navigate('/careers')}
+                >
+                  <TrendingUp className="w-4 h-4 mr-2 text-blue-400" />
+                  Career Constellations
+                </Button>
+              </CardContent>
+            </Card>
 
             {/* Recent Achievements */}
             <Card>

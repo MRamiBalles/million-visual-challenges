@@ -11,7 +11,26 @@ interface CodePlaygroundProps {
     description?: string;
 }
 
-export const CodePlayground = ({ initialCode = "print('Hello, World!')", title = "Millennium Notebook", description = "Run Python code directly in your browser." }: CodePlaygroundProps) => {
+const EXAMPLES = {
+    "hello": {
+        label: "Hello World",
+        code: `print("Hello from the Infinite Lab!")\nprint("This is Python running in your browser.")\nimport sys\nprint(f"Python Version: {sys.version}")`
+    },
+    "primes": {
+        label: "Prime Number Sieve",
+        code: `def sieve(n):\n    primes = []\n    for i in range(2, n + 1):\n        is_prime = True\n        for j in range(2, int(i ** 0.5) + 1):\n            if i % j == 0:\n                is_prime = False\n                break\n        if is_prime:\n            primes.append(i)\n    return primes\n\nprint(f"Primes under 50: {sieve(50)}")`
+    },
+    "fibonacci": {
+        label: "Fibonacci Sequence",
+        code: `def fib(n):\n    a, b = 0, 1\n    for _ in range(n):\n        print(a, end=' ')\n        a, b = b, a + b\n    print()\n\nprint("First 10 Fibonacci numbers:")\nfib(10)`
+    },
+    "zeta": {
+        label: "Riemann Zeta Approx",
+        code: `def zeta_partial(s, n_terms=100):\n    return sum(1 / (n ** s) for n in range(1, n_terms))\n\nprint("Approximating Zeta(2)...")\napprox = zeta_partial(2, 1000)\nprint(f"Approx: {approx}")\nprint(f"Target: {3.14159**2 / 6}")`
+    }
+};
+
+export const CodePlayground = ({ initialCode = EXAMPLES.hello.code, title = "Millennium Notebook", description = "Run Python code directly in your browser." }: CodePlaygroundProps) => {
     const { pyodide, isLoading, error, runPython } = usePyodide();
     const [code, setCode] = useState(initialCode);
     const [output, setOutput] = useState<string[]>([]);
@@ -57,7 +76,20 @@ export const CodePlayground = ({ initialCode = "print('Hello, World!')", title =
                         </CardTitle>
                         {description && <p className="text-xs text-slate-500 mt-1">{description}</p>}
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-4">
+                        <select
+                            className="bg-slate-900 border border-slate-700 text-xs text-slate-300 rounded px-2 py-1 outline-none focus:border-blue-500"
+                            onChange={(e) => {
+                                const key = e.target.value as keyof typeof EXAMPLES;
+                                if (EXAMPLES[key]) setCode(EXAMPLES[key].code);
+                            }}
+                            defaultValue="hello"
+                        >
+                            {Object.entries(EXAMPLES).map(([key, ex]) => (
+                                <option key={key} value={key}>{ex.label}</option>
+                            ))}
+                        </select>
+                        <div className="h-4 w-px bg-slate-800" />
                         {isLoading ? (
                             <span className="flex items-center text-xs text-yellow-500">
                                 <Loader2 className="w-3 h-3 animate-spin mr-1" /> Loading Engine...

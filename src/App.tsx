@@ -31,6 +31,9 @@ import AIOpsDashboard from "./pages/admin/AIOpsDashboard";
 import GlassRoom from "./pages/GlassRoom";
 import Careers from "./pages/Careers";
 import WeeklyChallenge from "./pages/WeeklyChallenge";
+import InsightMarket from "./pages/InsightMarket";
+import { SharedWhiteboard } from "./components/collaboration/SharedWhiteboard";
+import { ProblemLayout } from "./components/layout/ProblemLayout";
 
 const queryClient = new QueryClient();
 
@@ -65,6 +68,8 @@ const App = () => (
           <Route path="/glass-room" element={<GlassRoom />} />
           <Route path="/careers" element={<Careers />} />
           <Route path="/weekly" element={<WeeklyChallenge />} />
+          <Route path="/market" element={<InsightMarket />} />
+          <Route path="/market/whiteboard" element={<ProblemLayout slug="whiteboard" title="Collaborative Whiteboard"><SharedWhiteboard /></ProblemLayout>} />
 
           {/* Admin */}
           <Route path="/admin" element={<AdminDashboard />}>
