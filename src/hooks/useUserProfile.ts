@@ -16,6 +16,7 @@ export interface UserProfile {
     education_level: string | null;
     research_interests: string[] | null;
     preferences: Record<string, any> | null;
+    is_public: boolean;
     created_at: string;
     updated_at: string;
 }
@@ -30,6 +31,7 @@ export interface UpdateProfileData {
     location?: string;
     education_level?: string;
     research_interests?: string[];
+    is_public?: boolean;
 }
 
 export const useUserProfile = (userId?: string) => {

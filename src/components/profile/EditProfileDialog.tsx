@@ -10,8 +10,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Camera, Loader2 } from "lucide-react";
+import { Camera, Loader2, Globe, Lock } from "lucide-react";
 import { UserProfile, useUserProfile } from "@/hooks/useUserProfile";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -33,6 +34,7 @@ export const EditProfileDialog = ({ profile, open, onOpenChange }: EditProfileDi
         website_url: profile.website_url || '',
         location: profile.location || '',
         education_level: profile.education_level || '',
+        is_public: profile.is_public || false,
     });
 
     const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
@@ -186,6 +188,34 @@ export const EditProfileDialog = ({ profile, open, onOpenChange }: EditProfileDi
                                 onChange={(e) => setFormData({ ...formData, education_level: e.target.value })}
                                 placeholder="Ej: Licenciatura en Matemáticas"
                             />
+                        </div>
+
+                        {/* Profile Visibility */}
+                        <div className="p-4 rounded-lg border border-border bg-muted/30 space-y-3">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    {formData.is_public ? (
+                                        <Globe className="w-5 h-5 text-green-500" />
+                                    ) : (
+                                        <Lock className="w-5 h-5 text-muted-foreground" />
+                                    )}
+                                    <div>
+                                        <Label htmlFor="is_public" className="text-base font-medium">
+                                            Perfil público
+                                        </Label>
+                                        <p className="text-xs text-muted-foreground">
+                                            {formData.is_public 
+                                                ? "Otros usuarios pueden ver tu perfil" 
+                                                : "Solo tú puedes ver tu perfil"}
+                                        </p>
+                                    </div>
+                                </div>
+                                <Switch
+                                    id="is_public"
+                                    checked={formData.is_public}
+                                    onCheckedChange={(checked) => setFormData({ ...formData, is_public: checked })}
+                                />
+                            </div>
                         </div>
                     </div>
 
