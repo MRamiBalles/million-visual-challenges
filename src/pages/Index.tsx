@@ -347,6 +347,69 @@ const Index = () => {
         </motion.div>
       </section>
 
+      {/* Cortex-13 Teaser Section */}
+      <motion.section
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        className="py-20 bg-black text-white relative overflow-hidden"
+      >
+        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=1974&auto=format&fit=crop')] bg-cover bg-center opacity-20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black" />
+
+        <div className="container mx-auto px-6 relative z-10 flex flex-col md:flex-row items-center gap-12">
+          <div className="flex-1 space-y-6">
+            <div className="flex items-center gap-2 text-cyan-400 font-mono text-sm tracking-widest">
+              <Sparkles className="w-4 h-4" />
+              <span>NUEVA CARACTERÍSTICA EXPERIMENTAL</span>
+            </div>
+            <h2 className="text-4xl md:text-6xl font-bold leading-tight">
+              Cortex-13: <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500">
+                The Glass Box
+              </span>
+            </h2>
+            <p className="text-lg text-gray-400 leading-relaxed max-w-xl">
+              No solo uses la IA, observa cómo "piensa". Hemos integrado una visualización
+              transparente de nuestra red neuronal híbrida. Mira cómo Cortex-13 intenta
+              entender la geometría oculta de P vs NP en tiempo real.
+            </p>
+            <div className="flex flex-wrap gap-4 pt-4">
+              <Button
+                size="lg"
+                className="bg-cyan-500 hover:bg-cyan-400 text-black font-bold"
+                onClick={() => navigate("/glass-room")}
+              >
+                <Brain className="w-5 h-5 mr-2" />
+                Entrar al Neural Playground
+              </Button>
+              <Button
+                variant="outline"
+                size="lg"
+                className="border-white/20 text-white hover:bg-white/10"
+                onClick={() => window.open('/scripts/cortex_research/README.md', '_blank')}
+              >
+                Ver Investigación
+              </Button>
+            </div>
+          </div>
+
+          <div className="flex-1 w-full max-w-md">
+            <div className="relative aspect-square bg-gradient-to-br from-cyan-500/20 to-purple-500/20 rounded-3xl p-1 backdrop-blur-3xl border border-white/10">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Atom className="w-32 h-32 text-cyan-400/50 animate-spin-slow" />
+              </div>
+              <div className="absolute inset-4 border border-white/5 rounded-2xl flex items-center justify-center">
+                <div className="text-center">
+                  <div className="text-4xl font-mono font-bold text-white mb-2">98.4%</div>
+                  <div className="text-xs text-cyan-400 uppercase tracking-widest">Precisión Probabilística</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.section>
+
       {/* Info Section */}
       <motion.section
         initial={{ opacity: 0 }}
