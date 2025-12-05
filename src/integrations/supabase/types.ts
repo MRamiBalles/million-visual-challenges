@@ -457,6 +457,7 @@ export type Database = {
           education_level: string | null
           github_handle: string | null
           id: string
+          is_public: boolean
           location: string | null
           preferences: Json | null
           research_interests: string[] | null
@@ -474,6 +475,7 @@ export type Database = {
           education_level?: string | null
           github_handle?: string | null
           id?: string
+          is_public?: boolean
           location?: string | null
           preferences?: Json | null
           research_interests?: string[] | null
@@ -491,6 +493,7 @@ export type Database = {
           education_level?: string | null
           github_handle?: string | null
           id?: string
+          is_public?: boolean
           location?: string | null
           preferences?: Json | null
           research_interests?: string[] | null
