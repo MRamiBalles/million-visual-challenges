@@ -104,7 +104,7 @@ const Index = () => {
           <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" strokeWidth="1"/>
+                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" strokeWidth="1" />
               </pattern>
             </defs>
             <rect width="100%" height="100%" fill="url(#grid)" />
@@ -114,6 +114,15 @@ const Index = () => {
         <div className="container mx-auto px-6 py-20 relative z-10">
           <div className="absolute top-4 right-6">
             <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground hover:text-white"
+                onClick={() => navigate("/glass-room")}
+              >
+                <Brain className="w-4 h-4 mr-2" />
+                Cortex-13
+              </Button>
               {user && (
                 <>
                   <NotificationCenter />
@@ -169,7 +178,7 @@ const Index = () => {
             <Badge className="mb-6 text-base px-4 py-2" variant="secondary">
               Clay Mathematics Institute • Año 2000
             </Badge>
-            
+
             <h1 className="text-6xl md:text-8xl font-bold mb-6">
               <span className="bg-gradient-accent bg-clip-text text-transparent">
                 Los Problemas
@@ -177,7 +186,7 @@ const Index = () => {
               <br />
               <span className="text-foreground">del Milenio</span>
             </h1>
-            
+
             <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
               Siete desafíos matemáticos monumentales. Cada uno con un premio de{" "}
               <span className="text-primary font-bold">$1 millón de dólares</span>.
@@ -216,7 +225,7 @@ const Index = () => {
         >
           {millenniumProblems.map((problem, index) => {
             const Icon = problem.icon;
-            
+
             return (
               <motion.div
                 key={problem.id}

@@ -27,6 +27,8 @@ import ContentModeration from "./pages/admin/ContentModeration";
 import NotificationManagement from "./pages/admin/NotificationManagement";
 import Analytics from "./pages/admin/Analytics";
 
+import GlassRoom from "./pages/GlassRoom";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -57,6 +59,7 @@ const App = () => (
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/profile/:username" element={<Profile />} />
           <Route path="/collections/:collectionId" element={<CollectionView />} />
+          <Route path="/glass-room" element={<GlassRoom />} />
 
           {/* Admin */}
           <Route path="/admin" element={<AdminDashboard />}>
