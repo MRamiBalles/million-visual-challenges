@@ -1,11 +1,33 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { GlassBrain } from "@/components/ai/GlassBrain";
+import { ConceptSpace } from "@/components/ai/ConceptSpace";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft, Cpu, Network, Zap } from 'lucide-react';
+import { ArrowLeft, Cpu, Network, Zap, Brain, Share2, Activity } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const GlassRoom = () => {
+    const [viewMode, setViewMode] = useState<'brain' | 'concept'>('brain');
+    const [metrics, setMetrics] = useState({
+        loss: 0.0423,
+        velocity: 45,
+        memory: 2.4,
+        activeNeurons: 84
+    });
+
+    // Simulate real-time metrics
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setMetrics(prev => ({
+                loss: Math.max(0.01, prev.loss + (Math.random() - 0.5) * 0.001),
+                velocity: Math.floor(45 + (Math.random() - 0.5) * 5),
+                memory: 2.4 + (Math.random() - 0.5) * 0.1,
+                activeNeurons: Math.floor(84 + (Math.random() - 0.5) * 10)
+            }));
+        }, 1000);
+        return () => clearInterval(interval);
+    }, []);
+
     return (
         <div className="min-h-screen bg-[#0a0a0a] text-white selection:bg-cyan-500/30">
             {/* Header / Nav */}
@@ -15,9 +37,15 @@ const GlassRoom = () => {
                         <ArrowLeft className="w-4 h-4" />
                         <span>Back to Lab</span>
                     </Link>
-                    <div className="flex items-center gap-2">
-                        <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-                        <span className="font-mono text-sm tracking-widest text-green-500">CORTEX-13: ONLINE</span>
+                    <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-green-500/10 border border-green-500/20">
+                            <Activity className="w-3 h-3 text-green-500" />
+                            <span className="font-mono text-xs tracking-widest text-green-500">SYSTEM STABLE</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+                            <span className="font-mono text-sm tracking-widest text-green-500">CORTEX-13: ONLINE</span>
+                        </div>
                     </div>
                 </div>
             </nav>
@@ -30,9 +58,8 @@ const GlassRoom = () => {
                             The Glass Room
                         </h1>
                         <p className="text-xl text-gray-400 max-w-2xl leading-relaxed">
-                            Peer inside the mind of Cortex-13. Observe real-time activation patterns,
-                            attention mechanism flows, and the emergence of mathematical intuition
-                            within the neural substrate.
+                            Peer inside the mind of Cortex-13. Toggle between the physical neural architecture
+                            and the high-dimensional concept space where intuition emerges.
                         </p>
 
                         <div className="flex flex-wrap gap-3">
@@ -42,38 +69,52 @@ const GlassRoom = () => {
                         </div>
 
                         <div className="pt-4 flex gap-4">
-                            <Button className="bg-white text-black hover:bg-gray-200">
-                                Run Diagnostics
+                            <Button
+                                variant={viewMode === 'brain' ? 'default' : 'secondary'}
+                                onClick={() => setViewMode('brain')}
+                                className="gap-2"
+                            >
+                                <Brain className="w-4 h-4" /> Neural View
                             </Button>
-                            <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
-                                Export State
+                            <Button
+                                variant={viewMode === 'concept' ? 'default' : 'secondary'}
+                                onClick={() => setViewMode('concept')}
+                                className="gap-2"
+                            >
+                                <Share2 className="w-4 h-4" /> Concept Space
                             </Button>
                         </div>
                     </div>
 
                     {/* Stats Card */}
                     <Card className="w-full md:w-80 p-6 bg-black/40 border-white/10 backdrop-blur-xl">
-                        <h3 className="font-mono text-xs text-gray-400 uppercase tracking-wider mb-4">System Metrics</h3>
+                        <h3 className="font-mono text-xs text-gray-400 uppercase tracking-wider mb-4">Real-time Telemetry</h3>
                         <div className="space-y-4">
-                            <Metric label="Validation Loss" value="0.0423" trend="-12%" />
-                            <Metric label="Token Velocity" value="45 t/s" trend="+5%" />
-                            <Metric label="Memory Usage" value="2.4 GB" />
+                            <Metric label="Validation Loss" value={metrics.loss.toFixed(4)} trend="-12%" />
+                            <Metric label="Token Velocity" value={`${metrics.velocity} t/s`} trend="+5%" />
+                            <Metric label="Memory Usage" value={`${metrics.memory.toFixed(1)} GB`} />
+                            <Metric label="Active Neurons" value={`${metrics.activeNeurons}%`} trend="var" />
                         </div>
                     </Card>
                 </div>
 
-                {/* The Glass Brain Viz */}
-                <div className="w-full aspect-video rounded-3xl overflow-hidden border border-white/10 shadow-[0_0_50px_-10px_rgba(255,255,255,0.1)] mb-12 relative group">
+                {/* Main Viz Container */}
+                <div className="w-full aspect-video rounded-3xl overflow-hidden border border-white/10 shadow-[0_0_50px_-10px_rgba(255,255,255,0.1)] mb-12 relative group bg-black">
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none z-10" />
-                    <GlassBrain className="w-full h-full" />
+
+                    {viewMode === 'brain' ? (
+                        <GlassBrain className="w-full h-full" />
+                    ) : (
+                        <ConceptSpace className="w-full h-full" />
+                    )}
 
                     {/* Overlay Controls */}
                     <div className="absolute bottom-6 left-6 z-20 flex gap-4 opacity-0 group-hover:opacity-100 transition-opacity">
                         <div className="bg-black/80 backdrop-blur text-xs p-2 rounded border border-white/10 font-mono">
-                            LAYER: 4/6
+                            MODE: {viewMode.toUpperCase()}
                         </div>
                         <div className="bg-black/80 backdrop-blur text-xs p-2 rounded border border-white/10 font-mono">
-                            ATTN_HEADS: ACTIVE
+                            RENDER: THREE.JS
                         </div>
                     </div>
                 </div>
@@ -98,7 +139,7 @@ const GlassRoom = () => {
     );
 };
 
-// Simple UI Helpers
+// UI Helpers
 const Badge = ({ icon, label }: { icon: React.ReactNode, label: string }) => (
     <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-gray-300">
         {icon}
@@ -113,7 +154,7 @@ const Metric = ({ label, value, trend }: { label: string, value: string, trend?:
             <div className="text-lg font-mono font-bold text-white">{value}</div>
         </div>
         {trend && (
-            <div className={`text-xs ${trend.startsWith('-') ? 'text-green-400' : 'text-cyan-400'}`}>
+            <div className={`text-xs ${trend === 'var' ? 'text-yellow-400' : trend.startsWith('-') ? 'text-green-400' : 'text-cyan-400'}`}>
                 {trend}
             </div>
         )}

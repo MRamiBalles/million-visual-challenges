@@ -5,29 +5,20 @@ import { Slider } from "@/components/ui/slider";
 import { Card } from "@/components/ui/card";
 import { Play, RotateCcw, Plus, Trash2, Zap, BrainCircuit } from "lucide-react";
 import { toast } from "sonner";
+import { ProblemGenerator } from "@/lib/generators/ProblemGenerator";
 
 interface Point {
     x: number;
     y: number;
 }
 
-export const TSPVisualizer = () => {
+interface TSPVisualizerProps {
+    seed?: string;
+}
+
+export const TSPVisualizer = ({ seed }: TSPVisualizerProps) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [cities, setCities] = useState<Point[]>([]);
-    const [path, setPath] = useState<number[]>([]);
-    const [isComputing, setIsComputing] = useState(false);
-    const [algorithm, setAlgorithm] = useState<"brute" | "nearest" | null>(null);
-    const [stats, setStats] = useState({ distance: 0, operations: 0, time: 0 });
-
-    // Init with some random cities
-    useEffect(() => {
-        if (cities.length === 0) generateRandomCities(6);
-    }, []);
-
-    useEffect(() => {
-        draw();
-    }, [cities, path]);
-
     const generateRandomCities = (count: number) => {
         const newCities: Point[] = [];
         for (let i = 0; i < count; i++) {

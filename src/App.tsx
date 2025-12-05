@@ -26,6 +26,7 @@ import UserManagement from "./pages/admin/UserManagement";
 import ContentModeration from "./pages/admin/ContentModeration";
 import NotificationManagement from "./pages/admin/NotificationManagement";
 import Analytics from "./pages/admin/Analytics";
+import AIOpsDashboard from "./pages/admin/AIOpsDashboard";
 
 import GlassRoom from "./pages/GlassRoom";
 
@@ -68,6 +69,7 @@ const App = () => (
             <Route path="content" element={<ContentModeration />} />
             <Route path="notifications" element={<NotificationManagement />} />
             <Route path="analytics" element={<Analytics />} />
+            <Route path="ai-ops" element={<AIOpsDashboard />} />
           </Route>
 
           <Route path="*" element={<NotFound />} />

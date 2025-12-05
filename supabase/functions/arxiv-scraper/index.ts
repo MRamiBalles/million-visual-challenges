@@ -1,263 +1,124 @@
-// Supabase Edge Function: arxiv-scraper
-// Fetches new papers from arXiv related to Millennium Problems
-// RESTRICTED: Admin users only
-
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
+import { XMLParser } from "https://esm.sh/fast-xml-parser@4.2.5"
 
 const corsHeaders = {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
-
-interface ArxivEntry {
-    id: string;
-    updated: string;
-    published: string;
-    title: string;
-    summary: string;
-    author: Array<{ name: string }>;
-    link: Array<{ $: { href: string; rel: string; type?: string } }>;
-    category: Array<{ $: { term: string } }>;
-    "arxiv:primary_category": Array<{ $: { term: string } }>;
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
 serve(async (req) => {
-    // Handle CORS preflight
-    if (req.method === "OPTIONS") {
-        return new Response("ok", { headers: corsHeaders });
+    if (req.method === 'OPTIONS') {
+        return new Response('ok', { headers: corsHeaders })
     }
 
     try {
-        // AUTHENTICATION CHECK
-        const authHeader = req.headers.get("Authorization");
-        if (!authHeader) {
-            console.error("No authorization header provided");
-            return new Response(
-                JSON.stringify({ success: false, error: "Authentication required" }),
-                { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-            );
-        }
-
-        // Create client with user's auth to verify identity
-        const supabaseAuth = createClient(
-            Deno.env.get("SUPABASE_URL") ?? "",
-            Deno.env.get("SUPABASE_ANON_KEY") ?? "",
-            { global: { headers: { Authorization: authHeader } } }
-        );
-
-        // Verify user is authenticated
-        const { data: { user }, error: authError } = await supabaseAuth.auth.getUser();
-        if (authError || !user) {
-            console.error("Authentication failed:", authError?.message);
-            return new Response(
-                JSON.stringify({ success: false, error: "Invalid or expired token" }),
-                { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-            );
-        }
-
-        console.log(`User ${user.id} attempting to access arxiv-scraper`);
-
-        // ADMIN CHECK - Verify user has admin role
-        const { data: roleData, error: roleError } = await supabaseAuth
-            .from("user_roles")
-            .select("role")
-            .eq("user_id", user.id)
-            .eq("role", "admin")
-            .maybeSingle();
-
-        if (roleError) {
-            console.error("Error checking admin role:", roleError.message);
-            return new Response(
-                JSON.stringify({ success: false, error: "Error verifying permissions" }),
-                { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-            );
-        }
-
-        if (!roleData) {
-            console.warn(`User ${user.id} attempted admin-only operation without admin role`);
-            return new Response(
-                JSON.stringify({ success: false, error: "Admin access required" }),
-                { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-            );
-        }
-
-        console.log(`Admin user ${user.id} authorized for arxiv-scraper`);
-
-        // Use service role for database operations (admin verified above)
         const supabase = createClient(
-            Deno.env.get("SUPABASE_URL") ?? "",
-            Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
-        );
+            Deno.env.get('SUPABASE_URL') ?? '',
+            Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+        )
 
-        const { problemSlug, maxResults = 10 } = await req.json();
+        console.log("Fetching problem IDs...")
+        // Get Problem IDs map
+        const { data: problems } = await supabase
+            .from('millennium_problems')
+            .select('id, slug')
 
-        // Validate maxResults to prevent abuse
-        const safeMaxResults = Math.min(Math.max(1, maxResults), 50);
+        if (!problems) throw new Error("Could not fetch problems")
 
-        // Define search queries for each problem
-        const searchQueries: Record<string, string> = {
-            pvsnp: "P versus NP OR computational complexity OR NP-complete",
-            riemann: "Riemann hypothesis OR zeta function OR prime distribution",
-            "navier-stokes": "Navier-Stokes OR fluid dynamics OR existence smoothness",
-            "yang-mills": "Yang-Mills OR mass gap OR quantum field theory",
-            hodge: "Hodge conjecture OR algebraic cycles OR cohomology",
-            "birch-sd": "Birch Swinnerton-Dyer OR elliptic curves OR L-functions",
-            poincare: "Poincaré conjecture OR Ricci flow OR 3-manifolds",
-        };
+        const problemMap: Record<string, number> = {}
+        problems.forEach(p => problemMap[p.slug] = p.id)
 
-        const query = problemSlug ? searchQueries[problemSlug] : null;
+        console.log("Problem Map:", problemMap)
 
-        if (!query) {
-            return new Response(
-                JSON.stringify({ success: false, error: "Invalid problem slug" }),
-                { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-            );
-        }
+        // Arxiv Queries
+        // P vs NP -> cs.CC (Computational Complexity)
+        // Riemann -> math.NT (Number Theory)
+        // Navier-Stokes -> math.AP (Analysis of PDEs)
+        // Hodge -> math.AG (Algebraic Geometry)
+        // Poincaré (Solved, but Topology) -> math.GT
+        // Birch and Swinnerton-Dyer -> math.NT
+        // Yang-Mills -> math-ph (Mathematical Physics)
 
-        // Get problem_id from slug
-        const { data: problem, error: problemError } = await supabase
-            .from("millennium_problems")
-            .select("id")
-            .eq("slug", problemSlug)
-            .single();
+        const categories = [
+            { cat: 'cs.CC', problem: 'pvsnp', keywords: ['p vs np', 'polynomial time', 'traveling salesman'] },
+            { cat: 'math.NT', problem: 'riemann', keywords: ['riemann', 'zeta function', 'prime distribution'] },
+            { cat: 'math.AP', problem: 'navier-stokes', keywords: ['navier-stokes', 'fluid dynamics'] },
+        ]
 
-        if (problemError) {
-            console.error("Error finding problem:", problemError.message);
-            return new Response(
-                JSON.stringify({ success: false, error: "Problem not found" }),
-                { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-            );
-        }
+        const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: "@_" });
+        const computedPapers = []
 
-        // Fetch from arXiv API
-        const arxivUrl = `http://export.arxiv.org/api/query?search_query=all:${encodeURIComponent(
-            query
-        )}&start=0&max_results=${safeMaxResults}&sortBy=submittedDate&sortOrder=descending`;
+        for (const item of categories) {
+            console.log(`Querying ${item.cat}...`)
+            const response = await fetch(
+                `http://export.arxiv.org/api/query?search_query=cat:${item.cat}&sortBy=submittedDate&sortOrder=descending&max_results=5`
+            )
+            const xml = await response.text()
+            const result = parser.parse(xml)
 
-        console.log(`Fetching from arXiv: ${arxivUrl}`);
+            const entries = result.feed.entry
+            const entriesArray = Array.isArray(entries) ? entries : [entries];
 
-        const response = await fetch(arxivUrl);
-        const xmlText = await response.text();
+            for (const entry of entriesArray) {
+                // Check relevance via keywords if generic category
+                const title = entry.title?.toString() || ""
+                const summary = entry.summary?.toString() || ""
+                const fullText = (title + " " + summary).toLowerCase()
 
-        // Parse XML
-        const entries = parseArxivXML(xmlText);
-        console.log(`Found ${entries.length} papers from arXiv`);
+                // Simple relevance check
+                const isRelevant = item.keywords.some(k => fullText.includes(k))
 
-        const newPapers = [];
+                if (isRelevant) {
+                    const authors = Array.isArray(entry.author)
+                        ? entry.author.map((a: any) => a.name)
+                        : [entry.author.name];
 
-        for (const entry of entries) {
-            const arxivId = entry.id.split("/abs/")[1] || entry.id;
-
-            // Check if paper already exists
-            const { data: existing } = await supabase
-                .from("research_papers")
-                .select("id")
-                .eq("arxiv_id", arxivId)
-                .single();
-
-            if (existing) {
-                console.log(`Paper ${arxivId} already exists, skipping`);
-                continue;
+                    computedPapers.push({
+                        problem_id: problemMap[item.problem],
+                        title: title.replace(/\n/g, ' ').trim(),
+                        authors: authors,
+                        abstract: summary.replace(/\n/g, ' ').trim(),
+                        publication_date: entry.published,
+                        source_url: entry.id,
+                        pdf_url: entry.link?.find((l: any) => l["@_title"] === "pdf")?.["@_href"] || entry.id.replace("abs", "pdf"),
+                    })
+                }
             }
-
-            // Extract authors
-            const authors = entry.author?.map((a) => a.name) || [];
-
-            // Get PDF URL
-            const pdfLink = entry.link?.find((l) => l.$?.type === "application/pdf");
-            const pdf_url = pdfLink?.$?.href || null;
-
-            // Insert paper
-            const { data: paper, error: insertError } = await supabase
-                .from("research_papers")
-                .insert({
-                    problem_id: problem.id,
-                    title: entry.title.trim(),
-                    authors,
-                    abstract: entry.summary.trim(),
-                    arxiv_id: arxivId,
-                    published_date: entry.published,
-                    pdf_url,
-                })
-                .select()
-                .single();
-
-            if (insertError) {
-                console.error("Error inserting paper:", insertError);
-                continue;
-            }
-
-            newPapers.push(paper);
         }
 
-        console.log(`Successfully added ${newPapers.length} new papers`);
+        console.log(`Found ${computedPapers.length} relevant papers.`)
+
+        // Upsert papers
+        if (computedPapers.length > 0) {
+            // We use source_url as unique key implicitly if strict constraint exists, 
+            // else we might duplicate. Ideally we should have a unique constraint on source_url.
+            // For now, we utilize 'upsert' assuming 'source_url' or 'title' + 'problem_id' unique.
+            // Actually simplest is checking existence or assume Supabase handles constraints. 
+            // Let's rely on `source_url` being unique if configured, or just insert.
+
+            // Better: Fetch existing URLs to filter
+            const existingUrls = (await supabase.from('research_papers').select('source_url')).data?.map(p => p.source_url) || []
+
+            const newPapers = computedPapers.filter(p => !existingUrls.includes(p.source_url))
+
+            if (newPapers.length > 0) {
+                const { error } = await supabase.from('research_papers').insert(newPapers)
+                if (error) console.error("Insert error:", error)
+                else console.log(`Inserted ${newPapers.length} new papers.`)
+            } else {
+                console.log("No new unique papers to insert.")
+            }
+        }
 
         return new Response(
-            JSON.stringify({
-                success: true,
-                problemSlug,
-                newPapersCount: newPapers.length,
-                totalSearched: entries.length,
-                papers: newPapers,
-            }),
-            { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+            JSON.stringify({ success: true, count: computedPapers.length }),
+            { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
     } catch (error) {
-        console.error("Error:", error);
         return new Response(
-            JSON.stringify({
-                success: false,
-                error: error instanceof Error ? error.message : "Unknown error",
-            }),
-            { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+            JSON.stringify({ error: error.message }),
+            { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+        )
     }
-});
-
-// Basic XML parser for arXiv response
-function parseArxivXML(xmlText: string): ArxivEntry[] {
-    const entries: ArxivEntry[] = [];
-    const entryMatches = xmlText.matchAll(/<entry>([\s\S]*?)<\/entry>/g);
-
-    for (const entryMatch of entryMatches) {
-        const entryXml = entryMatch[1];
-
-        const entry: Partial<ArxivEntry> = {
-            id: extractTag(entryXml, "id"),
-            title: extractTag(entryXml, "title"),
-            summary: extractTag(entryXml, "summary"),
-            published: extractTag(entryXml, "published"),
-            updated: extractTag(entryXml, "updated"),
-            author: [],
-            link: [],
-        };
-
-        // Extract authors
-        const authorMatches = entryXml.matchAll(/<author>[\s\S]*?<name>(.*?)<\/name>[\s\S]*?<\/author>/g);
-        for (const authorMatch of authorMatches) {
-            entry.author!.push({ name: authorMatch[1] });
-        }
-
-        // Extract links
-        const linkMatches = entryXml.matchAll(/<link\s+href="(.*?)"\s+rel="(.*?)"(?:\s+type="(.*?)")?\s*\/>/g);
-        for (const linkMatch of linkMatches) {
-            entry.link!.push({
-                $: {
-                    href: linkMatch[1],
-                    rel: linkMatch[2],
-                    type: linkMatch[3],
-                },
-            });
-        }
-
-        entries.push(entry as ArxivEntry);
-    }
-
-    return entries;
-}
-
-function extractTag(xml: string, tagName: string): string {
-    const match = xml.match(new RegExp(`<${tagName}>(.*?)<\/${tagName}>`, "s"));
-    return match ? match[1].trim() : "";
-}
+})

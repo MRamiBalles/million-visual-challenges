@@ -10,6 +10,7 @@ import { ArrowLeft, Trophy, Clock, BookOpen, ExternalLink, FileText } from "luci
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ProgressTracker } from "@/components/problem/ProgressTracker";
+import { SocraticTutor } from "@/components/ai/SocraticTutor";
 
 interface ProblemLayoutProps {
     slug: string;
@@ -179,6 +180,8 @@ export const ProblemLayout = ({ slug, visualizer, children }: ProblemLayoutProps
                     </div>
                 </div>
             </main>
+
+            <SocraticTutor problemContext={problem.title} />
         </div>
     );
 };
