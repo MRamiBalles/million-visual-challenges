@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { useProblem } from "@/hooks/useProblem";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ArrowLeft, Trophy, Clock, BookOpen, ExternalLink, FileText } from "lucide-react";
+import { ArrowLeft, Trophy, BookOpen, ExternalLink, FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ProgressTracker } from "@/components/problem/ProgressTracker";
@@ -14,33 +14,36 @@ import { SocraticTutor } from "@/components/ai/SocraticTutor";
 
 interface ProblemLayoutProps {
     slug: string;
+    title?: string;
+    subtitle?: string;
     visualizer?: React.ReactNode;
-    children?: React.ReactNode; // Extra content if needed
+    children?: React.ReactNode;
 }
 
-export const ProblemLayout = ({ slug, visualizer, children }: ProblemLayoutProps) => {
+export const ProblemLayout = ({ slug, title, subtitle, visualizer, children }: ProblemLayoutProps) => {
     const { problem, papers, userProgress, isLoading } = useProblem(slug);
     const navigate = useNavigate();
     const [difficulty, setDifficulty] = useState<"simple" | "intermediate" | "advanced">("simple");
 
+    // Use passed props or fallback to problem data
+    const displayTitle = title || problem?.title || "Loading...";
+    const displaySubtitle = subtitle || problem?.field || "";
+    const displayStatement = problem?.short_title || problem?.statement || "";
+
     const DifficultyContent = {
-        simple: problem?.description_simple,
-        intermediate: problem?.description_intermediate,
-        advanced: problem?.description_advanced,
+        simple: problem?.description_simple || "No simple description available.",
+        intermediate: problem?.description_intermediate || "No intermediate description available.",
+        advanced: problem?.description_advanced || "No advanced description available.",
     };
 
     if (isLoading) {
         return <ProblemSkeleton />;
     }
 
-    if (!problem) {
-        return (
-            <div className="flex flex-col items-center justify-center min-h-screen">
-                <h1 className="text-2xl font-bold mb-4">Problem Not Found</h1>
-                <Button onClick={() => navigate("/")}>Go Home</Button>
-            </div>
-        );
-    }
+    // If no problem found and no manual title provided (e.g. static pages), show skeleton or basic layout
+    // Actually for 'static' pages like Market, 'problem' might be undefined if slug doesn't match a real problem.
+    // In that case we just render the content.
+    const isStaticPage = !!title;
 
     return (
         <div className="min-h-screen bg-background text-foreground">
@@ -51,7 +54,7 @@ export const ProblemLayout = ({ slug, visualizer, children }: ProblemLayoutProps
                         <ArrowLeft className="w-4 h-4" /> Back to Lab
                     </Button>
                     <div className="font-mono text-sm text-muted-foreground hidden md:block">
-                        {problem.field.toUpperCase()}
+                        {displaySubtitle.toUpperCase()}
                     </div>
                 </div>
             </nav>
@@ -66,25 +69,31 @@ export const ProblemLayout = ({ slug, visualizer, children }: ProblemLayoutProps
                     >
                         <div>
                             <div className="flex items-center gap-3 mb-4">
-                                <Badge variant={problem.status === 'solved' ? 'default' : 'secondary'} className="text-sm">
-                                    {problem.status === 'solved' ? 'SOLVED' : 'UNSOLVED'}
-                                </Badge>
-                                <div className="flex items-center text-yellow-500 gap-1 text-sm font-medium">
-                                    <Trophy className="w-4 h-4" />
-                                    {problem.prize}
-                                </div>
+                                {problem && (
+                                    <>
+                                        <Badge variant={problem.status === 'solved' ? 'default' : 'secondary'} className="text-sm">
+                                            {problem.status === 'solved' ? 'SOLVED' : 'UNSOLVED'}
+                                        </Badge>
+                                        <div className="flex items-center text-yellow-500 gap-1 text-sm font-medium">
+                                            <Trophy className="w-4 h-4" />
+                                            {problem.prize}
+                                        </div>
+                                    </>
+                                )}
                             </div>
                             <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-4 text-transparent bg-clip-text bg-gradient-to-r from-foreground to-foreground/70">
-                                {problem.title}
+                                {displayTitle}
                             </h1>
                             <p className="text-xl text-muted-foreground max-w-2xl">
-                                {problem.short_title || problem.field}
+                                {displayStatement}
                             </p>
                         </div>
 
-                        <div className="w-full md:w-72">
-                            <ProgressTracker problemId={problem.id} initialProgress={userProgress} />
-                        </div>
+                        {problem && (
+                            <div className="w-full md:w-72">
+                                <ProgressTracker problemId={problem.id} initialProgress={userProgress} />
+                            </div>
+                        )}
                     </motion.div>
                 </header>
 
@@ -94,42 +103,47 @@ export const ProblemLayout = ({ slug, visualizer, children }: ProblemLayoutProps
                     {/* Left Column: Visualization & Explanation (2/3 width) */}
                     <div className="lg:col-span-2 space-y-8">
 
-                        {/* Context/Difficulty Tabs */}
-                        <Tabs
-                            defaultValue="simple"
-                            value={difficulty}
-                            onValueChange={(v) => setDifficulty(v as any)}
-                            className="w-full"
-                        >
-                            <TabsList className="grid w-full grid-cols-3 mb-6">
-                                <TabsTrigger value="simple">Simple</TabsTrigger>
-                                <TabsTrigger value="intermediate">Intermediate</TabsTrigger>
-                                <TabsTrigger value="advanced">Advanced</TabsTrigger>
-                            </TabsList>
+                        {/* Only show Difficulty Tabs if it's a real problem page */}
+                        {problem && !visualizer && !children && (
+                            <Tabs
+                                defaultValue="simple"
+                                value={difficulty}
+                                onValueChange={(v) => setDifficulty(v as any)}
+                                className="w-full h-full"
+                            >
+                                <TabsList className="grid w-full grid-cols-3 mb-6">
+                                    <TabsTrigger value="simple">Simple</TabsTrigger>
+                                    <TabsTrigger value="intermediate">Intermediate</TabsTrigger>
+                                    <TabsTrigger value="advanced">Advanced</TabsTrigger>
+                                </TabsList>
 
-                            <Card className="min-h-[200px] p-6 mb-8 border-primary/20 bg-gradient-to-b from-card to-background">
-                                <div className="prose dark:prose-invert max-w-none whitespace-pre-wrap leading-relaxed">
-                                    {DifficultyContent[difficulty]}
-                                </div>
-                            </Card>
+                                <Card className="min-h-[200px] p-6 mb-8 border-primary/20 bg-gradient-to-b from-card to-background">
+                                    <div className="prose dark:prose-invert max-w-none whitespace-pre-wrap leading-relaxed">
+                                        {DifficultyContent[difficulty]}
+                                    </div>
+                                </Card>
+                            </Tabs>
+                        )}
 
-                            {/* Dynamic Visualizer Slot */}
-                            {visualizer && (
-                                <div className="rounded-xl overflow-hidden border border-border bg-black/50 shadow-2xl relative min-h-[500px]">
-                                    {visualizer}
-                                </div>
-                            )}
-                        </Tabs>
+                        {/* If visualizer is passed (e.g. Riemann), wrap it */}
+                        {/* Dynamic Visualizer Slot */}
+                        {visualizer && (
+                            <div className="rounded-xl overflow-hidden border border-border bg-black/50 shadow-2xl relative min-h-[500px]">
+                                {visualizer}
+                            </div>
+                        )}
 
-                        {/* Children Content */}
+                        {/* Children Content (for Custom pages like Market) */}
                         {children}
+                    </Tabs>
 
-                    </div>
+                </div>
 
-                    {/* Right Column: Resources & Community (1/3 width) */}
-                    <div className="space-y-6">
+                {/* Right Column: Resources & Community (1/3 width) */}
+                <div className="space-y-6">
 
-                        {/* Related Papers */}
+                    {/* Related Papers - Only for real problems */}
+                    {papers && papers.length > 0 && (
                         <Card className="p-0 overflow-hidden">
                             <div className="p-4 border-b border-border bg-muted/30 flex items-center gap-2">
                                 <BookOpen className="w-4 h-4 text-primary" />
@@ -137,7 +151,7 @@ export const ProblemLayout = ({ slug, visualizer, children }: ProblemLayoutProps
                             </div>
                             <ScrollArea className="h-[400px]">
                                 <div className="p-4 space-y-4">
-                                    {papers?.map(paper => (
+                                    {papers.map(paper => (
                                         <a
                                             key={paper.id}
                                             href={paper.pdf_url || paper.source_url || '#'}
@@ -164,8 +178,10 @@ export const ProblemLayout = ({ slug, visualizer, children }: ProblemLayoutProps
                                 <Button variant="link" size="sm" className="text-muted-foreground">View all papers</Button>
                             </div>
                         </Card>
+                    )}
 
-                        {/* Clay Institute Link */}
+                    {/* Clay Institute Link - Only for real problems */}
+                    {problem && (
                         <Card className="p-6 bg-blue-950/20 border-blue-900/50">
                             <h3 className="font-semibold mb-2">Original Problem Statement</h3>
                             <p className="text-sm text-muted-foreground mb-4">
@@ -176,13 +192,14 @@ export const ProblemLayout = ({ slug, visualizer, children }: ProblemLayoutProps
                                 <ExternalLink className="w-3 h-3 ml-auto" />
                             </Button>
                         </Card>
+                    )}
 
-                    </div>
                 </div>
-            </main>
-
-            <SocraticTutor problemContext={problem.title} />
         </div>
+            </main >
+
+    <SocraticTutor problemContext={displayTitle} />
+        </div >
     );
 };
 

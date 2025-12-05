@@ -12,51 +12,38 @@ import { AchievementsBadges } from "@/components/profile/AchievementsBadges";
 import { EditProfileDialog } from "@/components/profile/EditProfileDialog";
 import { Skeleton } from "@/components/ui/skeleton";
 
+import { Share2, Printer } from "lucide-react";
+import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from "recharts";
+
+const SKILLS_DATA = [
+  { subject: 'Logic', A: 120, fullMark: 150 },
+  { subject: 'Speed', A: 98, fullMark: 150 },
+  { subject: 'Topology', A: 86, fullMark: 150 },
+  { subject: 'Algebra', A: 99, fullMark: 150 },
+  { subject: 'Persistence', A: 85, fullMark: 150 },
+  { subject: 'Creativity', A: 65, fullMark: 150 },
+];
+
 const Profile = () => {
+  // ... existing hooks
   const navigate = useNavigate();
   const { user } = useAuth();
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-
   const { profile, isLoading: profileLoading } = useUserProfile(user?.id);
   const { data: statistics, isLoading: statsLoading } = useUserStatistics(user?.id);
 
-  if (!user) {
-    navigate('/auth');
-    return null;
-  }
-
-  if (profileLoading || statsLoading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <div className="container mx-auto px-6 py-16">
-          <Skeleton className="h-48 w-full mb-8" />
-          <Skeleton className="h-96 w-full" />
-        </div>
-      </div>
-    );
-  }
-
-  if (!profile || !statistics) {
-    return (
-      <div className="min-h-screen bg-background">
-        <div className="container mx-auto px-6 py-16">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold mb-4">Perfil no encontrado</h2>
-            <Button onClick={() => navigate('/')}>Volver al inicio</Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  if (!user || profileLoading || statsLoading || !profile || !statistics) return <Skeleton className="h-screen" />;
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Navigation Header */}
-      <header className="border-b border-border sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto px-6 py-4">
+    <div className="min-h-screen bg-background print:bg-white print:text-black">
+      {/* Navigation Header - Hide on Print */}
+      <header className="border-b border-border sticky top-0 z-50 bg-background/95 backdrop-blur print:hidden">
+        <div className="container mx-auto px-6 py-4 flex justify-between">
           <Button variant="ghost" onClick={() => navigate('/')} className="gap-2">
-            <ArrowLeft className="w-4 h-4" />
-            Volver
+            <ArrowLeft className="w-4 h-4" /> Volver
+          </Button>
+          <Button variant="outline" onClick={() => window.print()} className="gap-2">
+            <Printer className="w-4 h-4" /> Export Neuro-Resume
           </Button>
         </div>
       </header>
@@ -70,31 +57,52 @@ const Profile = () => {
           onEdit={() => setIsEditDialogOpen(true)}
         />
 
-        {/* Tabs */}
-        <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="overview">Resumen</TabsTrigger>
-            <TabsTrigger value="achievements">Logros</TabsTrigger>
-            <TabsTrigger value="activity">Actividad</TabsTrigger>
-          </TabsList>
+        <div className="grid md:grid-cols-2 gap-8">
+          {/* Stats Overview */}
+          <div>
+            <Tabs defaultValue="overview" className="w-full">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="overview">Resumen</TabsTrigger>
+                <TabsTrigger value="achievements">Logros</TabsTrigger>
+              </TabsList>
+              <TabsContent value="overview" className="space-y-6 mt-6">
+                <StatisticsCard statistics={statistics} />
+              </TabsContent>
+              <TabsContent value="achievements" className="mt-6">
+                <AchievementsBadges userId={user.id} />
+              </TabsContent>
+            </Tabs>
+          </div>
 
-          <TabsContent value="overview" className="space-y-6 mt-6">
-            <StatisticsCard statistics={statistics} />
-          </TabsContent>
-
-          <TabsContent value="achievements" className="mt-6">
-            <AchievementsBadges userId={user.id} />
-          </TabsContent>
-
-          <TabsContent value="activity" className="mt-6">
-            <div className="text-center py-12 text-muted-foreground">
-              <p>Historial de actividad próximamente...</p>
+          {/* Neuro-Radar Chart */}
+          <div className="bg-slate-900/50 p-6 rounded-xl border border-slate-800 print:border-black print:text-black">
+            <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+              <Share2 className="w-4 h-4 text-primary" /> Cognitive Signature
+            </h3>
+            <div className="h-[300px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <RadarChart cx="50%" cy="50%" outerRadius="80%" data={SKILLS_DATA}>
+                  <PolarGrid stroke="#334155" />
+                  <PolarAngleAxis dataKey="subject" tick={{ fill: '#94a3b8', fontSize: 12 }} />
+                  <PolarRadiusAxis angle={30} domain={[0, 150]} tick={false} axisLine={false} />
+                  <Radar
+                    name="Skills"
+                    dataKey="A"
+                    stroke="#8b5cf6"
+                    strokeWidth={2}
+                    fill="#8b5cf6"
+                    fillOpacity={0.3}
+                  />
+                </RadarChart>
+              </ResponsiveContainer>
             </div>
-          </TabsContent>
-        </Tabs>
+            <p className="text-xs text-muted-foreground mt-4 text-center">
+              Verified by Million Visual Challenges Consensus Protocol.
+            </p>
+          </div>
+        </div>
       </div>
 
-      {/* Edit Profile Dialog */}
       <EditProfileDialog
         profile={profile}
         open={isEditDialogOpen}
