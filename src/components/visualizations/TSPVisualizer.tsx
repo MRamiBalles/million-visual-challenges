@@ -183,20 +183,20 @@ export const TSPVisualizer = ({ seed }: TSPVisualizerProps) => {
         let bestPath: number[] = [];
         let minDistance = Infinity;
 
-        const permute = async (arr: number[], m: number = []) => {
+        const permute = async (arr: number[], m: number[] = []): Promise<void> => {
             if (arr.length === 0) {
                 operations++;
                 const currentDist = getTotalDistance([0, ...m]);
                 if (currentDist < minDistance) {
                     minDistance = currentDist;
                     bestPath = [0, ...m];
-                    setPath(bestPath); // Update visualization occasionally
+                    setPath(bestPath);
                 }
-                if (operations % 1000 === 0) await new Promise(r => setTimeout(r, 0)); // Yield to UI
+                if (operations % 1000 === 0) await new Promise(r => setTimeout(r, 0));
             } else {
                 for (let i = 0; i < arr.length; i++) {
-                    let curr = arr.slice();
-                    let next = curr.splice(i, 1);
+                    const curr = arr.slice();
+                    const next = curr.splice(i, 1);
                     await permute(curr.slice(), m.concat(next));
                 }
             }
