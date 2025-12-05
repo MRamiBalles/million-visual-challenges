@@ -18,7 +18,7 @@ interface ProblemLayoutProps {
 }
 
 export const ProblemLayout = ({ slug, visualizer, children }: ProblemLayoutProps) => {
-    const { problem, papers, isLoading } = useProblem(slug);
+    const { problem, papers, userProgress, isLoading } = useProblem(slug);
     const navigate = useNavigate();
     const [difficulty, setDifficulty] = useState<"simple" | "intermediate" | "advanced">("simple");
 
@@ -81,17 +81,9 @@ export const ProblemLayout = ({ slug, visualizer, children }: ProblemLayoutProps
                             </p>
                         </div>
 
-                        {/* Progress / Stats Card - Placeholder for now */}
-                        <Card className="p-4 w-full md:w-64 bg-card/50 backdrop-blur">
-                            <div className="flex items-center gap-3 mb-2 text-muted-foreground">
-                                <Clock className="w-4 h-4" />
-                                <span className="text-sm">Est. Time: 45m</span>
-                            </div>
-                            <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                                <div className="h-full bg-primary w-[10%]" />
-                            </div>
-                            <div className="mt-2 text-xs text-right text-muted-foreground">10% Complete</div>
-                        </Card>
+                        <div className="w-full md:w-72">
+                            <ProgressTracker problemId={problem.id} initialProgress={userProgress} />
+                        </div>
                     </motion.div>
                 </header>
 
