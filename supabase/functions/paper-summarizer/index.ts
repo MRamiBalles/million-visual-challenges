@@ -50,17 +50,67 @@ serve(async (req) => {
 
         const { paperId, title, abstract } = await req.json()
 
+        // Input validation
+        if (!paperId || typeof paperId !== 'string') {
+            return new Response(JSON.stringify({ error: "paperId is required" }), {
+                status: 400,
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            })
+        }
+
+        // Validate UUID format for paperId
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+        if (!uuidRegex.test(paperId)) {
+            return new Response(JSON.stringify({ error: "Invalid paperId format" }), {
+                status: 400,
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            })
+        }
+
+        if (!title || typeof title !== 'string') {
+            return new Response(JSON.stringify({ error: "title is required" }), {
+                status: 400,
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            })
+        }
+
+        // Validate and sanitize title (max 500 chars)
+        const MAX_TITLE_LENGTH = 500
+        if (title.length > MAX_TITLE_LENGTH) {
+            return new Response(JSON.stringify({ 
+                error: `Title too long (max ${MAX_TITLE_LENGTH} characters)` 
+            }), {
+                status: 400,
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            })
+        }
+        const sanitizedTitle = title.trim().replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
+
+        // Validate and sanitize abstract (max 5000 chars)
+        const MAX_ABSTRACT_LENGTH = 5000
+        if (abstract && typeof abstract === 'string' && abstract.length > MAX_ABSTRACT_LENGTH) {
+            return new Response(JSON.stringify({ 
+                error: `Abstract too long (max ${MAX_ABSTRACT_LENGTH} characters)` 
+            }), {
+                status: 400,
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            })
+        }
+        const sanitizedAbstract = abstract 
+            ? abstract.trim().replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
+            : ''
+
         console.log('[paper-summarizer] Request:', {
             userId: user.id.substring(0, 8) + '...',
             paperId,
-            hasTitle: !!title,
-            hasAbstract: !!abstract
+            hasTitle: !!sanitizedTitle,
+            hasAbstract: !!sanitizedAbstract
         })
 
         // Rate limiting - returns info about current usage
         const limitInfo = await checkRateLimit(user.id, "paper-summarizer", 5)
 
-        const prompt = `Summarize this mathematics research paper in three levels:\n\nTitle: ${title}\nAbstract: ${abstract}\n\nProvide:\n1. Simple (undergraduate) – 2‑3 sentences\n2. Intermediate (graduate) – one paragraph\n3. Advanced (researcher) – detailed summary with key contributions.\n\nReturn JSON with keys: simple, intermediate, advanced.`
+        const prompt = `Summarize this mathematics research paper in three levels:\n\nTitle: ${sanitizedTitle}\nAbstract: ${sanitizedAbstract}\n\nProvide:\n1. Simple (undergraduate) – 2‑3 sentences\n2. Intermediate (graduate) – one paragraph\n3. Advanced (researcher) – detailed summary with key contributions.\n\nReturn JSON with keys: simple, intermediate, advanced.`
 
         const response = await fetch("https://api.openai.com/v1/chat/completions", {
             method: "POST",
