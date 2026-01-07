@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 import { XMLParser } from "https://esm.sh/fast-xml-parser@4.2.5"
+import { checkRateLimit, RateLimitError } from "../_shared/rateLimit.ts"
 
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
@@ -13,6 +14,72 @@ serve(async (req) => {
     }
 
     try {
+        // 1. Require authentication
+        const authHeader = req.headers.get('Authorization')
+        if (!authHeader) {
+            console.warn('[arxiv-scraper] Missing auth header')
+            return new Response(
+                JSON.stringify({ error: 'Authentication required' }),
+                { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
+            )
+        }
+
+        // 2. Verify user session using anon key
+        const anonSupabase = createClient(
+            Deno.env.get('SUPABASE_URL')!,
+            Deno.env.get('SUPABASE_ANON_KEY')!,
+            { global: { headers: { Authorization: authHeader } } }
+        )
+
+        const { data: { user }, error: authError } = await anonSupabase.auth.getUser()
+        if (authError || !user) {
+            console.warn('[arxiv-scraper] Auth failed:', authError?.message)
+            return new Response(
+                JSON.stringify({ error: 'Invalid authentication' }),
+                { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
+            )
+        }
+
+        // 3. Verify admin role
+        const { data: isAdmin, error: roleError } = await anonSupabase
+            .rpc('has_role', { _user_id: user.id, _role: 'admin' })
+
+        if (roleError) {
+            console.error('[arxiv-scraper] Role check error:', roleError.message)
+            return new Response(
+                JSON.stringify({ error: 'Authorization check failed' }),
+                { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+            )
+        }
+
+        if (!isAdmin) {
+            console.warn('[arxiv-scraper] Non-admin access attempt by:', user.id.substring(0, 8) + '...')
+            return new Response(
+                JSON.stringify({ error: 'Admin access required' }),
+                { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 403 }
+            )
+        }
+
+        // 4. Rate limiting (2 requests per minute for admin scraping)
+        try {
+            await checkRateLimit(user.id, 'arxiv-scraper', 2)
+        } catch (error) {
+            if (error instanceof RateLimitError) {
+                return new Response(
+                    JSON.stringify({ 
+                        error: 'Rate limit exceeded', 
+                        remaining: error.info.remaining,
+                        resetAt: error.info.resetAt 
+                    }),
+                    { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 429 }
+                )
+            }
+            throw error
+        }
+
+        console.log('[arxiv-scraper] Admin scrape initiated by:', user.id.substring(0, 8) + '...')
+
+        // Use service role key for database writes
         const supabase = createClient(
             Deno.env.get('SUPABASE_URL') ?? '',
             Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
@@ -117,8 +184,9 @@ serve(async (req) => {
         )
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        console.error('[arxiv-scraper] Error:', errorMessage)
         return new Response(
-            JSON.stringify({ error: errorMessage }),
+            JSON.stringify({ error: 'An error occurred processing your request' }),
             { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
         )
     }
