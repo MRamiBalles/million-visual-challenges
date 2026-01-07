@@ -52,8 +52,27 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Validate UUID format for experimentId
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(experimentId)) {
+      return new Response(JSON.stringify({ error: 'Invalid experimentId format' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     if (commentText.length > 2000) {
       return new Response(JSON.stringify({ error: 'Comment too long (max 2000 characters)' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Sanitize comment text - remove control characters but preserve Unicode for internationalization
+    const sanitizedComment = commentText.trim().replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
+    
+    if (sanitizedComment.length === 0) {
+      return new Response(JSON.stringify({ error: 'Comment cannot be empty after sanitization' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -88,13 +107,13 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Insert the comment
+    // Insert the comment (using sanitized text)
     const { data: comment, error: commentError } = await supabaseClient
       .from('experiment_comments')
       .insert({
         experiment_id: experimentId,
         user_id: user.id,
-        comment_text: commentText.trim(),
+        comment_text: sanitizedComment,
       })
       .select()
       .single();

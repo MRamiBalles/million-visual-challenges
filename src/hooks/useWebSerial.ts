@@ -73,6 +73,26 @@ export const useWebSerial = () => {
         toast.info("Device Disconnected");
     }, [port]);
 
+    // Security: Validate and sanitize incoming serial data
+    const sanitizeSerialData = (data: string): string | null => {
+        // Max length limit to prevent buffer issues (1024 bytes)
+        const MAX_LENGTH = 1024;
+        if (data.length > MAX_LENGTH) {
+            console.warn('[WebSerial] Data exceeds max length, truncating');
+            data = data.substring(0, MAX_LENGTH);
+        }
+
+        // Only allow printable ASCII, common control chars, and basic Unicode
+        // This prevents injection of control characters and malicious sequences
+        const sanitized = data.replace(/[^\x20-\x7E\t\n\r\u00A0-\uFFFF]/g, '');
+        
+        if (sanitized.length === 0) {
+            return null;
+        }
+
+        return sanitized;
+    };
+
     const readLoop = async (currentPort: SerialPort) => {
         if (!currentPort.readable) return;
 
@@ -86,9 +106,9 @@ export const useWebSerial = () => {
                 const { value, done } = await reader.read();
                 if (done) break;
                 if (value) {
-                    // Handle streaming text - this is a simplified line parser
-                    // In production, we'd buffer incomplete lines
-                    const cleanValue = value.trim();
+                    const trimmedValue = value.trim();
+                    const cleanValue = sanitizeSerialData(trimmedValue);
+                    
                     if (cleanValue) {
                         setIncomingData(prev => [...prev.slice(-19), {
                             timestamp: Date.now(),
