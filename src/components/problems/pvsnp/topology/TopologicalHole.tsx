@@ -1,0 +1,256 @@
+/**
+ * TopologicalHole.tsx
+ * 
+ * Visualization of Čech cohomology obstructions in logical problems.
+ * Illustrates the failure to glue local solutions into a global one (H1 != 0).
+ * 
+ * Source: Azevedo et al., Curry (2025) - "Sheaf Theory and Contextuality"
+ */
+
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { AlertTriangle, Share2, HelpCircle } from 'lucide-react';
+
+interface Node {
+    id: number;
+    label: string;
+}
+
+interface Edge {
+    source: number;
+    target: number;
+    constraint: string;
+    is_obstruction?: boolean;
+}
+
+interface TopologyData {
+    cases: {
+        p_problem: {
+            global_obstruction: boolean;
+            h1_value: number;
+            description: string;
+        };
+        np_problem: {
+            global_obstruction: boolean;
+            h1_value: number;
+            description: string;
+        };
+    };
+    visualization_data: {
+        nodes: Node[];
+        edges: Edge[];
+    };
+}
+
+const mockData: TopologyData = {
+    cases: {
+        p_problem: {
+            global_obstruction: false,
+            h1_value: 0,
+            description: "Global consistency confirmed: H1 = 0.",
+        },
+        np_problem: {
+            global_obstruction: true,
+            h1_value: 1,
+            description: "Global inconsistency detected: H1 != 0.",
+        },
+    },
+    visualization_data: {
+        nodes: [
+            { id: 0, label: "X0" },
+            { id: 1, label: "X1" },
+            { id: 2, label: "X2" },
+            { id: 3, label: "X3" },
+        ],
+        edges: [
+            { source: 0, target: 1, constraint: "X0 = X1" },
+            { source: 1, target: 2, constraint: "X1 = X2" },
+            { source: 2, target: 3, constraint: "X2 = X3" },
+            { source: 3, target: 0, constraint: "X3 != X0", is_obstruction: true },
+        ],
+    },
+};
+
+export function TopologicalHole() {
+    const [data, setData] = useState<TopologyData | null>(null);
+    const [isHard, setIsHard] = useState(true);
+    const [activeEdge, setActiveEdge] = useState<number | null>(null);
+
+    useEffect(() => {
+        fetch('/data/topology_obstructions.json')
+            .then((res) => res.json())
+            .then((jsonData) => setData(jsonData))
+            .catch(() => setData(mockData));
+    }, []);
+
+    if (!data) return null;
+
+    const currentCase = isHard ? data.cases.np_problem : data.cases.p_problem;
+    const nodes = data.visualization_data.nodes;
+    const edges = data.visualization_data.edges;
+
+    // Circle layout constants
+    const radius = 80;
+    const centerX = 150;
+    const centerY = 150;
+
+    const getNodePos = (id: number) => {
+        const angle = (id / nodes.length) * 2 * Math.PI - Math.PI / 2;
+        return {
+            x: centerX + radius * Math.cos(angle),
+            y: centerY + radius * Math.sin(angle),
+        };
+    };
+
+    return (
+        <Card className="bg-black/40 border-purple-500/30 backdrop-blur-sm">
+            <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg flex items-center gap-2 text-purple-300">
+                        <Share2 className="w-5 h-5" />
+                        Obstrucción Topológica (Sheaves)
+                    </CardTitle>
+                    <Badge
+                        variant="outline"
+                        className={currentCase.global_obstruction ? "bg-red-500/20 text-red-300 border-red-500/30" : "bg-green-500/20 text-green-300 border-green-500/30"}
+                    >
+                        H1 = {currentCase.h1_value}
+                    </Badge>
+                </div>
+            </CardHeader>
+            <CardContent>
+                <div className="flex flex-col md:flex-row gap-6 items-center">
+                    {/* SVG Visualization */}
+                    <div className="relative w-[300px] h-[300px] bg-black/20 rounded-full border border-purple-500/10 p-4">
+                        <svg width="100%" height="100%" viewBox="0 0 300 300">
+                            {/* Edges */}
+                            {edges.map((edge, idx) => {
+                                const start = getNodePos(edge.source);
+                                const end = getNodePos(edge.target);
+                                const isObs = isHard && edge.is_obstruction;
+                                const isActive = activeEdge === idx;
+
+                                return (
+                                    <motion.line
+                                        key={`edge-${idx}`}
+                                        x1={start.x}
+                                        y1={start.y}
+                                        x2={end.x}
+                                        y2={end.y}
+                                        stroke={isObs ? "#ef4444" : "#22c55e"}
+                                        strokeWidth={isActive ? 4 : 2}
+                                        strokeDasharray={isObs ? "4 4" : "0"}
+                                        initial={{ pathLength: 0, opacity: 0 }}
+                                        animate={{
+                                            pathLength: 1,
+                                            opacity: 1,
+                                            stroke: isObs ? "#ef4444" : "#22c55e"
+                                        }}
+                                        whileHover={{ strokeWidth: 4 }}
+                                        onMouseEnter={() => setActiveEdge(idx)}
+                                        onMouseLeave={() => setActiveEdge(null)}
+                                        style={{ cursor: 'pointer' }}
+                                    />
+                                );
+                            })}
+
+                            {/* Nodes */}
+                            {nodes.map((node) => {
+                                const pos = getNodePos(node.id);
+                                return (
+                                    <motion.g key={`node-${node.id}`} initial={{ scale: 0 }} animate={{ scale: 1 }}>
+                                        <circle
+                                            cx={pos.x}
+                                            cy={pos.y}
+                                            r={12}
+                                            fill="#1e1e2e"
+                                            stroke="#8b5cf6"
+                                            strokeWidth={2}
+                                        />
+                                        <text
+                                            x={pos.x}
+                                            y={pos.y}
+                                            dy=".35em"
+                                            textAnchor="middle"
+                                            fill="white"
+                                            fontSize="10"
+                                            className="pointer-events-none select-none"
+                                        >
+                                            {node.label}
+                                        </text>
+                                    </motion.g>
+                                );
+                            })}
+                        </svg>
+
+                        {/* Overlay for "Hole" */}
+                        {isHard && (
+                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                <motion.div
+                                    initial={{ scale: 0, opacity: 0 }}
+                                    animate={{ scale: 1, opacity: 0.1 }}
+                                    className="w-32 h-32 bg-red-500 rounded-full blur-xl"
+                                />
+                                <div className="text-red-500 font-mono text-xl font-bold opacity-30">H1 ≠ 0</div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Controls & Description */}
+                    <div className="flex-1 space-y-4">
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => setIsHard(false)}
+                                className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${!isHard ? 'bg-green-500/20 text-green-300 border border-green-500/50' : 'bg-gray-800 text-gray-400 border border-gray-700'}`}
+                            >
+                                P (Globally Consistent)
+                            </button>
+                            <button
+                                onClick={() => setIsHard(true)}
+                                className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${isHard ? 'bg-red-500/20 text-red-300 border border-red-500/50' : 'bg-gray-800 text-gray-400 border border-gray-700'}`}
+                            >
+                                NP (Global Obstruction)
+                            </button>
+                        </div>
+
+                        <div className="p-3 bg-white/5 rounded-lg border border-white/10">
+                            <p className="text-sm text-gray-300 leading-relaxed italic">
+                                "{currentCase.description}"
+                            </p>
+                        </div>
+
+                        <div className="space-y-2">
+                            <div className="flex items-center gap-2 text-xs text-purple-300">
+                                <HelpCircle className="w-3 h-3" />
+                                <span>Interact con las aristas para ver restricciones</span>
+                            </div>
+                            <AnimatePresence mode="wait">
+                                {activeEdge !== null && (
+                                    <motion.div
+                                        initial={{ opacity: 0, x: -10 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        exit={{ opacity: 0, x: 10 }}
+                                        className="text-sm font-mono p-2 bg-purple-500/10 border border-purple-500/30 rounded"
+                                    >
+                                        Local constraint: <span className="text-purple-400">{edges[activeEdge].constraint}</span>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Legend/Note */}
+                <div className="mt-4 p-3 bg-yellow-500/10 rounded-lg border border-yellow-500/30 flex gap-3">
+                    <AlertTriangle className="w-4 h-4 text-yellow-400 flex-shrink-0 mt-0.5" />
+                    <p className="text-xs text-yellow-200/80">
+                        <strong>Concepto de Haz (Sheaf):</strong> En NP, las soluciones localmente válidas no pueden pegarse
+                        en una sección global coherente. La inconsistencia circular genera un "agujero" en el haz lógico.
+                    </p>
+                </div>
+            </CardContent>
+        </Card>
+    );
+}

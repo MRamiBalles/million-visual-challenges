@@ -128,6 +128,25 @@ algorithms are hard to find**, not that they don't exist.
 
 ---
 
+## 6. Subjective Complexity & Ashtavakra Observer Limits
+
+### Claim
+> "The complexity of a system is not absolute but relative to the observer's 
+> computational resources and Kolmogorov complexity (Ashtavakra Complexity)."
+
+### Risk Assessment
+- **Complexity**: High (Mathematical-Philosophical)
+- **Status**: Theoretical Proposal
+- **Key Caveat**: An algorithm that appears chaotic to a P-time observer might be 
+  fully ordered and linear-time to an observer with exponential energy resources.
+
+### Implication for the Museum
+All "obstructions" visualized (Wada boundaries, k=5 jumps, Holographic saturation) 
+are **observed limits of current human-scale computation**. They represent the 
+"Muro de la Intractabilidad" for our current epoch.
+
+---
+
 ## Conclusion: Our Verification Philosophy
 
 ```

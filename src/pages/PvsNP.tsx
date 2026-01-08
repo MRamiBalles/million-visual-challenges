@@ -12,6 +12,8 @@ import { useSearchParams } from "react-router-dom";
 import { ChaoticTrajectories } from "@/components/problems/pvsnp/physics/ChaoticTrajectories";
 import { KroneckerWall } from "@/components/problems/pvsnp/algebra/KroneckerWall";
 import { ARECompression } from "@/components/problems/pvsnp/holography/ARECompression";
+import { TopologicalHole } from "@/components/problems/pvsnp/topology/TopologicalHole";
+
 
 
 const PvsNP = () => {
@@ -46,8 +48,13 @@ const PvsNP = () => {
             <KroneckerWall />
           </div>
 
-          {/* Holography: ARE Compression */}
-          <ARECompression />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            {/* Topology: Sheaf Obstructions */}
+            <TopologicalHole />
+
+            {/* Holography: ARE Compression */}
+            <ARECompression />
+          </div>
         </div>
 
         {/* SCO Dashboard - Integrated from MRamiBalles/PvsNP */}
