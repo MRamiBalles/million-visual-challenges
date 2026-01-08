@@ -3,9 +3,11 @@ import { EDSACConvergence } from "@/components/problems/birch-sd/EDSACConvergenc
 import { LFunctionPlot } from "@/components/problems/birch-sd/LFunctionPlot";
 import { SpectralContrast } from "@/components/problems/birch-sd/SpectralContrast";
 import { SpectralLandscape } from "@/components/problems/birch-sd/SpectralLandscape";
+import { SpectralDensity } from "@/components/problems/birch-sd/SpectralDensity";
+import { PrismaticIntegrity } from "@/components/problems/birch-sd/PrismaticIntegrity";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Microscope, History, Zap, ShieldCheck, AlertCircle, CheckCircle2, FlaskConical } from "lucide-react";
+import { Microscope, History, Zap, ShieldCheck, AlertCircle, CheckCircle2, FlaskConical, Shield, BarChart3 } from "lucide-react";
 import { motion } from "framer-motion";
 import verificationData from "@/data/iran_verification.json";
 
@@ -41,7 +43,11 @@ const BSDLaboratory = () => {
                             </TabsTrigger>
                             <TabsTrigger value="report" className="inline-flex items-center gap-2 px-6">
                                 <ShieldCheck className="w-4 h-4 text-green-400" />
-                                Reporte de Auditoría
+                                Reporte
+                            </TabsTrigger>
+                            <TabsTrigger value="prismatic" className="inline-flex items-center gap-2 px-6">
+                                <Shield className="w-4 h-4 text-cyan-400" />
+                                Prismatic
                             </TabsTrigger>
                         </TabsList>
                     </div>
@@ -134,6 +140,11 @@ const BSDLaboratory = () => {
                                 ))}
                             </div>
                         </div>
+                    </TabsContent>
+
+                    <TabsContent value="prismatic" className="space-y-8 animate-in zoom-in-95 duration-500">
+                        <SpectralDensity />
+                        <PrismaticIntegrity />
                     </TabsContent>
                 </Tabs>
             </div>
