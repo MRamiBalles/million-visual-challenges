@@ -4,8 +4,9 @@ import { LFunctionPlot } from "@/components/problems/birch-sd/LFunctionPlot";
 import { SpectralContrast } from "@/components/problems/birch-sd/SpectralContrast";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Microscope, History, Zap, ShieldCheck } from "lucide-react";
+import { Microscope, History, Zap, ShieldCheck, AlertCircle, CheckCircle2, FlaskConical } from "lucide-react";
 import { motion } from "framer-motion";
+import verificationData from "@/data/iran_verification.json";
 
 const BSDLaboratory = () => {
     return (
@@ -79,24 +80,54 @@ const BSDLaboratory = () => {
                     </TabsContent>
 
                     <TabsContent value="report" className="animate-in slide-in-from-right-4 duration-500">
-                        <div className="max-w-4xl mx-auto space-y-6">
-                            <h2 className="text-2xl font-bold border-b border-white/10 pb-4">Auditoría de Inconsistencias</h2>
-                            <div className="space-y-4">
-                                <div className="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-xl">
-                                    <h4 className="text-yellow-400 font-bold text-sm mb-1 uppercase tracking-tight">Anomalía de Rango 2</h4>
-                                    <p className="text-xs text-yellow-100/70 leading-relaxed font-mono">
-                                        DETECCIÓN: Ratio observado ~1.999 vs Predicción 1.0.
-                                        CAUSA PROBABLE: Factores de Tamagawa o paridad del Grupo de Selmer.
-                                        OBSERVACIÓN: El modelo espectral Whittaker estabiliza esta anomalía en k=2 exacto.
-                                    </p>
-                                </div>
-                                <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-xl">
-                                    <h4 className="text-green-400 font-bold text-sm mb-1 uppercase tracking-tight">Consistencia de Rango 1</h4>
-                                    <p className="text-xs text-green-100/70 leading-relaxed font-mono">
-                                        VALIDACIÓN: Curva 32a3 (y² = x³ - x).
-                                        RESULTADO: El método clásico y el espectral coinciden en k=1 con un margen de error de 0.001%.
-                                    </p>
-                                </div>
+                        <div className="max-w-4xl mx-auto space-y-8">
+                            <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                                <h2 className="text-2xl font-bold">Auditoría de Inconsistencias Aritméticas</h2>
+                                <Badge variant="outline" className="gap-2 border-yellow-500/30 text-yellow-400">
+                                    <FlaskConical className="w-3 h-3" />
+                                    Fase 2: Datos Experimentales
+                                </Badge>
+                            </div>
+
+                            <div className="grid gap-4">
+                                {Object.values(verificationData).map((result: any) => (
+                                    <div
+                                        key={result.label}
+                                        className={`p-5 rounded-xl border flex flex-col md:flex-row gap-4 items-start md:items-center justify-between transition-all ${result.status === "PASS"
+                                                ? "bg-green-500/5 border-green-500/20 hover:bg-green-500/10"
+                                                : "bg-yellow-500/5 border-yellow-500/20 hover:bg-yellow-500/10"
+                                            }`}
+                                    >
+                                        <div className="space-y-1">
+                                            <div className="flex items-center gap-3">
+                                                <Badge className={`font-mono ${result.status === "PASS" ? "bg-green-500/20 text-green-300" : "bg-yellow-500/20 text-yellow-300"
+                                                    }`}>
+                                                    {result.label}
+                                                </Badge>
+                                                <span className="text-xs text-muted-foreground uppercase tracking-wider font-bold">
+                                                    Rango {result.rank}
+                                                </span>
+                                            </div>
+                                            <p className="text-sm text-white/70">
+                                                {result.details}
+                                            </p>
+                                        </div>
+
+                                        <div className="flex items-center gap-6 min-w-[200px]">
+                                            <div className="flex flex-col items-end">
+                                                <span className="text-[10px] text-white/40 uppercase">Ratio Calculado</span>
+                                                <span className={`font-mono font-bold ${result.status === "PASS" ? "text-green-400" : "text-yellow-400"
+                                                    }`}>
+                                                    {result.ratio.toFixed(5)}
+                                                </span>
+                                            </div>
+                                            <div className={`p-2 rounded-full ${result.status === "PASS" ? "bg-green-500/20 text-green-400" : "bg-yellow-500/20 text-yellow-400"
+                                                }`}>
+                                                {result.status === "PASS" ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         </div>
                     </TabsContent>

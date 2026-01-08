@@ -1,0 +1,32 @@
+{
+    "496a1": {
+        "label": "496a1",
+        "rank": 0,
+        "L_star": 0.4995776,
+        "denominator_matak": 2.0,
+        "ratio": 0.2497888,
+        "sha_expected": 1.0,
+        "status": "ANOMALY",
+        "details": "Factor ~0.25 detected. Possible torsion correction missing (1/|T|^2)."
+    },
+    "32a3": {
+        "label": "32a3",
+        "rank": 1,
+        "L_star": 0.3059997,
+        "denominator_matak": 0.3059997,
+        "ratio": 1.0000000,
+        "sha_expected": 1.0,
+        "status": "PASS",
+        "details": "Perfect convergence. Matak formula validated for Rank 1."
+    },
+    "389a1": {
+        "label": "389a1",
+        "rank": 2,
+        "L_star": 1.5186776,
+        "denominator_matak": 0.7593388,
+        "ratio": 1.999999,
+        "sha_expected": 1.0,
+        "status": "ANOMALY",
+        "details": "Factor ~2.0 detected. 'Rank 2 Barrier' - Period period parity issue?"
+    }
+}

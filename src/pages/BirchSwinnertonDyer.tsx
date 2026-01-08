@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Bookmark, BookmarkCheck } from "lucide-react";
+import { ArrowLeft, Bookmark, BookmarkCheck, Zap } from "lucide-react";
 import {
     ProblemHeader,
     DifficultySelector,
@@ -163,6 +163,30 @@ const BirchSwinnertonDyer = () => {
                     >
                         <LFunctionPlot />
                     </VisualizationContainer>
+                </div>
+
+                {/* Laboratory Access CTA */}
+                <div className="relative py-12 px-8 my-20 rounded-3xl overflow-hidden border border-purple-500/30 bg-purple-500/5 group transition-all hover:bg-purple-500/10">
+                    <div className="absolute top-0 right-0 p-8 text-purple-500/10 pointer-events-none">
+                        <Zap className="w-64 h-64 rotate-12" />
+                    </div>
+                    <div className="relative z-10 flex flex-col items-center text-center space-y-6">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 text-[10px] font-bold uppercase tracking-widest">
+                            Fase 2: Verificación Experimental
+                        </div>
+                        <h2 className="text-3xl md:text-4xl font-black text-white">Laboratorio de Verificación BSD</h2>
+                        <p className="max-w-2xl text-white/60 text-sm md:text-base leading-relaxed">
+                            Acceda al entorno de pruebas avanzado donde contrastamos la aritmética clásica contra
+                            el Hamiltoniano de Whittaker y la Fórmula de Irán.
+                        </p>
+                        <Button
+                            onClick={() => navigate("/bsd-laboratory")}
+                            className="bg-purple-600 hover:bg-purple-500 text-white px-8 py-6 text-lg font-bold rounded-xl transition-all hover:scale-105 shadow-xl shadow-purple-500/20 gap-2"
+                        >
+                            Entrar al Laboratorio
+                            <Zap className="w-4 h-4" />
+                        </Button>
+                    </div>
                 </div>
 
                 <div className="mt-20">
