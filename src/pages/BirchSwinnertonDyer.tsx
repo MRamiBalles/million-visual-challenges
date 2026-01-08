@@ -17,6 +17,7 @@ import { millenniumProblems } from "@/data/millennium-problems";
 import { VisualizationContainer } from "@/components/problem";
 import { EllipticCurvePlotter } from "@/components/problems/birch-sd/EllipticCurvePlotter";
 import { LFunctionPlot } from "@/components/problems/birch-sd/LFunctionPlot";
+import { EDSACConvergence } from "@/components/problems/birch-sd/EDSACConvergence";
 
 const BirchSwinnertonDyer = () => {
     const navigate = useNavigate();

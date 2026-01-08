@@ -115,26 +115,38 @@ export function TopologicalHole({ isDecoherent = false }: TopologicalHoleProps) 
     };
 
     return (
-        <Card className="bg-black/40 border-purple-500/30 backdrop-blur-sm">
+        <Card className={`bg-black/40 backdrop-blur-sm transition-all ${isDecoherent ? 'border-red-500/50 animate-pulse' : 'border-purple-500/30'}`}>
             <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg flex items-center gap-2 text-purple-300">
-                        <Share2 className="w-5 h-5" />
-                        Obstrucción Topológica (Sheaves)
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                    <CardTitle className={`text-lg flex items-center gap-2 ${isDecoherent ? 'text-red-300' : 'text-purple-300'}`}>
+                        {isDecoherent ? <AlertOctagon className="w-5 h-5" /> : <Share2 className="w-5 h-5" />}
+                        {isDecoherent ? 'Falla de Coherencia Categórica' : 'Obstrucción Topológica (Sheaves)'}
                     </CardTitle>
-                    <Badge
-                        variant="outline"
-                        className={showHole ? "bg-red-500/20 text-red-300 border-red-500/30" : "bg-green-500/20 text-green-300 border-green-500/30"}
-                    >
-                        $H^1$ = {effectiveH1}
-                        {lineModelMode && " (Line Model)"}
-                    </Badge>
+                    <div className="flex gap-2">
+                        {isDecoherent && (
+                            <Badge variant="outline" className="bg-red-900/30 text-red-400 border-red-500/50 animate-pulse">
+                                🔥 Decoherence Induced
+                            </Badge>
+                        )}
+                        <Badge
+                            variant="outline"
+                            className={showHole ? "bg-red-500/20 text-red-300 border-red-500/30" : "bg-green-500/20 text-green-300 border-green-500/30"}
+                        >
+                            $H^1$ = {isDecoherent ? '∞' : effectiveH1}
+                            {lineModelMode && !isDecoherent && " (Line Model)"}
+                        </Badge>
+                    </div>
                 </div>
+                {isDecoherent && (
+                    <p className="text-xs text-red-400 mt-1 font-mono">
+                        Patrascu (2025): Thermal collapse ≅ Descent failure. Gluing impossible.
+                    </p>
+                )}
             </CardHeader>
             <CardContent>
                 <div className="flex flex-col md:flex-row gap-6 items-center">
                     {/* SVG Visualization */}
-                    <div className="relative w-[300px] h-[300px] bg-black/20 rounded-full border border-purple-500/10 p-4">
+                    <div className={`relative w-[300px] h-[300px] bg-black/20 rounded-full p-4 transition-colors ${isDecoherent ? 'border-2 border-red-500/50' : 'border border-purple-500/10'}`}>
                         <svg width="100%" height="100%" viewBox="0 0 300 300">
                             {/* Edges */}
                             {edges.map((edge, idx) => {
@@ -289,4 +301,3 @@ export function TopologicalHole({ isDecoherent = false }: TopologicalHoleProps) 
         </Card>
     );
 }
-```
