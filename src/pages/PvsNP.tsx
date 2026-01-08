@@ -14,6 +14,7 @@ import { KroneckerWall } from "@/components/problems/pvsnp/algebra/KroneckerWall
 import { ARECompression } from "@/components/problems/pvsnp/holography/ARECompression";
 import { TopologicalHole } from "@/components/problems/pvsnp/topology/TopologicalHole";
 import { CausalCone } from "@/components/problems/pvsnp/thermo/CausalCone";
+import { RefutationTree } from "@/components/problems/pvsnp/logic/RefutationTree";
 
 
 const PvsNP = () => {
@@ -40,7 +41,7 @@ const PvsNP = () => {
             </p>
           </div>
 
-          {/* Row 1: Physics + Algebra */}
+          {/* Row 1: Stage 1 (Physics) + Stage 2 (Algebra) */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
             {/* Physics: Chaotic Trajectories */}
             <ChaoticTrajectories />
@@ -49,7 +50,7 @@ const PvsNP = () => {
             <KroneckerWall />
           </div>
 
-          {/* Row 2: Topology + Holography */}
+          {/* Row 2: Stage 3 (Topology) + Stage 4 (Holography) */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
             {/* Topology: Sheaf Obstructions */}
             <TopologicalHole />
@@ -58,9 +59,13 @@ const PvsNP = () => {
             <ARECompression />
           </div>
 
-          {/* Row 3: Thermodynamics (Full Width) */}
-          <div className="mb-8">
+          {/* Row 3: Stage 5 (Thermodynamics) + Stage 6 (Metamathematics) */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            {/* Thermodynamics: Causal Depth */}
             <CausalCone />
+
+            {/* Metamathematics: Refuter Game */}
+            <RefutationTree />
           </div>
         </div>
 

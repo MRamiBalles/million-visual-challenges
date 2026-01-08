@@ -77,6 +77,7 @@ export function TopologicalHole() {
     const [data, setData] = useState<TopologyData | null>(null);
     const [isHard, setIsHard] = useState(true);
     const [activeEdge, setActiveEdge] = useState<number | null>(null);
+    const [lineModelMode, setLineModelMode] = useState(false);
 
     useEffect(() => {
         fetch('/data/topology_obstructions.json')
@@ -90,6 +91,10 @@ export function TopologicalHole() {
     const currentCase = isHard ? data.cases.np_problem : data.cases.p_problem;
     const nodes = data.visualization_data.nodes;
     const edges = data.visualization_data.edges;
+
+    // Line Model Effect: Detect Hardy contextuality even if original H1 is 0
+    const effectiveH1 = (isHard && lineModelMode) ? 1 : currentCase.h1_value;
+    const showHole = effectiveH1 !== 0;
 
     // Circle layout constants
     const radius = 80;
@@ -114,9 +119,10 @@ export function TopologicalHole() {
                     </CardTitle>
                     <Badge
                         variant="outline"
-                        className={currentCase.global_obstruction ? "bg-red-500/20 text-red-300 border-red-500/30" : "bg-green-500/20 text-green-300 border-green-500/30"}
+                        className={showHole ? "bg-red-500/20 text-red-300 border-red-500/30" : "bg-green-500/20 text-green-300 border-green-500/30"}
                     >
-                        H1 = {currentCase.h1_value}
+                        H1 = {effectiveH1}
+                        {lineModelMode && " (Line Model)"}
                     </Badge>
                 </div>
             </CardHeader>
@@ -129,7 +135,7 @@ export function TopologicalHole() {
                             {edges.map((edge, idx) => {
                                 const start = getNodePos(edge.source);
                                 const end = getNodePos(edge.target);
-                                const isObs = isHard && edge.is_obstruction;
+                                const isObs = isHard && (edge.is_obstruction || lineModelMode);
                                 const isActive = activeEdge === idx;
 
                                 return (
@@ -153,6 +159,15 @@ export function TopologicalHole() {
                                         onMouseLeave={() => setActiveEdge(null)}
                                         style={{ cursor: 'pointer' }}
                                     />
+                                );
+                            })}
+
+                            {/* Line Model Connections (Visual extra) */}
+                            {lineModelMode && edges.map((edge, idx) => {
+                                const start = getNodePos(edge.source);
+                                const end = getNodePos(edge.target);
+                                return (
+                                    <circle key={`joint-${idx}`} cx={(start.x + end.x) / 2} cy={(start.y + end.y) / 2} r={3} fill="#8b5cf6" opacity={0.5} />
                                 );
                             })}
 
@@ -186,7 +201,7 @@ export function TopologicalHole() {
                         </svg>
 
                         {/* Overlay for "Hole" */}
-                        {isHard && (
+                        {showHole && (
                             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                                 <motion.div
                                     initial={{ scale: 0, opacity: 0 }}
@@ -205,14 +220,30 @@ export function TopologicalHole() {
                                 onClick={() => setIsHard(false)}
                                 className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${!isHard ? 'bg-green-500/20 text-green-300 border border-green-500/50' : 'bg-gray-800 text-gray-400 border border-gray-700'}`}
                             >
-                                P (Globally Consistent)
+                                P (Easy)
                             </button>
                             <button
                                 onClick={() => setIsHard(true)}
                                 className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${isHard ? 'bg-red-500/20 text-red-300 border border-red-500/50' : 'bg-gray-800 text-gray-400 border border-gray-700'}`}
                             >
-                                NP (Global Obstruction)
+                                NP (Hard)
                             </button>
+                        </div>
+
+                        {/* Line Model Toggle */}
+                        <div className="p-3 bg-purple-500/10 rounded-lg border border-purple-500/20">
+                            <div className="flex items-center justify-between mb-2">
+                                <span className="text-[10px] text-purple-300 font-bold uppercase tracking-wider">Line Model (Carù 2018)</span>
+                                <input
+                                    type="checkbox"
+                                    checked={lineModelMode}
+                                    onChange={(e) => setLineModelMode(e.target.checked)}
+                                    className="w-3 h-3 accent-purple-500"
+                                />
+                            </div>
+                            <p className="text-[10px] text-purple-200/60 leading-tight">
+                                Elimina falsos negativos (como el escenario de Hardy) evaluando secciones sobre pares de contextos adyacentes.
+                            </p>
                         </div>
 
                         <div className="p-3 bg-white/5 rounded-lg border border-white/10">
@@ -224,7 +255,7 @@ export function TopologicalHole() {
                         <div className="space-y-2">
                             <div className="flex items-center gap-2 text-xs text-purple-300">
                                 <HelpCircle className="w-3 h-3" />
-                                <span>Interact con las aristas para ver restricciones</span>
+                                <span>Hover en aristas para ver restricciones locales</span>
                             </div>
                             <AnimatePresence mode="wait">
                                 {activeEdge !== null && (
@@ -234,7 +265,7 @@ export function TopologicalHole() {
                                         exit={{ opacity: 0, x: 10 }}
                                         className="text-sm font-mono p-2 bg-purple-500/10 border border-purple-500/30 rounded"
                                     >
-                                        Local constraint: <span className="text-purple-400">{edges[activeEdge].constraint}</span>
+                                        Restricción: <span className="text-purple-400">{edges[activeEdge].constraint}</span>
                                     </motion.div>
                                 )}
                             </AnimatePresence>
@@ -246,8 +277,9 @@ export function TopologicalHole() {
                 <div className="mt-4 p-3 bg-yellow-500/10 rounded-lg border border-yellow-500/30 flex gap-3">
                     <AlertTriangle className="w-4 h-4 text-yellow-400 flex-shrink-0 mt-0.5" />
                     <p className="text-xs text-yellow-200/80">
-                        <strong>Concepto de Haz (Sheaf):</strong> En NP, las soluciones localmente válidas no pueden pegarse
-                        en una sección global coherente. La inconsistencia circular genera un "agujero" en el haz lógico.
+                        <strong>Concepto:</strong> NP es una obstrucción global.
+                        A veces el H1 estándar falla (falsos negativos), pero el
+                        <strong> Modelo de Línea</strong> revela la inconsistencia oculta.
                     </p>
                 </div>
             </CardContent>

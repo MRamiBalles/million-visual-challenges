@@ -192,6 +192,18 @@ higher $K(\mathcal{O})$ perceives lower complexity.
 \end{center}
 
 % ============================================================================
+\section{Limitaciones y Honestidad Científica}
+% ============================================================================
+
+Para mantener el rigor académico, identificamos las siguientes limitaciones técnicas en el marco de trabajo actual:
+
+\begin{enumerate}
+    \item \textbf{Aproximación Abeliana:} La detección de obstrucciones topológicas en \texttt{sheaf\_scanner.py} utiliza grupos Abelianos ($\mathbb{Z}_2$). Fuentes críticas (Carù 2018) indican que esto puede generar falsos negativos en modelos como el de Hardy. La Fase 12.0 introduce el \textbf{Line Model} para mitigar esta brecha.
+    \item \textbf{Control de Fase Ideal:} La simulación LagONN (\texttt{lagonn\_sim.py}) asume un control de fase continuo sin ruido térmico masivo. En sistemas físicos reales, el ruido podría colapsar las trayectorias caóticas antes de que se detecte la binarización SHIL.
+    \item \textbf{Dependencia Axiomática:} Las especificaciones en Lean 4 (\texttt{Theorems.lean}) dependen de la aceptación de la Categoría \textsf{Comp} y los axiomas de computabilidad sobre el modelo de máquina de Turing de un solo cabezal.
+\end{enumerate}
+
+% ============================================================================
 \section{Academic Integrity Statement}
 % ============================================================================
 

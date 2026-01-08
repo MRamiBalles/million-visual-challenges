@@ -31,17 +31,26 @@ structure PolyTimeBound where
   exponent : ℕ
   bound : ℕ → ℕ := fun n => coefficient * n^exponent + coefficient
 
+/-- A concrete measure of computational effort (StepCount)
+    (Addresses Source 1423: complexity must have a concrete metric) -/
+structure StepCount where
+  value : ℕ
+
 /-- A verifier with explicit polynomial time constraint
     (Addresses dlnnlsn's critique: verifier must be tied to poly-time) -/
 structure PolyTimeVerifier (α : Type) where
   /-- The verification function -/
   verify : List α → List α → Bool
-  /-- Explicit time bound for verification -/
+  /-- Transition cost function: (input, witness) ↦ steps -/
+  cost : List α → List α → StepCount
+  /-- Explicit polynomial bound -/
   time_bound : PolyTimeBound
   /-- Witness length bound -/
   witness_bound : PolyTimeBound
-  /-- Soundness: verification terminates within bound -/
-  time_bounded : ∀ x w, x.length + w.length ≤ time_bound.bound x.length
+  /-- Soundness: verification costs less than bound -/
+  cost_bounded : ∀ x w, (cost x w).value ≤ time_bound.bound x.length
+  /-- Witness size is bounded -/
+  witness_bounded : ∀ x w, verify x w = true → w.length ≤ witness_bound.bound x.length
 
 /-- A computational problem with explicit complexity bounds -/
 structure ComputationalProblem where

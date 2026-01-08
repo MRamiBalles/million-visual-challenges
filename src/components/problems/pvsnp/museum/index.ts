@@ -14,3 +14,6 @@ export { TopologicalHole } from '../topology/TopologicalHole';
 
 // Thermodynamics Stage
 export { CausalCone } from '../thermo/CausalCone';
+
+// Metamathematics/Logic Stage
+export { RefutationTree } from '../logic/RefutationTree';
