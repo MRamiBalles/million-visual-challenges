@@ -63,6 +63,9 @@ El defecto de 2.0 en 389a1 NO es un cuadrado perfecto. Esto indica que:
 | Integralidad p=2 | ⚠️ Abierta |
 | Construcción de Puntos | ❌ Pendiente |
 
+> [!TIP]
+> Para detalles sobre el manejo de singularidades y falla de pureza en modelos integrales, consultar [LIMITATIONS.md](./LIMITATIONS.md).
+
 **Veredicto Final**: Los métodos espectrales de Whittaker (2025) y Matak (2025) **resuelven la inestabilidad analítica** del BSD en rangos altos. La barrera del Rango ≥2 está siendo abordada actualmente mediante la variación discreta (**Números de Kurihara** $\tilde{\delta}_n$) y la densidad espectral (**UESDF**), abandonando la construcción directa de puntos a favor de la pureza cohomológica recuperada mediante **Morfismos de Períodos Extendidos** (Guo-Yang 2025) en modelos singulares.
 
 ---
