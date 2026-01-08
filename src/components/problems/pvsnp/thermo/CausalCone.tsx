@@ -99,14 +99,14 @@ const mockData: CausalData = {
 
 interface CausalConeProps {
     thermalNoise?: number;
+    onDecoherence?: (isDecoherent: boolean) => void; // Phase 14.5: Callback for Cascading Failure
 }
 
-export function CausalCone({ thermalNoise = 0 }: CausalConeProps) {
+export function CausalCone({ thermalNoise = 0, onDecoherence }: CausalConeProps) {
     const [data, setData] = useState<CausalData | null>(null);
     const [showNP, setShowNP] = useState(true);
     const [isLoading, setIsLoading] = useState(true);
     // Ashtavakra Complexity: Observer Insight K(O) - range 0 to 1
-    // 0 = Classical observer (narrow cone), 1 = "Enlightened" observer (expanded perception)
     const [observerInsight, setObserverInsight] = useState(0);
 
     useEffect(() => {
@@ -137,18 +137,23 @@ export function CausalCone({ thermalNoise = 0 }: CausalConeProps) {
         ? data.visualization_data.np_trajectory
         : data.visualization_data.p_trajectory;
 
-    // Apply Ashtavakra transformation:
-    // - Higher K(O) "compresses" the problem trajectory (xi shrinks)
-    // - OR equivalently, expands the causal cone (cone_limit grows)
+    // Phase 14.5: Ashtavakra Mitigation (Ghosh 2025)
+    // The collapse threshold is NOT fixed. A highly insightful observer can tolerate more noise.
+    // η_critical = 0.7 + (K(O) × 0.2) -> Range: 0.7 (classical) to 0.9 (oracle)
+    const etaCritical = 0.7 + (observerInsight * 0.2);
+    const etaSoft = 0.3; // Soft threshold is fixed (Gneiting 2025)
 
-    // Phase 14: Thermal Noise Integration
-    // If thermal noise is high (>0.7), the causal cone collapses due to decoherence.
-    const noisePenalty = Math.max(0, (thermalNoise - 0.3) * 2); // Starts affecting at 0.3, max at 0.8
+    // Determine the system state
+    const isHardCollapse = thermalNoise > etaCritical;
+    const isSoftThreshold = thermalNoise > etaSoft && !isHardCollapse;
+    const isStable = !isHardCollapse && !isSoftThreshold;
+
+    // Noise penalty starts at soft threshold, maxes at dynamic hard threshold
+    const noisePenalty = isHardCollapse ? 1.5 : Math.max(0, (thermalNoise - etaSoft) / (etaCritical - etaSoft));
 
     // Observer insight expands the cone, but Noise shrinks it.
     const compressionFactor = 1 - observerInsight * 0.6;
-    // Cone expansion: Insight expands (+), Noise contracts (-)
-    // Effective Cone = Base * (1 + Insight - NoisePenalty)
+    // Effective Cone: Insight expands, Noise contracts
     const effectiveConeExpansion = Math.max(0.2, 1 + (observerInsight * 0.8) - noisePenalty);
 
     const chartData = trajectory.map((pt, i) => {
@@ -165,22 +170,48 @@ export function CausalCone({ thermalNoise = 0 }: CausalConeProps) {
 
     // Recalculate violation based on observer insight and noise
     const adjustedViolation = chartData.some(pt => !pt.in_cone);
-    const adjustedEntropy = analysis.entropy_cost * compressionFactor * (1 + thermalNoise); // Noise increases entropy
+    const adjustedEntropy = analysis.entropy_cost * compressionFactor * (1 + thermalNoise);
+
+    // Phase 14.5: Notify parent of decoherence state for Cascading Failure
+    useEffect(() => {
+        if (onDecoherence) {
+            onDecoherence(isHardCollapse);
+        }
+    }, [isHardCollapse, onDecoherence]);
+
+    // Determine badge styles based on state
+    const getStateBadge = () => {
+        if (isHardCollapse) {
+            return { bg: 'bg-red-900/30', text: 'text-red-400', border: 'border-red-500/50', label: '🔥 DECOHERENCIA TOTAL', icon: '❌' };
+        }
+        if (isSoftThreshold) {
+            return { bg: 'bg-yellow-500/20', text: 'text-yellow-300', border: 'border-yellow-500/40', label: '⚡ Soft Threshold', icon: '⚠️' };
+        }
+        return { bg: 'bg-green-500/20', text: 'text-green-300', border: 'border-green-500/30', label: '✅ Estable', icon: '✅' };
+    };
+
+    const stateBadge = getStateBadge();
 
     return (
-        <Card className="bg-black/40 border-cyan-500/30 backdrop-blur-sm">
+        <Card className={`bg-black/40 backdrop-blur-sm transition-colors ${isHardCollapse ? 'border-red-500/50' : isSoftThreshold ? 'border-yellow-500/40' : 'border-cyan-500/30'}`}>
             <CardHeader className="pb-2">
                 <div className="flex items-center justify-between flex-wrap gap-2">
                     <CardTitle className="text-lg flex items-center gap-2 text-cyan-300">
                         <Zap className="w-5 h-5" />
                         Cono Causal Log-Spacetime
                     </CardTitle>
-                    <div className="flex gap-2">
-                        {thermalNoise > 0.3 && (
-                            <Badge variant="outline" className="bg-orange-500/10 text-orange-300 border-orange-500/30">
-                                🔥 Decoherence: -{((noisePenalty / 1.8) * 100).toFixed(0)}%
+                    <div className="flex gap-2 flex-wrap">
+                        {/* Noise State Badge */}
+                        <Badge variant="outline" className={`${stateBadge.bg} ${stateBadge.text} ${stateBadge.border}`}>
+                            {stateBadge.label}
+                        </Badge>
+                        {/* Dynamic Threshold Indicator */}
+                        {observerInsight > 0 && (
+                            <Badge variant="outline" className="bg-purple-500/10 text-purple-300 border-purple-500/30 text-[10px]">
+                                η<sub>crit</sub>={etaCritical.toFixed(2)}
                             </Badge>
                         )}
+                        {/* Causal Status Badge */}
                         <Badge
                             variant="outline"
                             className={
@@ -194,7 +225,7 @@ export function CausalCone({ thermalNoise = 0 }: CausalConeProps) {
                     </div>
                 </div>
                 <p className="text-xs text-cyan-200/60 font-mono">
-                    Métrica: ds² = -e<sup>2τ</sup>dτ² + e<sup>2ξ</sup>dξ² | Landauer: {adjustedEntropy.toFixed(1)} k<sub>B</sub>T
+                    Métrica: ds² = -e<sup>2τ</sup>dτ² + e<sup>2ξ</sup>dξ² | Landauer: {adjustedEntropy.toFixed(1)} k<sub>B</sub>T | η={thermalNoise.toFixed(2)}
                 </p>
             </CardHeader>
 

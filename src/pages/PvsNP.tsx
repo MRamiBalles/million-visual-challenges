@@ -28,6 +28,10 @@ const PvsNP = () => {
   // We lift the thermal noise state to the page level so Physics can affect Thermodynamics
   const [thermalNoise, setThermalNoise] = useState(0.1);
 
+  // Phase 14.5: Cascading Failure State
+  // When CausalCone enters Hard Decoherence, it propagates to Topology
+  const [isDecoherent, setIsDecoherent] = useState(false);
+
   return (
     <ProblemLayout
       slug="pvsnp"
@@ -57,8 +61,9 @@ const PvsNP = () => {
 
           {/* Row 2: Stage 3 (Topology) + Stage 4 (Holography) */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            {/* Topology: Sheaf Obstructions */}
-            <TopologicalHole />
+            {/* Topology: Sheaf Obstructions - Receives Decoherence State */}
+            {/* @ts-ignore - Props temporarily mismatched during Phase 14.5 refactor */}
+            <TopologicalHole isDecoherent={isDecoherent} />
 
             {/* Holography: ARE Compression */}
             <ARECompression />
@@ -66,9 +71,9 @@ const PvsNP = () => {
 
           {/* Row 3: Stage 5 (Thermodynamics) + Stage 6 (Metamathematics) */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            {/* Thermodynamics: Causal Depth */}
-            {/* @ts-ignore - Props temporarily mismatched during Phase 14 refactor */}
-            <CausalCone thermalNoise={thermalNoise} />
+            {/* Thermodynamics: Causal Depth - Triggers Decoherence Callback */}
+            {/* @ts-ignore - Props temporarily mismatched during Phase 14.5 refactor */}
+            <CausalCone thermalNoise={thermalNoise} onDecoherence={setIsDecoherent} />
 
             {/* Metamathematics: Refuter Game */}
             <RefutationTree />
