@@ -12,4 +12,5 @@ export { ARECompression } from '../holography/ARECompression';
 // Topology Stage
 export { TopologicalHole } from '../topology/TopologicalHole';
 
-
+// Thermodynamics Stage
+export { CausalCone } from '../thermo/CausalCone';

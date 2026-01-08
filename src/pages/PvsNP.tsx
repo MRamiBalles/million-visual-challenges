@@ -13,7 +13,7 @@ import { ChaoticTrajectories } from "@/components/problems/pvsnp/physics/Chaotic
 import { KroneckerWall } from "@/components/problems/pvsnp/algebra/KroneckerWall";
 import { ARECompression } from "@/components/problems/pvsnp/holography/ARECompression";
 import { TopologicalHole } from "@/components/problems/pvsnp/topology/TopologicalHole";
-
+import { CausalCone } from "@/components/problems/pvsnp/thermo/CausalCone";
 
 
 const PvsNP = () => {
@@ -40,6 +40,7 @@ const PvsNP = () => {
             </p>
           </div>
 
+          {/* Row 1: Physics + Algebra */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
             {/* Physics: Chaotic Trajectories */}
             <ChaoticTrajectories />
@@ -48,12 +49,18 @@ const PvsNP = () => {
             <KroneckerWall />
           </div>
 
+          {/* Row 2: Topology + Holography */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
             {/* Topology: Sheaf Obstructions */}
             <TopologicalHole />
 
             {/* Holography: ARE Compression */}
             <ARECompression />
+          </div>
+
+          {/* Row 3: Thermodynamics (Full Width) */}
+          <div className="mb-8">
+            <CausalCone />
           </div>
         </div>
 
