@@ -8,6 +8,12 @@ import { useActivityTracker } from "@/hooks/useActivityTracker";
 import { Card } from "@/components/ui/card";
 import { useSearchParams } from "react-router-dom";
 
+// Living Museum Components (2024-2025 Theories)
+import { ChaoticTrajectories } from "@/components/problems/pvsnp/physics/ChaoticTrajectories";
+import { KroneckerWall } from "@/components/problems/pvsnp/algebra/KroneckerWall";
+import { ARECompression } from "@/components/problems/pvsnp/holography/ARECompression";
+
+
 const PvsNP = () => {
   // Track page view
   useActivityTracker("pvsnp", "overview");
@@ -20,6 +26,29 @@ const PvsNP = () => {
       visualizer={<TSPVisualizer seed={seed} />}
     >
       <div className="space-y-16 mt-16 border-t border-border pt-16">
+
+        {/* Living Museum of Intractability - New 2024-2025 Theories */}
+        <div>
+          <div className="text-center max-w-3xl mx-auto mb-8">
+            <h2 className="text-3xl font-bold mb-4">🏛️ Museo Vivo de la Intractabilidad</h2>
+            <p className="text-muted-foreground">
+              Exploraciones experimentales basadas en teorías de 2024-2025.
+              Estas visualizaciones muestran <strong>por qué</strong> los algoritmos son difíciles de encontrar,
+              no prueban que no existan.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            {/* Physics: Chaotic Trajectories */}
+            <ChaoticTrajectories />
+
+            {/* Algebra: Kronecker Wall */}
+            <KroneckerWall />
+          </div>
+
+          {/* Holography: ARE Compression */}
+          <ARECompression />
+        </div>
 
         {/* SCO Dashboard - Integrated from MRamiBalles/PvsNP */}
         <div>
@@ -39,6 +68,7 @@ const PvsNP = () => {
             Más allá del Problema del Viajante, P vs NP se conecta con los fundamentos mismos de la computación.
           </p>
         </div>
+
 
         {/* Verification Demo */}
         <Card className="p-6 bg-card/30 backdrop-blur overflow-hidden">
