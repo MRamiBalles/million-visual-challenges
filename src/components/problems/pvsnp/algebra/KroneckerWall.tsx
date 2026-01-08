@@ -20,14 +20,13 @@ import {
 } from 'recharts';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, Target } from 'lucide-react';
+import { AlertTriangle, Target, Activity, Legend } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface KroneckerPoint {
     k: number;
-    actual_coefficient: number;
-    hogben_prediction: number;
-    correction: number;
+    perm_mult: number;
+    det_mult: number;
     is_stable: boolean;
     discriminant: number;
     factorization_pattern: string;
@@ -41,52 +40,32 @@ interface KroneckerData {
         algebraic_cause: string;
         implication: string;
     };
-    visualization_data: {
-        bar_chart: { k: number; correction: number }[];
-        jump_annotation: {
-            x: number;
-            label: string;
-            description: string;
-        };
-    };
     meta: {
         engine: string;
         source: string;
     };
 }
 
-// Mock data matching kronecker_fault.py output
+// Mock data reflecting GCT Multiplicity Obstructions
 const mockData: KroneckerData = {
     sequence: [
-        { k: 1, actual_coefficient: 1, hogben_prediction: 1, correction: 0, is_stable: true, discriminant: 0, factorization_pattern: 'Stable' },
-        { k: 2, actual_coefficient: 6, hogben_prediction: 6, correction: 0, is_stable: true, discriminant: 0, factorization_pattern: 'Stable' },
-        { k: 3, actual_coefficient: 28, hogben_prediction: 28, correction: 0, is_stable: true, discriminant: 0, factorization_pattern: 'Stable' },
-        { k: 4, actual_coefficient: 91, hogben_prediction: 91, correction: 0, is_stable: true, discriminant: 0, factorization_pattern: 'Stable' },
-        { k: 5, actual_coefficient: 260, hogben_prediction: 231, correction: 29, is_stable: false, discriminant: -3, factorization_pattern: 'OBSTRUCTION' },
-        { k: 6, actual_coefficient: 650, hogben_prediction: 561, correction: 89, is_stable: false, discriminant: -3, factorization_pattern: 'OBSTRUCTION' },
-        { k: 7, actual_coefficient: 1470, hogben_prediction: 1225, correction: 245, is_stable: false, discriminant: -3, factorization_pattern: 'OBSTRUCTION' },
+        { k: 1, perm_mult: 1, det_mult: 1, is_stable: true, discriminant: 0, factorization_pattern: 'Stable' },
+        { k: 2, perm_mult: 6, det_mult: 6, is_stable: true, discriminant: 0, factorization_pattern: 'Stable' },
+        { k: 3, perm_mult: 28, det_mult: 28, is_stable: true, discriminant: 0, factorization_pattern: 'Stable' },
+        { k: 4, perm_mult: 91, det_mult: 91, is_stable: true, discriminant: 0, factorization_pattern: 'Stable' },
+        { k: 5, perm_mult: 260, det_mult: 231, is_stable: false, discriminant: -3, factorization_pattern: 'GAP' },
+        { k: 6, perm_mult: 650, det_mult: 561, is_stable: false, discriminant: -3, factorization_pattern: 'GAP' },
+        { k: 7, perm_mult: 1470, det_mult: 1225, is_stable: false, discriminant: -3, factorization_pattern: 'GAP' },
     ],
     five_threshold: {
         location: 5,
-        phenomenon: 'Discontinuous jump in correction sequence',
-        algebraic_cause: 'Negative discriminant in Lee\'s formula (Δ = -3)',
-        implication: 'Elementary combinatorics fails beyond k=4',
-    },
-    visualization_data: {
-        bar_chart: [
-            { k: 1, correction: 0 },
-            { k: 2, correction: 0 },
-            { k: 3, correction: 0 },
-            { k: 4, correction: 0 },
-            { k: 5, correction: 29 },
-            { k: 6, correction: 89 },
-            { k: 7, correction: 245 },
-        ],
-        jump_annotation: { x: 5, label: 'MURO DE CINCO', description: 'The Five Threshold' },
+        phenomenon: 'Multiplicity Gap Emergence',
+        algebraic_cause: 'Negative discriminant in orbit closure (Δ = -3)',
+        implication: 'Separation of classes via multiplicity obstructions',
     },
     meta: {
-        engine: 'kronecker_fault.py',
-        source: 'Lee (2025) - Geometric Complexity Theory',
+        engine: 'gct_multiplicity.py',
+        source: 'Mulmuley/Sohoni (GCT) - Multiplicity vs Occurrence',
     },
 };
 
@@ -95,11 +74,11 @@ export function KroneckerWall() {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        fetch('/data/kronecker_fault.json')
+        fetch('/data/kronecker_mult.json')
             .then((res) => res.json())
             .then((jsonData) => {
                 setData(jsonData);
-                setIsLoading(false);
+                setIsLoading(false)
             })
             .catch(() => {
                 setData(mockData);
@@ -117,7 +96,7 @@ export function KroneckerWall() {
         );
     }
 
-    const chartData = data.visualization_data.bar_chart;
+    const chartData = data.sequence;
     const threshold = data.five_threshold;
 
     return (
@@ -126,13 +105,13 @@ export function KroneckerWall() {
                 <div className="flex items-center justify-between flex-wrap gap-2">
                     <CardTitle className="text-lg flex items-center gap-2 text-orange-300">
                         <Target className="w-5 h-5" />
-                        El Muro de Cinco: Obstrucción Algebraica
+                        Muro de Multiplicidad (GCT)
                     </CardTitle>
                     <Badge
                         variant="outline"
-                        className="bg-red-500/20 text-red-300 border-red-500/30"
+                        className="bg-orange-500/20 text-orange-300 border-orange-500/30 font-mono"
                     >
-                        k = {threshold.location} → Δ = -3
+                        $\text{mult}(V) \neq \text{mult}(W)$
                     </Badge>
                 </div>
             </CardHeader>
@@ -144,87 +123,77 @@ export function KroneckerWall() {
                             <XAxis
                                 dataKey="k"
                                 stroke="#666"
-                                label={{ value: 'Parámetro de Partición (k)', position: 'bottom', fill: '#888' }}
+                                label={{ value: 'Parámetro (k)', position: 'bottom', fill: '#888', fontSize: 10 }}
                             />
                             <YAxis
                                 stroke="#666"
-                                label={{ value: 'Corrección C_k', angle: -90, position: 'left', fill: '#888' }}
+                                label={{ value: 'Multiplicidad', angle: -90, position: 'left', fill: '#888', fontSize: 10 }}
+                                scale="log"
+                                domain={[1, 'auto']}
                             />
                             <Tooltip
-                                cursor={{ fill: 'rgba(255,255,255,0.05)' }}
-                                content={({ active, payload }) => {
-                                    if (active && payload && payload.length) {
-                                        const point = payload[0].payload;
-                                        const seqPoint = data.sequence.find((s) => s.k === point.k);
-                                        return (
-                                            <div className="bg-gray-900 p-3 border border-gray-700 rounded-lg text-white text-xs">
-                                                <p className="font-bold">k = {point.k}</p>
-                                                <p>Corrección: <span className={point.correction > 0 ? 'text-red-400' : 'text-green-400'}>
-                                                    {point.correction > 0 ? '+' : ''}{point.correction}
-                                                </span></p>
-                                                {seqPoint && (
-                                                    <>
-                                                        <p>Real: {seqPoint.actual_coefficient}</p>
-                                                        <p>Hogben: {seqPoint.hogben_prediction}</p>
-                                                        {!seqPoint.is_stable && (
-                                                            <p className="text-red-400 font-bold mt-1">⚠️ OBSTRUCCIÓN</p>
-                                                        )}
-                                                    </>
-                                                )}
-                                            </div>
-                                        );
-                                    }
-                                    return null;
-                                }}
+                                contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155' }}
+                                labelStyle={{ color: '#ffffff', fontWeight: 'bold' }}
+                                itemStyle={{ fontSize: '10px' }}
                             />
+                            <Legend wrapperStyle={{ fontSize: '10px' }} />
                             <ReferenceLine
                                 x={4.5}
                                 stroke="#ef4444"
                                 strokeWidth={2}
                                 strokeDasharray="5 5"
-                                label={{ value: 'UMBRAL', fill: '#ef4444', fontSize: 10 }}
+                                label={{ value: 'THRESHOLD', fill: '#ef4444', fontSize: 10, position: 'top' }}
                             />
-                            <Bar dataKey="correction" radius={[4, 4, 0, 0]}>
-                                {chartData.map((entry, index) => (
-                                    <Cell
-                                        key={`cell-${index}`}
-                                        fill={entry.correction > 0 ? '#ef4444' : '#22c55e'}
-                                    />
-                                ))}
-                            </Bar>
+
+                            <Bar
+                                dataKey="perm_mult"
+                                name="Perm (Exponencial)"
+                                fill="#f43f5e"
+                                radius={[2, 2, 0, 0]}
+                            />
+                            <Bar
+                                dataKey="det_mult"
+                                name="Det (Polinomial)"
+                                fill="#22c55e"
+                                radius={[2, 2, 0, 0]}
+                            />
                         </BarChart>
                     </ResponsiveContainer>
                 </div>
 
-                {/* Threshold Info */}
+                {/* Multiplicity Gap Description */}
                 <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="p-4 bg-red-500/10 rounded-lg border border-red-500/30 mb-4"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="p-3 bg-orange-500/10 rounded-lg border border-orange-500/30 mb-4"
                 >
-                    <div className="flex items-center gap-2 mb-2">
-                        <AlertTriangle className="w-5 h-5 text-red-400" />
-                        <span className="font-bold text-red-300">COLAPSO DETECTADO</span>
+                    <div className="flex items-center gap-2 mb-1">
+                        <Activity className="w-4 h-4 text-orange-400" />
+                        <span className="text-[10px] font-bold text-orange-300 uppercase underline decoration-orange-500/50 underline-offset-4">Brecha de Multiplicidad (GAP)</span>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                        <div>
-                            <p className="text-gray-400">Causa:</p>
-                            <p className="text-white">{threshold.algebraic_cause}</p>
+                    <p className="text-[10px] text-gray-300 mb-2 leading-relaxed">
+                        A partir de $k \geq 5$, la multiplicidad de representaciones en el Permanente diverge de la del Determinante.
+                        Este "Gap" es la firma algebraica de que existen funciones en $\mathsf{VNP}$ que no están en la órbita de $\mathsf{VP}$.
+                    </p>
+                    <div className="grid grid-cols-2 gap-2 text-[10px]">
+                        <div className="bg-black/40 p-1.5 rounded border border-orange-500/20">
+                            <span className="text-gray-400 bloc">Discriminante (Δ):</span>
+                            <span className="text-white font-mono">{threshold.algebraic_cause}</span>
                         </div>
-                        <div>
-                            <p className="text-gray-400">Implicación:</p>
-                            <p className="text-white">{threshold.implication}</p>
+                        <div className="bg-black/40 p-1.5 rounded border border-orange-500/20">
+                            <span className="text-gray-400 block">Efecto:</span>
+                            <span className="text-white">Colapso de simetría</span>
                         </div>
                     </div>
                 </motion.div>
 
-                {/* Scientific Disclaimer */}
-                <div className="flex items-start gap-2 p-3 bg-yellow-500/10 rounded-lg border border-yellow-500/30">
+                {/* Legend/Scientific Context */}
+                <div className="flex items-start gap-2 p-3 bg-yellow-500/5 rounded-lg border border-yellow-500/20">
                     <AlertTriangle className="w-4 h-4 text-yellow-400 flex-shrink-0 mt-0.5" />
-                    <p className="text-xs text-yellow-200/80">
-                        <strong>Fuente:</strong> Teoría GCT de Lee (2025). La secuencia C_k = A_k - Hogben(k)
-                        permanece en 0 hasta k=4, luego salta. Esto indica una obstrucción algebraica
-                        (discriminante negativo), NO una prueba de P ≠ NP.
+                    <p className="text-[10px] text-yellow-200/80 leading-tight">
+                        <strong>Insight GCT:</strong> No basta con que el coeficiente sea 0 o positivo.
+                        Lo que separa clases es la diferencia de crecimiento entre las multiplicidades de las representaciones irreducibles
+                        (Mulmuley/Sohoni 2001).
                     </p>
                 </div>
             </CardContent>

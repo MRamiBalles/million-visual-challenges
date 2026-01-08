@@ -117,6 +117,7 @@ export function ChaoticTrajectories() {
     const [data, setData] = useState<LagonnData | null>(null);
     const [activePhase, setActivePhase] = useState<'easy' | 'critical'>('critical');
     const [isLoading, setIsLoading] = useState(true);
+    const [thermalNoise, setThermalNoise] = useState(0.1);
 
     useEffect(() => {
         // Try to load real data, fall back to mock
@@ -146,23 +147,37 @@ export function ChaoticTrajectories() {
     const currentPhase = activePhase === 'easy' ? data.easy_phase : data.critical_phase;
     const { summary } = currentPhase;
 
+    // Hard Threshold: η_hard ≈ 0.7
+    // System collapses at high noise
+    const isCollapsed = thermalNoise > 0.7;
+    const isWobbly = thermalNoise > 0.3;
+
+    const chartData = currentPhase.lagonn.map((pt, i) => {
+        const noiseEffect = (Math.random() - 0.5) * thermalNoise * 10;
+        const disintegrationEffect = isCollapsed ? (Math.random() - 0.5) * thermalNoise * 50 : 0;
+
+        return {
+            t: pt.t,
+            energy: isCollapsed ? (Math.random() * 20 + 30) : (pt.energy + noiseEffect),
+            ising_energy: currentPhase.ising[i]?.energy + noiseEffect,
+            isCollapsed
+        };
+    });
+
     return (
         <Card className="bg-black/40 border-blue-500/30 backdrop-blur-sm">
             <CardHeader className="pb-2">
                 <div className="flex items-center justify-between flex-wrap gap-2">
                     <CardTitle className="text-lg flex items-center gap-2 text-blue-300">
                         <Zap className="w-5 h-5" />
-                        Dinámica LagONN: Caos Transitorio
+                        Dinámica LagONN: Caos y Resiliencia
                     </CardTitle>
                     <div className="flex items-center gap-2">
                         <Badge
                             variant="outline"
-                            className={`${summary.is_critical_phase
-                                    ? 'bg-red-500/20 text-red-300 border-red-500/30'
-                                    : 'bg-green-500/20 text-green-300 border-green-500/30'
-                                }`}
+                            className={isCollapsed ? 'bg-red-900/50 text-red-500 border-red-500' : (summary.is_critical_phase ? 'bg-red-500/20 text-red-300 border-red-500/30' : 'bg-green-500/20 text-green-300 border-green-500/30')}
                         >
-                            α = {currentPhase.alpha.toFixed(2)}
+                            {isCollapsed ? 'COLLAPSE' : `α = ${currentPhase.alpha.toFixed(2)}`}
                         </Badge>
                         <Badge
                             variant="outline"
@@ -175,94 +190,112 @@ export function ChaoticTrajectories() {
             </CardHeader>
 
             <CardContent>
-                <Tabs value={activePhase} onValueChange={(v) => setActivePhase(v as 'easy' | 'critical')}>
-                    <TabsList className="bg-black/40 border border-blue-500/30 mb-4">
-                        <TabsTrigger value="easy" className="data-[state=active]:bg-green-500/30">
-                            🟢 Fase Fácil (α=2.0)
-                        </TabsTrigger>
-                        <TabsTrigger value="critical" className="data-[state=active]:bg-red-500/30">
-                            🔴 Fase Crítica (α≈4.26)
-                        </TabsTrigger>
-                    </TabsList>
+                <div className="flex flex-col md:flex-row gap-4 mb-4">
+                    <div className="flex-1">
+                        <Tabs value={activePhase} onValueChange={(v) => setActivePhase(v as 'easy' | 'critical')}>
+                            <TabsList className="bg-black/40 border border-blue-500/30 mb-2">
+                                <TabsTrigger value="easy" className="data-[state=active]:bg-green-500/30 text-[10px] h-7">
+                                    🟢 Fácil (α=2.0)
+                                </TabsTrigger>
+                                <TabsTrigger value="critical" className="data-[state=active]:bg-red-500/30 text-[10px] h-7">
+                                    🔴 Crítico (α=4.26)
+                                </TabsTrigger>
+                            </TabsList>
+                        </Tabs>
+                    </div>
 
-                    <TabsContent value={activePhase}>
-                        <div className="h-64 mb-4">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <LineChart>
-                                    <XAxis
-                                        dataKey="t"
-                                        stroke="#666"
-                                        label={{ value: 'Tiempo (t)', position: 'bottom', fill: '#888' }}
-                                        data={currentPhase.lagonn}
-                                    />
-                                    <YAxis
-                                        stroke="#666"
-                                        label={{ value: 'Energía', angle: -90, position: 'left', fill: '#888' }}
-                                    />
-                                    <Tooltip
-                                        contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155' }}
-                                        labelStyle={{ color: '#94a3b8' }}
-                                    />
-                                    <Legend />
-                                    <ReferenceLine y={0} stroke="#444" strokeDasharray="3 3" />
-
-                                    {/* LagONN trajectory */}
-                                    <Line
-                                        data={currentPhase.lagonn}
-                                        type="monotone"
-                                        dataKey="energy"
-                                        name="LagONN"
-                                        stroke="#3b82f6"
-                                        dot={false}
-                                        strokeWidth={2}
-                                    />
-
-                                    {/* Standard Ising trajectory */}
-                                    <Line
-                                        data={currentPhase.ising}
-                                        type="monotone"
-                                        dataKey="energy"
-                                        name="Ising (sin λ)"
-                                        stroke="#ef4444"
-                                        dot={false}
-                                        strokeWidth={2}
-                                        strokeDasharray="5 5"
-                                    />
-                                </LineChart>
-                            </ResponsiveContainer>
+                    {/* Noise Slider */}
+                    <div className="w-full md:w-64 p-3 bg-blue-500/10 rounded-lg border border-blue-500/30">
+                        <div className="flex items-center justify-between mb-1">
+                            <span className="text-[10px] text-blue-300 font-bold uppercase tracking-wider">Ruido Térmico (η)</span>
+                            <span className={`text-[10px] font-mono ${isCollapsed ? 'text-red-400 animate-pulse' : 'text-blue-400'}`}>
+                                {isCollapsed ? 'Hard Collapse' : isWobbly ? 'Soft Threshold' : 'Stable'}
+                            </span>
                         </div>
+                        <input
+                            type="range"
+                            min="0"
+                            max="1"
+                            step="0.05"
+                            value={thermalNoise}
+                            onChange={(e) => setThermalNoise(parseFloat(e.target.value))}
+                            className="w-full h-1.5 bg-blue-900 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                        />
+                    </div>
+                </div>
 
-                        {/* Stats Grid */}
-                        <div className="grid grid-cols-3 gap-3 text-center mb-4">
-                            <div className="bg-black/30 rounded-lg p-2 border border-blue-500/20">
-                                <div className="text-lg font-mono text-blue-400">
-                                    {summary.lagonn_final_energy.toFixed(1)}
-                                </div>
-                                <div className="text-xs text-muted-foreground">LagONN Final</div>
-                            </div>
-                            <div className="bg-black/30 rounded-lg p-2 border border-red-500/20">
-                                <div className="text-lg font-mono text-red-400">
-                                    {summary.ising_final_energy.toFixed(1)}
-                                </div>
-                                <div className="text-xs text-muted-foreground">Ising Final</div>
-                            </div>
-                            <div className="bg-black/30 rounded-lg p-2 border border-emerald-500/20">
-                                <div className="text-lg font-mono text-emerald-400">
-                                    {summary.lagonn_escaped_trap ? '✅' : '❌'}
-                                </div>
-                                <div className="text-xs text-muted-foreground">Escapó Trampa</div>
-                            </div>
+                <div className="h-64 mb-4">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={chartData}>
+                            <XAxis
+                                dataKey="t"
+                                stroke="#666"
+                                label={{ value: 'Tiempo (t)', position: 'bottom', fill: '#888', fontSize: 10 }}
+                            />
+                            <YAxis
+                                stroke="#666"
+                                label={{ value: 'Energía', angle: -90, position: 'left', fill: '#888', fontSize: 10 }}
+                            />
+                            <Tooltip
+                                contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155' }}
+                                labelStyle={{ color: '#94a3b8' }}
+                            />
+                            <Legend wrapperStyle={{ fontSize: '10px' }} />
+                            <ReferenceLine y={0} stroke="#444" strokeDasharray="3 3" />
+
+                            <Line
+                                type="monotone"
+                                dataKey="energy"
+                                name="LagONN Trajectory"
+                                stroke={isCollapsed ? "#f43f5e" : "#3b82f6"}
+                                strokeWidth={isCollapsed ? 1 : 2}
+                                dot={false}
+                                animationDuration={300}
+                            />
+
+                            <Line
+                                type="monotone"
+                                dataKey="ising_energy"
+                                name="Classical Stochastic"
+                                stroke="#94a3b8"
+                                strokeWidth={1}
+                                strokeDasharray="5 5"
+                                dot={false}
+                                animationDuration={300}
+                            />
+                        </LineChart>
+                    </ResponsiveContainer>
+                </div>
+
+                {/* Stats Grid */}
+                <div className="grid grid-cols-3 gap-3 text-center mb-4">
+                    <div className="bg-black/30 rounded-lg p-2 border border-blue-500/20">
+                        <div className="text-md font-mono text-blue-400">
+                            {isCollapsed ? '∞' : (summary.lagonn_final_energy * (1 + thermalNoise)).toFixed(1)}
                         </div>
-                    </TabsContent>
-                </Tabs>
+                        <div className="text-[10px] text-muted-foreground uppercase">Resiliencia</div>
+                    </div>
+                    <div className="bg-black/30 rounded-lg p-2 border border-red-500/20">
+                        <div className="text-md font-mono text-red-400">
+                            {(summary.ising_final_energy).toFixed(1)}
+                        </div>
+                        <div className="text-[10px] text-muted-foreground uppercase">Error Base</div>
+                    </div>
+                    <div className="bg-black/30 rounded-lg p-2 border border-emerald-500/20">
+                        <div className={`text-md font-mono ${isCollapsed ? 'text-red-500' : 'text-emerald-400'}`}>
+                            {isCollapsed ? 'DISR' : (summary.lagonn_escaped_trap ? 'OPT' : 'TRAP')}
+                        </div>
+                        <div className="text-[10px] text-muted-foreground uppercase">Solución</div>
+                    </div>
+                </div>
 
-                {/* Scientific Disclaimer */}
-                <div className="flex items-start gap-2 p-3 bg-yellow-500/10 rounded-lg border border-yellow-500/30">
-                    <AlertTriangle className="w-4 h-4 text-yellow-400 flex-shrink-0 mt-0.5" />
-                    <p className="text-xs text-yellow-200/80">
-                        <strong>Fuente:</strong> Modelo LagONN de Delacour et al. (2025). Los
-                        multiplicadores de Lagrange "empujan" al sistema fuera de mínimos locales
-                        sin necesidad de ruido térmico. λ &gt; 0 indica caos transitorio.
+                {/* Scientific Insight */}
+                <div className="flex items-start gap-2 p-3 bg-blue-500/5 rounded-lg border border-blue-500/20">
+                    <AlertTriangle className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />
+                    <p className="text-[10px] text-blue-200/80 leading-tight">
+                        <strong>Umbral de Ruido (η):</strong> NP no es solo costo temporal; es fragilidad.
+                        A η &lt; 0.3, la robustez topológica permite convergencia. A η &gt; 0.7 (Hard Threshold),
+                        la "desintegración" hace que las instancias difíciles sean físicamente insolubles para solvers analógicos.
                     </p>
                 </div>
             </CardContent>

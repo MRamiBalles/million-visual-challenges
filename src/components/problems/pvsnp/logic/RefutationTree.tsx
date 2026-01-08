@@ -30,6 +30,7 @@ const NP_PROOF_STEPS: ProofStep[] = [
 
 export function RefutationTree() {
     const [isNP, setIsNP] = useState(true);
+    const [isRestricted, setIsRestricted] = useState(false);
     const [steps, setSteps] = useState<ProofStep[]>([]);
     const [isRunning, setIsRunning] = useState(false);
     const [currentStepIdx, setCurrentStepIdx] = useState(0);
@@ -43,24 +44,42 @@ export function RefutationTree() {
     useEffect(() => {
         if (isRunning) {
             const sourceSteps = isNP ? NP_PROOF_STEPS : P_PROOF_STEPS;
+
+            // If restricted, we might skip some intermediate steps or add restriction logs
+            if (isRestricted && currentStepIdx === 0) {
+                setSteps([{ id: 0, text: "Aplicando restricción aleatoria ρ...", isError: false }]);
+                // For P, move faster to the end
+            }
+
             if (currentStepIdx < sourceSteps.length) {
+                const delay = isRestricted && !isNP ? 400 : 800;
                 const timer = setTimeout(() => {
-                    setSteps(prev => [...prev, sourceSteps[currentStepIdx]]);
+                    const nextStep = sourceSteps[currentStepIdx];
+
+                    // If restricted and P, we might "detect" the error immediately after first checks
+                    if (isRestricted && !isNP && currentStepIdx === 2) {
+                        setSteps(prev => [...prev, { id: 99, text: "ρ-Colapso: Contradicción inmediata en hoja simplificada.", isError: true }]);
+                        setIsRunning(false);
+                        return;
+                    }
+
+                    setSteps(prev => [...prev, nextStep]);
                     setCurrentStepIdx(prev => prev + 1);
-                }, 800);
+                }, delay);
                 return () => clearTimeout(timer);
             } else if (isNP) {
                 // Infinite loop for NP
+                const timeout = isRestricted ? 1500 : 2000;
                 const timer = setTimeout(() => {
                     setCurrentStepIdx(0);
-                    setSteps([]);
-                }, 2000);
+                    setSteps(prev => isRestricted ? [prev[0]] : []); // Keep restriction log if active
+                }, timeout);
                 return () => clearTimeout(timer);
             } else {
                 setIsRunning(false);
             }
         }
-    }, [isRunning, currentStepIdx, isNP]);
+    }, [isRunning, currentStepIdx, isNP, isRestricted]);
 
     return (
         <Card className="bg-slate-950 border-purple-500/30 overflow-hidden">
@@ -68,35 +87,47 @@ export function RefutationTree() {
                 <div className="flex items-center justify-between">
                     <CardTitle className="text-md flex items-center gap-2 text-purple-300 font-mono">
                         <Terminal className="w-4 h-4" />
-                        Metamathematics: The Refuter Game
+                        Metamathematics: Refuter Game
                     </CardTitle>
-                    <Badge variant="outline" className="text-[10px] bg-purple-500/10 text-purple-400 border-purple-500/30">
+                    <Badge variant="outline" className="text-[10px] bg-purple-500/10 text-purple-400 border-purple-500/30 font-mono">
                         rwPHP(PLS)
                     </Badge>
                 </div>
             </CardHeader>
             <CardContent className="p-4">
-                <div className="flex gap-2 mb-4">
+                <div className="flex flex-wrap gap-2 mb-4">
+                    <div className="flex gap-1 bg-black/40 p-1 rounded-md border border-white/10">
+                        <Button
+                            variant={!isNP ? "secondary" : "ghost"}
+                            size="sm"
+                            className="text-[10px] h-6 px-2"
+                            onClick={() => { setIsNP(false); setIsRunning(false); setSteps([]); }}
+                        >
+                            2-SAT (P)
+                        </Button>
+                        <Button
+                            variant={isNP ? "secondary" : "ghost"}
+                            size="sm"
+                            className="text-[10px] h-6 px-2"
+                            onClick={() => { setIsNP(true); setIsRunning(false); setSteps([]); }}
+                        >
+                            3-SAT (NP)
+                        </Button>
+                    </div>
+
                     <Button
-                        variant={!isNP ? "secondary" : "outline"}
+                        variant={isRestricted ? "secondary" : "outline"}
                         size="sm"
-                        className="text-[10px] h-7"
-                        onClick={() => { setIsNP(false); setIsRunning(false); setSteps([]); }}
+                        className={`text-[10px] h-7 px-2 ${isRestricted ? 'bg-orange-500/20 text-orange-400 border-orange-500/50' : ''}`}
+                        onClick={() => { setIsRestricted(!isRestricted); setIsRunning(false); setSteps([]); }}
                     >
-                        2-SAT (P)
+                        <Search className="w-3 h-3 mr-1" /> Restricción ρ
                     </Button>
-                    <Button
-                        variant={isNP ? "secondary" : "outline"}
-                        size="sm"
-                        className="text-[10px] h-7"
-                        onClick={() => { setIsNP(true); setIsRunning(false); setSteps([]); }}
-                    >
-                        3-SAT (NP)
-                    </Button>
+
                     <Button
                         variant="ghost"
                         size="sm"
-                        className="text-cyan-400 h-7 ml-auto"
+                        className="text-cyan-400 h-7 ml-auto border border-cyan-500/30 hover:bg-cyan-500/10"
                         onClick={startGame}
                         disabled={isRunning}
                     >
@@ -104,7 +135,7 @@ export function RefutationTree() {
                     </Button>
                 </div>
 
-                <div className="bg-black/60 rounded border border-white/5 p-3 min-h-[160px] font-mono text-[11px]">
+                <div className="bg-black/60 rounded border border-white/5 p-3 min-h-[160px] font-mono text-[11px] relative">
                     <AnimatePresence>
                         {steps.map((step, idx) => (
                             <motion.div
@@ -125,14 +156,19 @@ export function RefutationTree() {
                             <span className="w-1 h-1 bg-purple-400 rounded-full animate-bounce [animation-delay:0.4s]" />
                         </div>
                     )}
+
+                    {isRestricted && !isRunning && steps.length === 0 && (
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20">
+                            <div className="text-[40px] font-bold text-orange-500">ρ</div>
+                        </div>
+                    )}
                 </div>
 
-                <div className="mt-3 p-2 bg-yellow-500/5 rounded border border-yellow-500/20 text-[10px] text-yellow-200/70">
+                <div className="mt-3 p-2 bg-purple-500/5 rounded border border-purple-500/20 text-[10px] text-purple-200/70 leading-tight">
                     <div className="flex gap-2">
-                        <AlertTriangle className="w-4 h-4 shrink-0 text-yellow-500" />
+                        <AlertTriangle className="w-4 h-4 shrink-0 text-purple-500" />
                         <p>
-                            <strong>Fundamento:</strong> En 2-SAT, la refutación es decidible en tiempo lineal.
-                            En 3-SAT (NP-completo), la búsqueda de fallos en demostraciones falsas (rwPHP) exhibe una complejidad exponencial, ilustrando la barrera entre $\mathsf{P}$ y $\mathsf{TFNP}$.
+                            <strong>Cápsula rwPHP:</strong> La restricción aleatoria simplifica el árbol. Un problema en $\mathsf{P}$ colapsa y revela el error de inmediato. Un problema en $\mathsf{NP}$ resiste la simplificación, atrapando al refutador en ciclos locales inútiles (Haken/Razborov argument).
                         </p>
                     </div>
                 </div>
@@ -140,3 +176,5 @@ export function RefutationTree() {
         </Card>
     );
 }
+
+export default RefutationTree;
