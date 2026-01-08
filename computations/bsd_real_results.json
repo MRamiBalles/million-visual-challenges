@@ -1,0 +1,29 @@
+{
+  "496a1": {
+    "label": "496a1",
+    "rank": 0,
+    "bsd_ratio": 0.06541393095123178,
+    "phi_limit": 0.00036952704464328617,
+    "phi_deviation": 0.00036952704464328617,
+    "status": "ANOMALY",
+    "details": "Ratio BSD = 0.0654, phi -> 0.0004"
+  },
+  "32a3": {
+    "label": "32a3",
+    "rank": 1,
+    "bsd_ratio": 1.0760046413453537,
+    "phi_limit": 0.0002984707286751868,
+    "phi_deviation": 0.9997015292713248,
+    "status": "PASS",
+    "details": "Ratio BSD = 1.0760, phi -> 0.0003"
+  },
+  "389a1": {
+    "label": "389a1",
+    "rank": 2,
+    "bsd_ratio": 0.00019024767230210835,
+    "phi_limit": 0.00019024767230210835,
+    "phi_deviation": 1.9998097523276979,
+    "status": "ANOMALY",
+    "details": "Ratio BSD = 0.0002, phi -> 0.0002"
+  }
+}
