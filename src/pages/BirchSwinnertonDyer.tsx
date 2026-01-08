@@ -131,7 +131,22 @@ const BirchSwinnertonDyer = () => {
 
                 {/* Visualizations Section */}
                 <div className="space-y-12 my-20">
-                    <h2 className="text-4xl font-bold mb-8">Visualizaciones Interactivas</h2>
+                    <h2 className="text-4xl font-bold mb-8">Laboratorio de Verificación BSD</h2>
+
+                    <VisualizationContainer
+                        title="Orígenes Computacionales: Convergencia EDSAC (1960s)"
+                        description="Visualización del producto Π (Np/p) en escala log-log, revelando el rango como la pendiente de la curva."
+                        fullscreenEnabled
+                    >
+                        <EDSACConvergence />
+                    </VisualizationContainer>
+
+                    <div className="bg-primary/5 border border-primary/20 p-6 rounded-xl my-12">
+                        <h3 className="text-xl font-bold mb-4 text-primary">La Barrera del Rango 2</h3>
+                        <p className="text-sm text-muted-foreground leading-relaxed">
+                            Históricamente, los métodos clásicos (como los puntos de Heegner) funcionan perfectamente para rangos 0 y 1. Sin embargo, para <strong>rango ≥ 2</strong>, los puntos racionales se vuelven extremadamente difíciles de encontrar y la convergencia local es ruidosa. Esta es la "barrera clásica" que motiva las nuevas teorías espectrales y prismáticas (2024-2025).
+                        </p>
+                    </div>
 
                     <VisualizationContainer
                         title="Curva Elíptica Interactiva"
