@@ -14,8 +14,17 @@ Concept:
 - A logical cycle (e.g., A -> B -> C -> !A) creates a topological "hole".
 - If the sum of "phase shifts" around the cycle is non-zero, H1 != 0.
 
+⚠️ KNOWN LIMITATION: Hardy False Negatives (Carù 2018)
+=======================================================
+The Čech cohomology obstruction is SUFFICIENT but NOT NECESSARY.
+Some strongly contextual structures (like the Hardy model or certain
+magic squares) have H1 = 0 but are still impossible to solve globally.
+This scanner detects "first-order" obstructions only.
+For a complete detection, use line-model covering or non-abelian cohomology.
+
 Output: JSON data for TopologicalHole.tsx
 """
+
 
 import numpy as np
 import json
@@ -84,9 +93,10 @@ def generate_topology_data() -> Dict[str, Any]:
     results = {
         "meta": {
             "engine": "sheaf_scanner.py",
-            "version": "1.0",
+            "version": "1.1",
             "source": "Azevedo, Curry, Gavillas (2025)",
-            "concept": "Čech Cohomology Obstructions (H1 != 0)"
+            "concept": "Čech Cohomology Obstructions (H1 != 0)",
+            "warning": "HARDY FALSE NEGATIVE: H1=0 does NOT guarantee solvability. Some contextual structures (Hardy 1992, Carù 2018) evade first-order cohomology detection."
         },
         "cases": {
             "p_problem": asdict(easy_case),

@@ -12,6 +12,10 @@ Equations:
 - Phase dynamics: τ_φ * φ̇ = -∇_φ L(φ, λ)  (gradient descent)
 - Lagrange dynamics: τ_λ * λ̇ = +∇_λ L(φ, λ) = g(φ)  (gradient ascent)
 
+v1.1: Added Second Harmonic Injection Locking (SHIL) to force binarization.
+Without SHIL, oscillators may converge to non-binary phases (Z=0), creating
+"ghost solutions" that are mathematically valid but not interpretable as SAT.
+
 Output: JSON data for ChaoticTrajectories.tsx visualization
 """
 
@@ -20,6 +24,7 @@ import json
 from pathlib import Path
 from typing import Tuple, List, Dict, Any
 from dataclasses import dataclass, asdict
+
 
 
 @dataclass
