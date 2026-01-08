@@ -11,7 +11,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, Share2, HelpCircle } from 'lucide-react';
+import { AlertTriangle, Share2, HelpCircle, AlertOctagon } from 'lucide-react';
 
 interface Node {
     id: number;
@@ -73,7 +73,11 @@ const mockData: TopologyData = {
     },
 };
 
-export function TopologicalHole() {
+interface TopologicalHoleProps {
+    isDecoherent?: boolean; // Phase 14.5: Cascading Failure from CausalCone
+}
+
+export function TopologicalHole({ isDecoherent = false }: TopologicalHoleProps) {
     const [data, setData] = useState<TopologyData | null>(null);
     const [isHard, setIsHard] = useState(true);
     const [activeEdge, setActiveEdge] = useState<number | null>(null);
@@ -93,7 +97,8 @@ export function TopologicalHole() {
     const edges = data.visualization_data.edges;
 
     // Line Model Effect: Detect Hardy contextuality even if original H1 is 0
-    const effectiveH1 = (isHard && lineModelMode) ? 1 : currentCase.h1_value;
+    // Phase 14.5: Decoherence FORCES H1 ≠ 0 (Patrascu: descent failure)
+    const effectiveH1 = isDecoherent ? Infinity : (isHard && lineModelMode) ? 1 : currentCase.h1_value;
     const showHole = effectiveH1 !== 0;
 
     // Circle layout constants
