@@ -1,0 +1,74 @@
+{
+    "496a1": {
+        "label": "496a1",
+        "rank": 0,
+        "equation": "y^2 = x^3 + x + 1",
+        "conductor": 496,
+        "bsd_invariants": {
+            "torsion_order": 1,
+            "tamagawa_product": 1,
+            "real_period": 2.5092968,
+            "regulator": 1.0,
+            "sha_order": 1
+        },
+        "l_values": {
+            "L_at_1": 0.4995776,
+            "L_prime_at_1": 0.0,
+            "L_double_prime_at_1": 0.0
+        },
+        "bsd_prediction": {
+            "predicted_leading_coefficient": 2.5092968,
+            "actual_l_value": 0.4995776,
+            "ratio": 0.19909248,
+            "bsd_consistent": false
+        }
+    },
+    "32a3": {
+        "label": "32a3",
+        "rank": 1,
+        "equation": "y^2 = x^3 - x",
+        "conductor": 32,
+        "bsd_invariants": {
+            "torsion_order": 2,
+            "tamagawa_product": 2,
+            "real_period": 5.2441912,
+            "regulator": 0.0511114,
+            "sha_order": 1
+        },
+        "l_values": {
+            "L_at_1": 0.0,
+            "L_prime_at_1": 0.3059997,
+            "L_double_prime_at_1": 0.0
+        },
+        "bsd_prediction": {
+            "predicted_leading_coefficient": 0.1341179,
+            "actual_l_value": 0.3059997,
+            "ratio": 2.2818778,
+            "bsd_consistent": false
+        }
+    },
+    "389a1": {
+        "label": "389a1",
+        "rank": 2,
+        "equation": "y^2 + y = x^3 + x^2 - 2x",
+        "conductor": 389,
+        "bsd_invariants": {
+            "torsion_order": 1,
+            "tamagawa_product": 1,
+            "real_period": 4.9808899,
+            "regulator": 0.1524857,
+            "sha_order": 1
+        },
+        "l_values": {
+            "L_at_1": 0.0,
+            "L_prime_at_1": 0.0,
+            "L_double_prime_at_1": 1.5186776
+        },
+        "bsd_prediction": {
+            "predicted_leading_coefficient": 0.7595621,
+            "actual_l_value": 1.5186776,
+            "ratio": 1.9993012,
+            "bsd_consistent": false
+        }
+    }
+}
