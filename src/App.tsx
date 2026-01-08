@@ -11,6 +11,7 @@ import NavierStokes from "./pages/NavierStokes";
 import YangMills from "./pages/YangMills";
 import HodgeConjecture from "./pages/HodgeConjecture";
 import BirchSwinnertonDyer from "./pages/BirchSwinnertonDyer";
+import BSDLaboratory from "./pages/BSDLaboratory";
 import PoincareConjecture from "./pages/PoincareConjecture";
 import Auth from "./pages/Auth";
 import ExperimentsGallery from "./pages/ExperimentsGallery";
@@ -54,6 +55,7 @@ const App = () => (
           <Route path="/yang-mills" element={<YangMills />} />
           <Route path="/hodge" element={<HodgeConjecture />} />
           <Route path="/birch-sd" element={<BirchSwinnertonDyer />} />
+          <Route path="/bsd-laboratory" element={<BSDLaboratory />} />
           <Route path="/poincare" element={<PoincareConjecture />} />
 
           {/* Auth & User */}
