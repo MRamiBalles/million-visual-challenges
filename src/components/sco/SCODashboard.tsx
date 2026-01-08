@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { EpistemicLedger } from './EpistemicLedger';
 import { PhaseTransitionChart } from './PhaseTransitionChart';
 import { HolographicSimulation } from './HolographicSimulation';
+import { DemoMode } from './DemoMode';
+import { GitHubConnection } from './GitHubConnection';
 import { 
   Telescope, 
   Brain, 
@@ -13,6 +15,7 @@ import {
   Layers, 
   Github, 
   ExternalLink,
+  FlaskConical,
   Sparkles,
   CheckCircle2,
   AlertTriangle
@@ -89,22 +92,30 @@ export function SCODashboard() {
       
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="bg-black/40 border border-purple-500/30">
+        <TabsList className="bg-black/40 border border-purple-500/30 flex-wrap h-auto gap-1 p-1">
           <TabsTrigger value="overview" className="data-[state=active]:bg-purple-500/30">
             <Sparkles className="w-4 h-4 mr-2" />
             Overview
           </TabsTrigger>
+          <TabsTrigger value="demo" className="data-[state=active]:bg-purple-500/30">
+            <FlaskConical className="w-4 h-4 mr-2" />
+            Demo Mode
+          </TabsTrigger>
+          <TabsTrigger value="github" className="data-[state=active]:bg-purple-500/30">
+            <Github className="w-4 h-4 mr-2" />
+            GitHub
+          </TabsTrigger>
           <TabsTrigger value="ledger" className="data-[state=active]:bg-purple-500/30">
             <Brain className="w-4 h-4 mr-2" />
-            Epistemic Ledger
+            Ledger
           </TabsTrigger>
           <TabsTrigger value="phase" className="data-[state=active]:bg-purple-500/30">
             <Activity className="w-4 h-4 mr-2" />
-            Phase Transitions
+            Phase
           </TabsTrigger>
           <TabsTrigger value="holographic" className="data-[state=active]:bg-purple-500/30">
             <Layers className="w-4 h-4 mr-2" />
-            Holographic Motor
+            Holographic
           </TabsTrigger>
         </TabsList>
         
@@ -195,6 +206,14 @@ export function SCODashboard() {
             <EpistemicLedger />
             <HolographicSimulation />
           </div>
+        </TabsContent>
+        
+        <TabsContent value="demo">
+          <DemoMode />
+        </TabsContent>
+        
+        <TabsContent value="github">
+          <GitHubConnection />
         </TabsContent>
         
         <TabsContent value="ledger">
