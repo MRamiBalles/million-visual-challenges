@@ -193,6 +193,37 @@ def estimate_lyapunov(trajectory: List[np.ndarray], dt: float) -> float:
     return 0.0
 
 
+def apply_shil(phi: np.ndarray, K: float, step: int, ramp_start: int, ramp_end: int) -> np.ndarray:
+    """
+    Apply Second Harmonic Injection Locking (SHIL) to force binarization.
+    
+    The SHIL potential V_SHIL = -K * Σ cos(2φ_i) has minima at φ = 0, π
+    (binary states). By gradually increasing K, we force oscillators
+    out of intermediate (non-binary) phases. This prevents "ghost solutions".
+    
+    Args:
+        phi: Current phases
+        K: SHIL strength (ramped up over time)
+        step: Current simulation step
+        ramp_start: Step at which to start ramping
+        ramp_end: Step at which SHIL reaches full strength
+        
+    Returns:
+        shil_force: Gradient of SHIL potential (to add to dynamics)
+    """
+    if step < ramp_start:
+        ramp = 0.0
+    elif step > ramp_end:
+        ramp = 1.0
+    else:
+        ramp = (step - ramp_start) / (ramp_end - ramp_start)
+    
+    # SHIL force: ∂V_SHIL/∂φ = 2K * sin(2φ)
+    shil_force = 2 * K * ramp * np.sin(2 * phi)
+    
+    return shil_force
+
+
 def run_lagonn_simulation(config: SimulationConfig) -> Dict[str, Any]:
     """
     Run LagONN simulation and compare with standard Ising dynamics.

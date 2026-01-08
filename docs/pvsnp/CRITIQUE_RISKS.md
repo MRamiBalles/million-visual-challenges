@@ -147,6 +147,53 @@ are **observed limits of current human-scale computation**. They represent the
 
 ---
 
+## 7. Computational Relativity (Nye/Smith 2025)
+
+### Claim
+> "Complexity classes P and NP are not absolute but depend on the observer's
+> reference frame in a curved (logarithmic) spacetime."
+
+### Risk Assessment
+- **Status**: Highly Speculative (Theoretical Physics)
+- **Testability**: Indirect (requires gedanken experiments)
+- **Implication**: An algorithm that appears NP-hard in flat spacetime might
+  be P-solvable for an observer near a gravitational horizon due to extreme
+  time dilation.
+
+### What We Implement
+- **Engine**: `log_causality.py` demonstrates causal horizon violations
+- **Visualization**: `CausalCone.tsx` shows information traveling "outside the light cone"
+
+### Scientific Position
+This connection between computational complexity and general relativity is
+**exploratory physics**. We visualize it as a conceptual metaphor for why
+algorithms "cannot go fast enough," not as proven physics.
+
+---
+
+## 8. TFNP & The Refuter Game (Metamathematics)
+
+### Claim
+> "Proving lower bounds (like P ≠ NP) is *computationally equivalent* to
+> finding errors in exponentially long proofs (rwPHP). The barrier is mathematical
+> self-reference."
+
+### Risk Assessment
+- **Status**: Established Metamathematics (Razborov, Kraj́ıček)
+- **Implication**: Even if P ≠ NP is true, its proof might require computational
+  resources beyond what any human or AI can achieve.
+
+### What We Implement
+- **Documentation only**: This is a "meta-barrier" explaining why progress is slow
+- **Future**: "Refuter Game" visualization for rwPHP resolution
+
+### Scientific Position
+This is the **deepest barrier** in the museum. It suggests that the difficulty
+of proving P ≠ NP is not a failure of human creativity but a fundamental
+mathematical obstruction (similar to Gödel incompleteness).
+
+---
+
 ## Conclusion: Our Verification Philosophy
 
 ```
@@ -154,9 +201,10 @@ are **observed limits of current human-scale computation**. They represent the
 │                    VERIFICATION HIERARCHY                       │
 ├─────────────────────────────────────────────────────────────────┤
 │  1. ESTABLISHED: Williams ARE, GCT Framework (Mulmuley-Sohoni)  │
-│  2. EXPLORATORY: Kronecker k=5, Holographic compression tests   │
-│  3. SPECULATIVE: Tang Homology, Log-Spacetime interpretation    │
-│  4. EXCLUDED: UIRIM, UESDF, multi-problem "solutions"           │
+│  2. EXPLORATORY: Kronecker k=5, Holographic compression, SHIL   │
+│  3. SPECULATIVE: Tang Homology, Log-Spacetime, Ashtavakra       │
+│  4. METAMATH: TFNP, rwPHP, Epistemic Barriers                   │
+│  5. EXCLUDED: UIRIM, UESDF, multi-problem "solutions"           │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
