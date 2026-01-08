@@ -200,6 +200,25 @@ export const ValleyScanner = () => {
                     <div className="text-[10px] text-white/40 mt-1">
                         t ≈ {(Math.sqrt(nVal) * 10 + scanOffset * 50).toFixed(4)}
                     </div>
+
+                    {/* Gabcke Confidence Index */}
+                    <div className="mt-2 p-1.5 bg-gray-800/60 rounded border border-gray-600/40 text-[9px]">
+                        <div className="text-gray-400 mb-0.5">Índice Gabcke R(t)</div>
+                        <div className="flex items-center gap-1">
+                            <div className="w-16 h-1.5 bg-gray-700 rounded overflow-hidden">
+                                <div
+                                    className="h-full bg-gradient-to-r from-green-500 to-yellow-500"
+                                    style={{ width: `${Math.max(10, 100 - nVal / 10)}%` }}
+                                />
+                            </div>
+                            <span className="text-gray-300 font-mono">
+                                {(0.001 / (Math.sqrt(nVal) + 1)).toExponential(2)}
+                            </span>
+                        </div>
+                        <div className="text-gray-500 italic mt-0.5">
+                            {nVal > 500 ? "✓ Margen aceptable" : "⚠ Verificar profundidad"}
+                        </div>
+                    </div>
                 </div>
 
                 {/* Lehmer Alert */}

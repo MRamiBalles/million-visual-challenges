@@ -115,6 +115,17 @@ export const FormalAuditor = () => {
                         <span className="w-2 h-2 rounded-full bg-red-500"></span> Fundamental Axiom
                     </div>
                 </div>
+
+                {/* Trusted Base Footprint (Washburn 2025) */}
+                <div className="absolute bottom-4 left-4 p-2 bg-indigo-900/30 border border-indigo-500/30 rounded text-[10px]">
+                    <div className="text-indigo-300 font-bold mb-1">Trusted Base Footprint</div>
+                    <div className="flex flex-wrap gap-1">
+                        <span className="px-1.5 py-0.5 bg-indigo-500/20 rounded text-indigo-200 font-mono">propext</span>
+                        <span className="px-1.5 py-0.5 bg-indigo-500/20 rounded text-indigo-200 font-mono">Classical.choice</span>
+                        <span className="px-1.5 py-0.5 bg-indigo-500/20 rounded text-indigo-200 font-mono">Quot.sound</span>
+                    </div>
+                    <div className="text-white/40 mt-1 italic">Solo axiomas estándar de Mathlib. Sin lógica exótica.</div>
+                </div>
             </div>
 
             {/* Semantic Diff Inspector */}

@@ -188,8 +188,8 @@ export const SpectralTuner = () => {
                     </div>
 
                     <div className={`p-3 rounded border text-xs leading-relaxed ${tuningQuality > 0.8
-                            ? "bg-green-500/10 border-green-500/30 text-green-300"
-                            : "bg-amber-500/10 border-amber-500/30 text-amber-200"
+                        ? "bg-green-500/10 border-green-500/30 text-green-300"
+                        : "bg-amber-500/10 border-amber-500/30 text-amber-200"
                         }`}>
                         <div className="flex items-start gap-2">
                             <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
@@ -198,6 +198,27 @@ export const SpectralTuner = () => {
                                 : "Desalineamiento de fase. El espectro es difuso ('Caos'). No existe un operador autoadjunto para esta fase."
                             }
                         </div>
+                    </div>
+
+                    {/* Berry Phase Quantization Error (Yang 2025) */}
+                    <div className="mt-4 p-3 bg-purple-900/20 border border-purple-500/20 rounded">
+                        <div className="text-[10px] uppercase text-purple-300/70 mb-2">Error de Cuantización (Yang 2025)</div>
+                        <div className="flex items-center justify-between">
+                            <span className="text-purple-200 font-mono text-lg">
+                                Δγ = {Math.abs((phase / (2 * Math.PI)) - Math.round(phase / (2 * Math.PI))).toFixed(4)}
+                            </span>
+                            <span className={`text-[10px] px-2 py-0.5 rounded ${Math.abs((phase / (2 * Math.PI)) - Math.round(phase / (2 * Math.PI))) < 0.05
+                                    ? "bg-green-500/20 text-green-300"
+                                    : "bg-red-500/20 text-red-300"
+                                }`}>
+                                {Math.abs((phase / (2 * Math.PI)) - Math.round(phase / (2 * Math.PI))) < 0.05
+                                    ? "CUANTIZADO"
+                                    : "NO-ENTERO"}
+                            </span>
+                        </div>
+                        <p className="text-[9px] text-purple-300/50 mt-1 italic">
+                            Si RH es cierta, γ_n/(2π) debe ser entero. Δγ mide la desviación.
+                        </p>
                     </div>
                 </div>
 
