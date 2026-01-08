@@ -2,6 +2,7 @@ import { ProblemLayout } from "@/components/layout/ProblemLayout";
 import { EDSACConvergence } from "@/components/problems/birch-sd/EDSACConvergence";
 import { LFunctionPlot } from "@/components/problems/birch-sd/LFunctionPlot";
 import { SpectralContrast } from "@/components/problems/birch-sd/SpectralContrast";
+import { SpectralLandscape } from "@/components/problems/birch-sd/SpectralLandscape";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Microscope, History, Zap, ShieldCheck, AlertCircle, CheckCircle2, FlaskConical } from "lucide-react";
@@ -55,6 +56,9 @@ const BSDLaboratory = () => {
                     <TabsContent value="spectral" className="space-y-8 animate-in zoom-in-95 duration-500">
                         <SpectralContrast />
 
+                        {/* Hamiltonian Landscape */}
+                        <SpectralLandscape />
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
                             <div className="p-6 bg-purple-500/5 rounded-2xl border border-purple-500/20">
                                 <h3 className="text-lg font-bold text-white mb-2">Hamiltoniano de Whittaker</h3>
@@ -94,8 +98,8 @@ const BSDLaboratory = () => {
                                     <div
                                         key={result.label}
                                         className={`p-5 rounded-xl border flex flex-col md:flex-row gap-4 items-start md:items-center justify-between transition-all ${result.status === "PASS"
-                                                ? "bg-green-500/5 border-green-500/20 hover:bg-green-500/10"
-                                                : "bg-yellow-500/5 border-yellow-500/20 hover:bg-yellow-500/10"
+                                            ? "bg-green-500/5 border-green-500/20 hover:bg-green-500/10"
+                                            : "bg-yellow-500/5 border-yellow-500/20 hover:bg-yellow-500/10"
                                             }`}
                                     >
                                         <div className="space-y-1">
