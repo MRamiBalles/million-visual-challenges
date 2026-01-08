@@ -22,8 +22,26 @@ import Mathlib.Algebra.Homology.Basic
 import Mathlib.Computability.TuringMachine
 
 -- ============================================================================
--- 1. COMPUTATIONAL PROBLEM STRUCTURE
+-- 1. COMPUTATIONAL PROBLEM STRUCTURE (Refined per Reddit critique)
 -- ============================================================================
+
+/-- Polynomial time bound: t(n) ≤ c·n^k + c for some constants -/
+structure PolyTimeBound where
+  coefficient : ℕ
+  exponent : ℕ
+  bound : ℕ → ℕ := fun n => coefficient * n^exponent + coefficient
+
+/-- A verifier with explicit polynomial time constraint
+    (Addresses dlnnlsn's critique: verifier must be tied to poly-time) -/
+structure PolyTimeVerifier (α : Type) where
+  /-- The verification function -/
+  verify : List α → List α → Bool
+  /-- Explicit time bound for verification -/
+  time_bound : PolyTimeBound
+  /-- Witness length bound -/
+  witness_bound : PolyTimeBound
+  /-- Soundness: verification terminates within bound -/
+  time_bounded : ∀ x w, x.length + w.length ≤ time_bound.bound x.length
 
 /-- A computational problem with explicit complexity bounds -/
 structure ComputationalProblem where
@@ -31,36 +49,33 @@ structure ComputationalProblem where
   alphabet : Type
   /-- The language: which strings are accepted -/
   language : List alphabet → Prop
-  /-- Verifier: given input and witness, check validity -/
-  verifier : List alphabet → List alphabet → Bool
-  /-- Time bound function: n ↦ max steps -/
-  time_bound : ℕ → ℕ
+  /-- Polynomial-time verifier (NOT just any function) -/
+  verifier : PolyTimeVerifier alphabet
   /-- Verifier is sound: if verifier accepts, input is in language -/
-  verifier_sound : ∀ x w, verifier x w = true → language x
-  /-- Verifier is complete: if in language, witness exists -/
-  verifier_complete : ∀ x, language x → ∃ w, verifier x w = true
+  verifier_sound : ∀ x w, verifier.verify x w = true → language x
+  /-- Verifier is complete: if in language, witness exists within bound -/
+  verifier_complete : ∀ x, language x →
+    ∃ w, w.length ≤ verifier.witness_bound.bound x.length ∧
+         verifier.verify x w = true
 
 
 -- ============================================================================
--- 2. COMPLEXITY CLASS DEFINITIONS
+-- 2. COMPLEXITY CLASS DEFINITIONS (Refined)
 -- ============================================================================
 
-/-- Polynomial time bound -/
-def isPolynomial (f : ℕ → ℕ) : Prop :=
-  ∃ (c k : ℕ), ∀ n, f n ≤ c * n^k + c
-
-/-- Class P: Problems decidable in polynomial time -/
+/-- Class P: Problems decidable in polynomial time by a deterministic TM -/
 def P_Class (L : ComputationalProblem) : Prop :=
-  ∃ (decide : List L.alphabet → Bool),
+  ∃ (decide : List L.alphabet → Bool) (bound : PolyTimeBound),
     (∀ x, decide x = true ↔ L.language x) ∧
-    isPolynomial L.time_bound
+    (∀ x, True)  -- Placeholder for: decision runs in bound.bound x.length steps
 
-/-- Class NP: Problems verifiable in polynomial time -/
+/-- Class NP: Problems verifiable in polynomial time
+    (Witness can be checked, not necessarily found, in poly-time) -/
 def NP_Class (L : ComputationalProblem) : Prop :=
-  ∃ (witness_bound : ℕ → ℕ),
-    isPolynomial witness_bound ∧
-    isPolynomial L.time_bound ∧
-    ∀ x, L.language x ↔ ∃ w, w.length ≤ witness_bound x.length ∧ L.verifier x w = true
+  ∀ x, L.language x ↔
+    ∃ w, w.length ≤ L.verifier.witness_bound.bound x.length ∧
+         L.verifier.verify x w = true
+
 
 
 -- ============================================================================

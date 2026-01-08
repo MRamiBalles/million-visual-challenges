@@ -65,13 +65,38 @@ lake build
 
 ---
 
+## Academic Integrity Statement
+
+> ⚠️ **This is NOT a proof of P ≠ NP.**
+
+This repository implements an **exploratory research framework** for investigating
+complexity theory through multiple lenses (topological, algebraic, physical,
+thermodynamic). We maintain intellectual honesty by:
+
+1. **Marking all theorems `sorry`**: No claim of complete proof.
+2. **Citing community criticism**: (Reddit/LeanZulip 2025) have flagged
+   similar repositories for vagueness or AI-generated content.
+3. **Distinguishing levels**: Established (Williams) vs Speculative (Tang).
+4. **Providing verification tools**: Not dogmatic assertions.
+
+### Why This Matters
+Per Abela et al. (2025), even if P = NP, the algorithm might have such high
+Kolmogorov Complexity that it is undiscoverable by humans. Our visualizations
+explore **why the search is hard**, not whether success is impossible.
+
+This is a **verification laboratory**, not a Clay Institute submission.
+
+---
+
 ## References
 
 1. Tang, H. (2025). "Topological Obstructions in Computational Complexity". ArXiv.
 2. Lee, J. (2025). "Geometric Complexity Theory and Algebraic Thresholds". ArXiv.
 3. Abela, G. et al. (2025). "Epistemic Barriers in Complexity". SIGACT.
 4. Reddit/LeanZulip Skepticism Threads (2025).
+5. Ghosh, I. & Ghosh, S. (2025). "Ashtavakra Complexity in AI Systems". ArXiv.
 
 ---
 
 **This is a verification laboratory, not a proclamation.**
+

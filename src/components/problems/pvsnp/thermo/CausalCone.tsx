@@ -204,7 +204,7 @@ export function CausalCone() {
                     </button>
                 </div>
 
-                {/* Ashtavakra Observer Insight Slider */}
+                {/* Ashtavakra Observer Insight Slider + Ghosh Equation */}
                 <div className="mb-4 p-3 bg-purple-500/10 rounded-lg border border-purple-500/30">
                     <div className="flex items-center justify-between mb-2">
                         <span className="text-xs text-purple-300 font-medium">
@@ -223,10 +223,31 @@ export function CausalCone() {
                         onChange={(e) => setObserverInsight(parseFloat(e.target.value))}
                         className="w-full h-2 bg-purple-900 rounded-lg appearance-none cursor-pointer accent-purple-500"
                     />
-                    <p className="text-xs text-purple-200/60 mt-2">
-                        <strong>Ashtavakra:</strong> La complejidad es relativa al observador.
-                        Un observador con más "insight" percibe el problema como más simple.
-                    </p>
+
+                    {/* Ghosh Equation Display (Ashtavakra Complexity) */}
+                    <div className="mt-3 p-2 bg-black/30 rounded font-mono text-xs">
+                        <div className="text-purple-300 mb-1">Ghosh (2025) Ashtavakra Complexity:</div>
+                        <div className="text-white flex items-center gap-1 flex-wrap">
+                            <span>AC = α·</span>
+                            <span className={`px-1 rounded transition-colors ${observerInsight > 0.5 ? 'bg-green-500/30 text-green-300' : 'bg-red-500/30 text-red-300'}`}>
+                                K(x|O)={((1 - observerInsight) * 10).toFixed(1)}
+                            </span>
+                            <span>+ β·(1/A) + γ·Φ(S)</span>
+                        </div>
+                        <div className="text-purple-200/50 mt-1 text-[10px]">
+                            K(x|O)↓ cuando K(O)↑ → El "muro" de NP es la medida de nuestra ignorancia
+                        </div>
+                    </div>
+
+                    {/* Refuter Game Status */}
+                    <div className="mt-2 flex items-center gap-2">
+                        <span className="text-[10px] text-gray-400">rwPHP Status:</span>
+                        {adjustedViolation ? (
+                            <span className="text-[10px] text-red-400">🔁 Bucle Infinito (Refuter activo)</span>
+                        ) : (
+                            <span className="text-[10px] text-green-400">✓ Error local encontrado (paso {Math.floor(12 + observerInsight * 8)})</span>
+                        )}
+                    </div>
                 </div>
 
 

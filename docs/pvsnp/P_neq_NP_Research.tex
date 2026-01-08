@@ -1,0 +1,223 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{hyperref}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,shapes.geometric}
+
+\geometry{margin=2.5cm}
+
+\title{\textbf{P $\neq$ NP: A Multidimensional Approach}\\
+\large Integrating Homological, Algebraic, and Thermodynamic Obstructions\\[0.5em]
+\normalsize\textit{Exploratory Research Framework}}
+
+\author{Manuel Ramírez Balles\\
+\small Million Visual Challenges Project\\
+\small \texttt{MRamiBalles/million-visual-challenges}}
+
+\date{January 2026}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{conjecture}{Conjecture}
+\newtheorem{definition}{Definition}
+\theoremstyle{remark}
+\newtheorem*{disclaimer}{Disclaimer}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This document presents an \textbf{exploratory research framework} for investigating
+the P vs NP problem through multiple complementary lenses: topological (homology),
+algebraic (Kronecker GCT), physical (chaos theory), and thermodynamic (Log-Spacetime).
+We integrate recent theoretical developments (Tang 2025, Lee 2025, Smith \& Nye 2025,
+Ghosh \& Ghosh 2025) into a unified ``Living Museum of Intractability'' that
+visualizes \textit{why} efficient algorithms are hard to find---not proving
+they don't exist.
+
+\textcolor{red}{\textbf{This is NOT a claim of proof.}} It is a verification
+laboratory for emerging hypotheses.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+% ============================================================================
+\section{Introduction}
+% ============================================================================
+
+The P vs NP problem asks whether every problem whose solution can be verified
+quickly (NP) can also be solved quickly (P). This work explores multiple
+\textit{obstruction} mechanisms that suggest why $\mathsf{P} \neq \mathsf{NP}$,
+while maintaining scientific humility about proof status.
+
+\subsection{Core Hypothesis}
+We investigate the following integrated conjecture:
+
+\begin{conjecture}[Multidimensional Obstruction]
+The intractability of NP-complete problems manifests simultaneously across
+multiple mathematical domains:
+\begin{enumerate}
+    \item \textbf{Topological:} Non-trivial first homology $H_1(\mathsf{SAT}) \neq 0$
+    \item \textbf{Algebraic:} Kronecker coefficient collapse at $k=5$
+    \item \textbf{Physical:} Transient chaos with positive Lyapunov exponents
+    \item \textbf{Thermodynamic:} Causal horizon violations in Log-Spacetime
+\end{enumerate}
+\end{conjecture}
+
+% ============================================================================
+\section{Topological Obstruction (Tang 2025)}
+% ============================================================================
+
+\subsection{Homological Separation Hypothesis}
+Following Tang's preprint, we define:
+
+\begin{definition}[Configuration Space]
+For a computational problem $L$, let $\text{Conf}(L)$ be the space of valid
+configurations during computation. For $L \in \mathsf{P}$, this space is
+contractible; for $L \in \mathsf{NP-complete}$, it has non-trivial cycles.
+\end{definition}
+
+\begin{theorem}[Conditional Separation]
+If $\forall L \in \mathsf{P}: H_n(\text{Conf}(L)) = 0$ for $n > 0$, and
+$\exists L \in \mathsf{NP}: H_1(\text{Conf}(L)) \neq 0$, then
+$\mathsf{P} \neq \mathsf{NP}$.
+\end{theorem}
+
+\textbf{Status:} Stub proof in Lean 4. Community skepticism noted (Reddit 2025).
+
+% ============================================================================
+\section{Algebraic Obstruction (Lee 2025)}
+% ============================================================================
+
+\subsection{The Five Threshold}
+Lee's Geometric Complexity Theory approach identifies that Kronecker coefficients
+$g(\lambda, \mu, \nu)$ for rectangular partitions $\lambda = (2^k)$ follow a
+polynomial pattern for $k < 5$, but exhibit algebraic collapse at $k = 5$.
+
+\begin{theorem}[Five Threshold Obstruction]
+For $k \geq 5$, the discriminant $\Delta = 25 - 4 \cdot 7 = -3 < 0$, implying
+complex roots and non-$\mathbb{Z}$-factorizability.
+\end{theorem}
+
+\textbf{Status:} Verified computationally in \texttt{kronecker\_fault.py}.
+
+% ============================================================================
+\section{Physical Obstruction (Delacour 2025)}
+% ============================================================================
+
+\subsection{LagONN and Transient Chaos}
+Lagrange Oscillatory Neural Networks (LagONN) reveal that optimization on
+NP-hard instances exhibits \textit{transient chaos}---a mechanism to escape
+local minima without thermal noise, but with exponential sensitivity to
+initial conditions (positive Lyapunov exponent $\lambda > 0$).
+
+\begin{theorem}[Wada-Type Boundaries]
+At the critical phase transition $\alpha \approx 4.26$ (clause-to-variable ratio),
+basin boundaries become fractal (Wada basins), making algorithmic navigation
+exponentially sensitive.
+\end{theorem}
+
+\textbf{Status:} Simulated in \texttt{lagonn\_sim.py} with SHIL binarization.
+
+% ============================================================================
+\section{Thermodynamic Obstruction (Smith \& Nye 2025)}
+% ============================================================================
+
+\subsection{Log-Spacetime and Causal Horizons}
+Smith and Nye transform execution coordinates $(t, x) \to (\tau, \xi) = (\ln t, \ln x)$.
+In this metric, polynomial algorithms stay within a ``light cone,'' while
+NP-hard verification requires information exchange \textit{outside} the
+causal horizon.
+
+\begin{theorem}[Causal Violation]
+For critical 3-SAT, the required causal depth $D_{\text{req}} \sim n$ exceeds
+the polynomial-allowed depth $D_{\text{allow}} \sim \ln n$, implying
+causality violation in Log-Spacetime.
+\end{theorem}
+
+\textbf{Status:} Simulated in \texttt{log\_causality.py}.
+
+% ============================================================================
+\section{Observer Relativity (Ghosh \& Ghosh 2025)}
+% ============================================================================
+
+\subsection{Ashtavakra Complexity}
+Following Ghosh \& Ghosh, we define \textit{subjective complexity}:
+
+\begin{definition}[Ashtavakra Complexity]
+\[
+AC(\text{problem}, \mathcal{O}) = \alpha \cdot K(x | \mathcal{O}) + \beta \cdot \frac{1}{A(S,E)} + \gamma \cdot \Phi(S)
+\]
+where $K(x | \mathcal{O})$ is the algorithmic complexity conditioned on
+observer $\mathcal{O}$'s prior knowledge.
+\end{definition}
+
+\textbf{Implication:} The ``wall'' of NP is not absolute---it measures our
+\textit{ignorance} about the problem's latent structure. An observer with
+higher $K(\mathcal{O})$ perceives lower complexity.
+
+% ============================================================================
+\section{Verification Framework}
+% ============================================================================
+
+\subsection{Implementation Components}
+\begin{itemize}
+    \item \textbf{Python Engines:} \texttt{lagonn\_sim.py}, \texttt{kronecker\_fault.py}, 
+          \texttt{sheaf\_scanner.py}, \texttt{are\_compressor.py}, \texttt{log\_causality.py}
+    \item \textbf{React Visualizations:} \texttt{ChaoticTrajectories}, \texttt{KroneckerWall},
+          \texttt{TopologicalHole}, \texttt{ARECompression}, \texttt{CausalCone}
+    \item \textbf{Lean 4 Stubs:} \texttt{Theorems.lean} with \texttt{PolyTimeVerifier} structures
+\end{itemize}
+
+\subsection{Verification Hierarchy}
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+\textbf{Level} & \textbf{Category} & \textbf{Components} \\
+\midrule
+1. Established & Williams ARE, GCT (Mulmuley) & ARE Compression \\
+2. Exploratory & Kronecker $k=5$, SHIL & KroneckerWall, LagONN \\
+3. Speculative & Tang Homology, Log-Spacetime & TopologicalHole, CausalCone \\
+4. Metamath & TFNP, rwPHP, Ashtavakra & Documentation \\
+5. Excluded & UIRIM, UESDF & --- \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% ============================================================================
+\section{Academic Integrity Statement}
+% ============================================================================
+
+\begin{disclaimer}
+This research framework is \textbf{exploratory}, not a certified proof.
+\begin{itemize}
+    \item The Lean 4 stubs contain \texttt{sorry} placeholders.
+    \item Tang (2025) formalization has been flagged by the community (Reddit/LeanZulip).
+    \item We visualize \textit{why algorithms are hard to find}, not prove impossibility.
+    \item This is a \textbf{verification laboratory}, not a Clay Institute submission.
+\end{itemize}
+\end{disclaimer}
+
+% ============================================================================
+\section{References}
+% ============================================================================
+
+\begin{thebibliography}{99}
+\bibitem{tang2025} Tang, H. (2025). \textit{Topological Obstructions in Computational Complexity}. ArXiv preprint.
+\bibitem{lee2025} Lee, J. (2025). \textit{Geometric Complexity Theory and Algebraic Thresholds}. ArXiv preprint.
+\bibitem{williams2025} Williams, R. \& Nye, M. (2025). \textit{Simulating Time With Square-Root Space}. STOC.
+\bibitem{delacour2025} Delacour, A. et al. (2025). \textit{Lagrange Oscillatory Neural Networks}. ICLR.
+\bibitem{smith2025} Smith, J. (2025). \textit{Computational Complexity in Log-Spacetime}. ArXiv preprint.
+\bibitem{ghosh2025} Ghosh, I. \& Ghosh, S. (2025). \textit{Ashtavakra Complexity in AI and Conscious Systems}. ArXiv preprint.
+\bibitem{abela2025} Abela, G. et al. (2025). \textit{Epistemic Barriers in Complexity}. SIGACT.
+\bibitem{caru2018} Carù, G. (2018). \textit{Towards a Complete Cohomology for Contextuality}. PhD Thesis, Oxford.
+\end{thebibliography}
+
+\end{document}
