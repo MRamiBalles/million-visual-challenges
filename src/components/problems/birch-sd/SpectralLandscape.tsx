@@ -172,10 +172,12 @@ export const SpectralLandscape = () => {
                 <div>
                     <div className="flex items-center gap-2 mb-1">
                         <Activity className="w-5 h-5 text-purple-400" />
-                        <h3 className="text-xl font-bold text-white">Paisaje Espectral Hamiltoniano</h3>
+                        <h3 className="text-xl font-bold text-white uppercase tracking-tighter">
+                            Paisaje Hamiltoniano UESDF <span className="text-[10px] text-purple-500 font-mono ml-2">(Whittaker 2025)</span>
+                        </h3>
                     </div>
                     <p className="text-xs text-white/40">
-                        Suma truncada $S_N(t) = \sum_{"p \\le N"} a_p / p^{"1/2+it"}$. La estructura revela el rango.
+                        Visualización del Marco Determinista Unificado Energía-Espacio. La anulación de L(1) es una transición de fase espectral.
                     </p>
                 </div>
                 <Tabs value={selectedCurve} onValueChange={(v) => setSelectedCurve(v as CurveKey)}>
@@ -204,8 +206,8 @@ export const SpectralLandscape = () => {
                     />
                     <div className="absolute top-3 left-3 flex items-center gap-2">
                         <Badge className={`font-mono ${rank === 0 ? "bg-amber-500/20 text-amber-300" :
-                                rank === 1 ? "bg-green-500/20 text-green-300" :
-                                    "bg-purple-500/20 text-purple-300"
+                            rank === 1 ? "bg-green-500/20 text-green-300" :
+                                "bg-purple-500/20 text-purple-300"
                             }`}>
                             Rango {rank}
                         </Badge>
@@ -284,21 +286,21 @@ export const SpectralLandscape = () => {
 
             {/* Rank Interpretation */}
             <div className={`mt-6 p-4 rounded-xl border ${rank === 0 ? "bg-amber-500/5 border-amber-500/20" :
-                    rank === 1 ? "bg-green-500/5 border-green-500/20" :
-                        "bg-purple-500/5 border-purple-500/20"
+                rank === 1 ? "bg-green-500/5 border-green-500/20" :
+                    "bg-purple-500/5 border-purple-500/20"
                 }`}>
                 <h4 className={`font-bold text-sm mb-1 ${rank === 0 ? "text-amber-400" :
                         rank === 1 ? "text-green-400" :
                             "text-purple-400"
                     }`}>
-                    {rank === 0 && "Interpretación: Paseo Aleatorio (Rango 0)"}
-                    {rank === 1 && "Interpretación: Deriva Lineal (Rango 1)"}
-                    {rank === 2 && "Interpretación: Resonancia Parabólica (Rango 2)"}
+                    {rank === 0 && "Interpretación UESDF: Paseo Aleatorio (Rango 0)"}
+                    {rank === 1 && "Interpretación UESDF: Deriva Lineal (Rango 1)"}
+                    {rank === 2 && "Interpretación UESDF: Transición de Fase / Resonancia Parabólica (Rango 2)"}
                 </h4>
                 <p className="text-xs text-white/60 leading-relaxed">
-                    {rank === 0 && "Sin cero en s=1. La trayectoria espectral no muestra sesgo direccional, comportándose como ruido estadístico."}
-                    {rank === 1 && "Cero simple en s=1. El sesgo lineal en la fase acumulada refleja la contribución del punto racional generador."}
-                    {rank === 2 && "Cero doble en s=1. La 'doble densidad' de estados genera la estructura parabólica característica del Factor 2.0 detectado."}
+                    {rank === 0 && "Sin transición de fase en s=1. La trayectoria espectral no muestra sesgo direccional, comportándose como ruido estadístico."}
+                    {rank === 1 && "Transición de fase simple en s=1. El sesgo lineal en la fase acumulada refleja la contribución del punto racional generador."}
+                    {rank === 2 && "Transición de fase crítica en s=1. La 'doble densidad' de estados genera la estructura parabólica característica del Factor 2.0."}
                 </p>
             </div>
         </motion.div>

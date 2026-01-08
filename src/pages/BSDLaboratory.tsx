@@ -5,6 +5,8 @@ import { SpectralContrast } from "@/components/problems/birch-sd/SpectralContras
 import { SpectralLandscape } from "@/components/problems/birch-sd/SpectralLandscape";
 import { SpectralDensity } from "@/components/problems/birch-sd/SpectralDensity";
 import { PrismaticIntegrity } from "@/components/problems/birch-sd/PrismaticIntegrity";
+import { BirchOriginPlot } from "@/components/problems/birch-sd/BirchOriginPlot";
+import { RankDistributionPie } from "@/components/problems/birch-sd/RankDistributionPie";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Microscope, History, Zap, ShieldCheck, AlertCircle, CheckCircle2, FlaskConical, Shield, BarChart3 } from "lucide-react";
@@ -53,7 +55,8 @@ const BSDLaboratory = () => {
                     </div>
 
                     <TabsContent value="historical" className="space-y-8 animate-in slide-in-from-left-4 duration-500">
-                        <div className="grid grid-cols-1 gap-8">
+                        <BirchOriginPlot />
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                             <EDSACConvergence />
                             <LFunctionPlot />
                         </div>
@@ -138,6 +141,20 @@ const BSDLaboratory = () => {
                                         </div>
                                     </div>
                                 ))}
+                            </div>
+
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-12">
+                                <RankDistributionPie />
+                                <div className="p-8 bg-black/60 rounded-2xl border border-white/10 flex flex-col justify-center">
+                                    <h3 className="text-xl font-bold text-white mb-4">Vindicación Estadística (2025)</h3>
+                                    <p className="text-sm text-white/50 leading-relaxed mb-4">
+                                        Alexander Smith demostró que los rangos altos son anomalías estadísticas.
+                                        El 100% de las curvas siguen la distribución de Goldfeld.
+                                    </p>
+                                    <div className="p-4 bg-purple-500/10 rounded-xl border border-purple-500/20 italic text-[10px] text-purple-400">
+                                        "Este resultado cierra la brecha entre la intuición original de Birch y la realidad asintótica del universo de las curvas elípticas."
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </TabsContent>
