@@ -113,11 +113,16 @@ const mockData: LagonnData = {
     },
 };
 
-export function ChaoticTrajectories() {
+interface ChaoticTrajectoriesProps {
+    thermalNoise?: number;
+    setThermalNoise?: (noise: number) => void;
+}
+
+export function ChaoticTrajectories({ thermalNoise = 0.1, setThermalNoise }: ChaoticTrajectoriesProps) {
     const [data, setData] = useState<LagonnData | null>(null);
     const [activePhase, setActivePhase] = useState<'easy' | 'critical'>('critical');
     const [isLoading, setIsLoading] = useState(true);
-    const [thermalNoise, setThermalNoise] = useState(0.1);
+    // Internal state removed in favor of props
 
     useEffect(() => {
         // Try to load real data, fall back to mock
@@ -154,7 +159,6 @@ export function ChaoticTrajectories() {
 
     const chartData = currentPhase.lagonn.map((pt, i) => {
         const noiseEffect = (Math.random() - 0.5) * thermalNoise * 10;
-        const disintegrationEffect = isCollapsed ? (Math.random() - 0.5) * thermalNoise * 50 : 0;
 
         return {
             t: pt.t,
@@ -209,7 +213,7 @@ export function ChaoticTrajectories() {
                         <div className="flex items-center justify-between mb-1">
                             <span className="text-[10px] text-blue-300 font-bold uppercase tracking-wider">Ruido Térmico (η)</span>
                             <span className={`text-[10px] font-mono ${isCollapsed ? 'text-red-400 animate-pulse' : 'text-blue-400'}`}>
-                                {isCollapsed ? 'Hard Collapse' : isWobbly ? 'Soft Threshold' : 'Stable'}
+                                {isCollapsed ? 'Hard Collapse' : isWobbly ? 'Soft Threshold' : 'Stable'} ({thermalNoise.toFixed(2)})
                             </span>
                         </div>
                         <input
@@ -218,7 +222,7 @@ export function ChaoticTrajectories() {
                             max="1"
                             step="0.05"
                             value={thermalNoise}
-                            onChange={(e) => setThermalNoise(parseFloat(e.target.value))}
+                            onChange={(e) => setThermalNoise && setThermalNoise(parseFloat(e.target.value))}
                             className="w-full h-1.5 bg-blue-900 rounded-lg appearance-none cursor-pointer accent-blue-500"
                         />
                     </div>

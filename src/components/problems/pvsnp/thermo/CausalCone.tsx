@@ -97,7 +97,11 @@ const mockData: CausalData = {
     },
 };
 
-export function CausalCone() {
+interface CausalConeProps {
+    thermalNoise?: number;
+}
+
+export function CausalCone({ thermalNoise = 0 }: CausalConeProps) {
     const [data, setData] = useState<CausalData | null>(null);
     const [showNP, setShowNP] = useState(true);
     const [isLoading, setIsLoading] = useState(true);
@@ -136,13 +140,20 @@ export function CausalCone() {
     // Apply Ashtavakra transformation:
     // - Higher K(O) "compresses" the problem trajectory (xi shrinks)
     // - OR equivalently, expands the causal cone (cone_limit grows)
-    // Effect: At high insight, even NP problems fit inside the cone
-    const compressionFactor = 1 - observerInsight * 0.6; // 0 -> 1.0, 1 -> 0.4
-    const coneExpansion = 1 + observerInsight * 0.8; // 0 -> 1.0, 1 -> 1.8
+
+    // Phase 14: Thermal Noise Integration
+    // If thermal noise is high (>0.7), the causal cone collapses due to decoherence.
+    const noisePenalty = Math.max(0, (thermalNoise - 0.3) * 2); // Starts affecting at 0.3, max at 0.8
+
+    // Observer insight expands the cone, but Noise shrinks it.
+    const compressionFactor = 1 - observerInsight * 0.6;
+    // Cone expansion: Insight expands (+), Noise contracts (-)
+    // Effective Cone = Base * (1 + Insight - NoisePenalty)
+    const effectiveConeExpansion = Math.max(0.2, 1 + (observerInsight * 0.8) - noisePenalty);
 
     const chartData = trajectory.map((pt, i) => {
         const adjustedXi = pt.xi * compressionFactor;
-        const adjustedCone = pt.tau * coneExpansion;
+        const adjustedCone = pt.tau * effectiveConeExpansion;
         return {
             tau: pt.tau,
             xi: adjustedXi,
@@ -152,10 +163,9 @@ export function CausalCone() {
         };
     });
 
-    // Recalculate violation based on observer insight
+    // Recalculate violation based on observer insight and noise
     const adjustedViolation = chartData.some(pt => !pt.in_cone);
-    const adjustedEntropy = analysis.entropy_cost * compressionFactor;
-
+    const adjustedEntropy = analysis.entropy_cost * compressionFactor * (1 + thermalNoise); // Noise increases entropy
 
     return (
         <Card className="bg-black/40 border-cyan-500/30 backdrop-blur-sm">
@@ -165,16 +175,23 @@ export function CausalCone() {
                         <Zap className="w-5 h-5" />
                         Cono Causal Log-Spacetime
                     </CardTitle>
-                    <Badge
-                        variant="outline"
-                        className={
-                            adjustedViolation
-                                ? 'bg-red-500/20 text-red-300 border-red-500/30'
-                                : 'bg-green-500/20 text-green-300 border-green-500/30'
-                        }
-                    >
-                        {adjustedViolation ? '⚠️ VIOLACIÓN CAUSAL' : '✅ CAUSAL'}
-                    </Badge>
+                    <div className="flex gap-2">
+                        {thermalNoise > 0.3 && (
+                            <Badge variant="outline" className="bg-orange-500/10 text-orange-300 border-orange-500/30">
+                                🔥 Decoherence: -{((noisePenalty / 1.8) * 100).toFixed(0)}%
+                            </Badge>
+                        )}
+                        <Badge
+                            variant="outline"
+                            className={
+                                adjustedViolation
+                                    ? 'bg-red-500/20 text-red-300 border-red-500/30'
+                                    : 'bg-green-500/20 text-green-300 border-green-500/30'
+                            }
+                        >
+                            {adjustedViolation ? '⚠️ VIOLACIÓN CAUSAL' : '✅ CAUSAL'}
+                        </Badge>
+                    </div>
                 </div>
                 <p className="text-xs text-cyan-200/60 font-mono">
                     Métrica: ds² = -e<sup>2τ</sup>dτ² + e<sup>2ξ</sup>dξ² | Landauer: {adjustedEntropy.toFixed(1)} k<sub>B</sub>T
@@ -205,7 +222,7 @@ export function CausalCone() {
                 </div>
 
                 {/* Ashtavakra Observer Insight Slider + Ghosh Equation */}
-                <div className="mb-4 p-3 bg-purple-500/10 rounded-lg border border-purple-500/30">
+                <div className={`mb-4 p-3 rounded-lg border transition-colors ${thermalNoise > 0.7 ? 'bg-red-900/10 border-red-500/30' : 'bg-purple-500/10 border-purple-500/30'}`}>
                     <div className="flex items-center justify-between mb-2">
                         <span className="text-xs text-purple-300 font-medium">
                             Insight del Observador $K(\mathcal{O})$
@@ -222,7 +239,9 @@ export function CausalCone() {
                         value={observerInsight}
                         onChange={(e) => setObserverInsight(parseFloat(e.target.value))}
                         className="w-full h-2 bg-purple-900 rounded-lg appearance-none cursor-pointer accent-purple-500"
+                        disabled={thermalNoise > 0.8} // Extreme noise prevents insight
                     />
+                    {thermalNoise > 0.8 && <p className="text-[10px] text-red-400 mt-1">⚠️ Ruido térmico masivo bloquea el insight cognitivo.</p>}
 
                     {/* Ghosh Equation Display (Ashtavakra Complexity) */}
                     <div className="mt-3 p-2 bg-black/30 rounded font-mono text-xs">
@@ -235,16 +254,16 @@ export function CausalCone() {
                             <span>$+ \beta \cdot (1/A) + \gamma \cdot \Phi(S)$</span>
                         </div>
                         <div className="text-purple-200/50 mt-1 text-[10px]">
-                            La complejidad decrece monótonamente respecto al conocimiento del observador.
+                            La complejidad decrece monótonamente respecto al conocimiento del observador, pero aumenta con el ruido ($\eta={thermalNoise}$).
                         </div>
                     </div>
 
                     <div className="mt-2 flex items-center gap-2">
                         <span className="text-[10px] text-gray-400">Estatus rwPHP:</span>
                         {adjustedViolation ? (
-                            <span className="text-[10px] text-red-400">🔁 No convergencia detectada (Refuter activo)</span>
+                            <span className="text-[10px] text-red-400">🔁 No convergencia detectada (Horizonte colapsado)</span>
                         ) : (
-                            <span className="text-[10px] text-green-400">✓ Certificado verificado localmente (paso {Math.floor(12 + observerInsight * 8)})</span>
+                            <span className="text-[10px] text-green-400">✓ Certificado verificado localmente</span>
                         )}
                     </div>
                 </div>
@@ -298,7 +317,7 @@ export function CausalCone() {
                             <Line
                                 type="monotone"
                                 dataKey="cone_limit"
-                                stroke="#06b6d4"
+                                stroke={thermalNoise > 0.7 ? "#ef4444" : "#06b6d4"}
                                 strokeWidth={2}
                                 strokeDasharray="5 5"
                                 dot={false}
@@ -321,7 +340,7 @@ export function CausalCone() {
                 <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className={`p-3 rounded-lg border mb-4 ${analysis.violates_causality
+                    className={`p-3 rounded-lg border mb-4 ${analysis.violates_causality || adjustedViolation
                         ? 'bg-red-500/10 border-red-500/30'
                         : 'bg-green-500/10 border-green-500/30'
                         }`}
@@ -333,13 +352,18 @@ export function CausalCone() {
                         </div>
                         <div>
                             <span className="text-gray-400">Profundidad Permitida:</span>
-                            <span className="ml-2 font-mono text-white">{analysis.allowed_depth.toFixed(1)}</span>
+                            <span className="ml-2 font-mono text-white flex items-center gap-2">
+                                {(analysis.allowed_depth * effectiveConeExpansion).toFixed(1)}
+                                {thermalNoise > 0.3 && <span className="text-[10px] text-red-400">(-{(noisePenalty).toFixed(1)} η)</span>}
+                            </span>
                         </div>
                     </div>
-                    {analysis.violates_causality && (
+                    {(analysis.violates_causality || adjustedViolation) && (
                         <p className="text-xs text-red-300 mt-2">
-                            La verificación global requiere información "fuera del cono de luz".
-                            Un Refuter ganaría el juego de prueba (rwPHP).
+                            {thermalNoise > 0.7
+                                ? "El colapso térmico ha contraído el horizonte causal. Verificación imposible."
+                                : "La verificación global requiere información 'fuera del cono de luz'. un Refuter ganaría el juego de prueba (rwPHP)."
+                            }
                         </p>
                     )}
                 </motion.div>
@@ -348,10 +372,8 @@ export function CausalCone() {
                 <div className="flex items-start gap-2 p-3 bg-yellow-500/10 rounded-lg border border-yellow-500/30">
                     <AlertTriangle className="w-4 h-4 text-yellow-400 flex-shrink-0 mt-0.5" />
                     <p className="text-xs text-yellow-200/80">
-                        <strong>Interpretación:</strong> La violación causal no significa "viajar más
-                        rápido que la luz". Significa que para resolver en tiempo polinomial, el
-                        algoritmo necesitaría acceder a información causalmente desconectada en la
-                        geometría logarítmica (Smith 2025, Nye 2025).
+                        <strong>Convergencia (Phase 14):</strong> La realidad física (ruido $\eta$) y la capacidad cognitiva ($K(\mathcal{O})$) son inseparables.
+                        El ruido reduce la correlación cuántica (Decoherencia), contrayendo el cono de luz efectivo y haciendo que $\mathsf{P} \neq \mathsf{NP}$ sea una verdad termodinámica para observadores finitos.
                     </p>
                 </div>
             </CardContent>
