@@ -5,11 +5,17 @@ import { CodePlayground } from "@/components/compute/CodePlayground";
 import { PrimeDistributionVisualization } from "@/components/problems/riemann/PrimeDistributionVisualization";
 import { ZetaFunctionVisualization } from "@/components/problems/riemann/ZetaFunctionVisualization";
 import { CriticalLineVisualization } from "@/components/problems/riemann/CriticalLineVisualization";
+import { ZetaLandscape3D } from "@/components/problems/riemann/ZetaLandscape3D";
+import { SpectralTuner } from "@/components/problems/riemann/SpectralTuner";
+import { ValleyScanner } from "@/components/problems/riemann/ValleyScanner";
+import { FormalAuditor } from "@/components/problems/riemann/FormalAuditor";
+import { AIFalsifiability } from "@/components/problems/riemann/AIFalsifiability";
 import { RiemannEraTimeline, RiemannEra } from "@/components/problems/riemann/RiemannEraTimeline";
 import { useActivityTracker } from "@/hooks/useActivityTracker";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { motion, AnimatePresence } from "framer-motion";
+import { ShieldCheck, Cpu } from "lucide-react";
 
 const RiemannHypothesis = () => {
   useActivityTracker("riemann", "overview");
@@ -50,7 +56,6 @@ const RiemannHypothesis = () => {
           >
             {/* 
                   ERA 1: FOUNDATIONS (1859 - 1914)
-                  Focus: Prime Distribution & Basic Zeta Visualization
                 */}
             {currentEra === "foundations" && (
               <>
@@ -66,12 +71,15 @@ const RiemannHypothesis = () => {
                   </Card>
 
                   <Card className="p-6 bg-card/30 backdrop-blur overflow-hidden border-indigo-500/10">
-                    <h3 className="text-xl font-bold mb-4">El Paisaje Zeta Clásico</h3>
+                    <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
+                      Paisaje Zeta 3D (Reconstrucción)
+                    </h3>
                     <p className="text-sm text-muted-foreground mb-6">
-                      Riemann extendió la suma de Euler al plano complejo. La hipótesis afirma que todos los ceros no triviales yacen en Re(s) = 1/2.
+                      Una visualización moderna de la extensión analítica de Riemann y la topología de la franja crítica.
                     </p>
-                    <div className="rounded-xl border border-white/5 bg-black/40 p-4 h-[400px] flex items-center justify-center">
-                      <ZetaFunctionVisualization />
+                    <div className="rounded-xl border border-white/5 bg-black/40 p-4 h-full">
+                      <ZetaLandscape3D />
                     </div>
                   </Card>
                 </div>
@@ -80,31 +88,30 @@ const RiemannHypothesis = () => {
 
             {/* 
                   ERA 2: CHAOS & PHYSICS (1970s - 2000s)
-                  Focus: Critical Line & GUE Connection
                 */}
             {currentEra === "chaos" && (
               <div className="grid grid-cols-1 gap-6">
                 <Card className="p-6 bg-card/30 backdrop-blur overflow-hidden border-indigo-500/10">
                   <h3 className="text-xl font-bold mb-4">La Conexión con el Caos Cuántico</h3>
-                  <p className="text-sm text-muted-foreground mb-6">
-                    En los 70s, Montgomery y Dyson descubrieron que los ceros de Zeta se repelen entre sí exactamente como los autovalores de matrices aleatorias (GUE) usadas en física nuclear.
-                  </p>
-                  <div className="rounded-xl border border-white/5 bg-black/40 p-4">
-                    <CriticalLineVisualization />
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="md:col-span-1 border-r border-white/5 pr-4">
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Los ceros de Zeta se repelen entre sí como los autovalores de matrices Hermitianas aleatorias (GUE). Esta "música" coincide con los niveles de energía de núcleos pesados (Montgomery-Odlyzko).
+                      </p>
+                      <div className="rounded-xl border border-white/5 bg-black/40 p-4 mb-4">
+                        <CriticalLineVisualization />
+                      </div>
+                    </div>
+                    <div className="md:col-span-2">
+                      <SpectralTuner />
+                    </div>
                   </div>
                 </Card>
-
-                <div className="p-12 border border-dashed border-white/10 rounded-xl text-center">
-                  <p className="text-white/40 italic">
-                    [Próximamente: Sintonizador Espectral (SpectralTuner) - Modele el Interferómetro de Riemann]
-                  </p>
-                </div>
               </div>
             )}
 
             {/* 
                   ERA 3: COMPUTATION (2004 - 2024)
-                  Focus: Interactive Python Lab & High Precision
                 */}
             {currentEra === "compute" && (
               <div className="space-y-6">
@@ -112,65 +119,40 @@ const RiemannHypothesis = () => {
                   <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
                     <span className="text-2xl">⚡</span> Laboratorio Computacional
                   </h3>
-                  <p className="text-sm text-muted-foreground mb-6">
-                    Ejecute algoritmos de búsqueda de ceros directamente en el navegador. Utilice bibliotecas científicas para replicar los cálculos de Odlyzko.
-                  </p>
-                  <CodePlayground
-                    title="Zeta Zero Hunter"
-                    description="Calcule ceros no triviales usando el algoritmo de Euler-Maclaurin simplificado."
-                    initialCode={`# Búsqueda de Ceros en la Línea Crítica
-import cmath
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <CodePlayground
+                      title="Zeta Zero Hunter"
+                      description="Algoritmo de Euler-Maclaurin simplificado."
+                      initialCode={`# Búsqueda de Ceros en la Línea Critica\nimport cmath\n\ndef zeta_approx(s, terms=100):\n    res = 0\n    for n in range(1, terms):\n        res += n**(-s)\n    return res\n\nprint("Buscando cerca de t=14.13...")\nval = zeta_approx(0.5 + 14.13j)\nprint(f"|Z| = {abs(val):.4f}")`}
+                    />
 
-def zeta_approx(s, terms=1000):
-    result = 0
-    for n in range(1, terms + 1):
-        result += 1 / (n ** s)
-    return result
-
-print("Buscando primer cero cerca de t=14.13...")
-t_start = 14.0
-step = 0.01
-
-for i in range(30):
-   t = t_start + i*step
-   s = complex(0.5, t)
-   val = zeta_approx(s, terms=500) 
-   if abs(val) < 0.1:
-       print(f"--> DETECTADO: t={t:.2f}, |Z(s)|={abs(val):.5f}")
-   else:
-       pass # print(f"t={t:.2f} | {abs(val):.2f}")
-`}
-                  />
+                    <div className="space-y-4">
+                      <div className="p-4 bg-amber-900/10 border border-amber-500/20 rounded-xl">
+                        <h4 className="text-amber-400 text-sm font-bold mb-2">Scanner de Valles (Orellana 2025)</h4>
+                        <p className="text-xs text-amber-200/60 mb-4">
+                          Visualización topográfica de $Z(t)$ para $N \approx 10^{20}$. Detecta el "Fenómeno de Lehmer" donde pares de ceros casi violan la hipótesis.
+                        </p>
+                        <ValleyScanner />
+                      </div>
+                    </div>
+                  </div>
                 </Card>
-
-                <div className="p-12 border border-dashed border-white/10 rounded-xl text-center">
-                  <p className="text-white/40 italic">
-                    [Próximamente: Valley Scanner (Orellana 2025) - Topografía WebGL de Z(t)]
-                  </p>
-                </div>
               </div>
             )}
 
             {/* 
                   ERA 4: VERIFICATION REVOLUTION (2025 - 2026)
-                  Focus: FormalProof & AI Falsifiability
                 */}
             {currentEra === "verification" && (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="p-12 border border-dashed border-green-500/20 bg-green-500/5 rounded-xl text-center flex flex-col justify-center items-center h-64">
-                  <ShieldCheck className="w-12 h-12 text-green-500/40 mb-4" />
-                  <h4 className="text-green-400 font-bold mb-2">Formal Auditor (Washburn 2025)</h4>
-                  <p className="text-white/40 italic text-sm max-w-xs">
-                    Visualización del grafo de dependencias en Lean 4 y "Diff Semántico" de axiomas.
-                  </p>
-                </div>
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <Card className="p-6 bg-card/30 backdrop-blur border-green-500/10">
+                    <FormalAuditor />
+                  </Card>
 
-                <div className="p-12 border border-dashed border-purple-500/20 bg-purple-500/5 rounded-xl text-center flex flex-col justify-center items-center h-64">
-                  <Cpu className="w-12 h-12 text-purple-500/40 mb-4" />
-                  <h4 className="text-purple-400 font-bold mb-2">AI Falsifiability (Wu 2025)</h4>
-                  <p className="text-white/40 italic text-sm max-w-xs">
-                    Mapas de calor SHAP y Teorema de Inaplicabilidad para contraejemplos.
-                  </p>
+                  <Card className="p-6 bg-card/30 backdrop-blur border-purple-500/10">
+                    <AIFalsifiability />
+                  </Card>
                 </div>
               </div>
             )}
@@ -181,8 +163,5 @@ for i in range(30):
     </ProblemLayout>
   );
 };
-
-// Imports for icons used in placeholders
-import { ShieldCheck, Cpu } from "lucide-react";
 
 export default RiemannHypothesis;
