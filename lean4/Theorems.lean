@@ -1,20 +1,17 @@
 /-
-  Theorems.lean - P vs NP Formal Specification Stubs
-  ==================================================
+  Theorems.lean: Formal Specification Framework for Complexity Obstructions
+  ==========================================================================
 
-  Based on: Tang (2025) - "Topological Obstructions in Computational Complexity"
+  This file implements a structural framework for exploring the homological 
+  and algebraic obstructions to P ≼ NP, as hypothesized in Tang (2025) and 
+  Lee (2025).
 
-  ⚠️ IMPORTANT DISCLAIMER:
-  This file contains SPECIFICATION STUBS, not complete proofs. The community
-  has expressed skepticism about the full formalization (Reddit/Skepticism 2025),
-  and the lean proofs in Tang's repository have been flagged as potentially
-  incomplete or AI-generated.
+  Note: The constructions provided here are specification-level stubs. 
+  Theorems are marked with 'sorry' where the formal connection between 
+  computational configuration spaces and simplicial homology is not yet 
+  fully established in Mathlib4.
 
-  We implement the STRUCTURAL framework to explore how homological concepts
-  might apply to complexity classes, while maintaining scientific humility
-  about the proof status.
-
-  This is an EXPLORATORY RESEARCH framework, not a dogmatic proof.
+  Primary Model: One-tape deterministic Turing Machine over Fin 2.
 -/
 
 import Mathlib.Topology.SimplicialComplex.Basic

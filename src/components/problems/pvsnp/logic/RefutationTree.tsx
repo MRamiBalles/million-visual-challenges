@@ -14,9 +14,9 @@ interface ProofStep {
 const P_PROOF_STEPS: ProofStep[] = [
     { id: 1, text: "Iniciando verificación de certificado...", isError: false },
     { id: 2, text: "Analizando grafo de implicación (2-SAT)", isError: false },
-    { id: 3, text: "Detectando ciclos de contradicción...", isError: false },
-    { id: 4, text: "¡Contradicción encontrada! x1 = ¬x1", isError: true },
-    { id: 5, text: "Refutación completa: El problema no tiene solución.", isError: false },
+    { id: 3, text: "Identificando ciclos de contradicción...", isError: false },
+    { id: 4, text: "Contradicción detectada: x1 ∧ ¬x1", isError: true },
+    { id: 5, text: "Refutación completa: El sistema no tiene solución.", isError: false },
 ];
 
 const NP_PROOF_STEPS: ProofStep[] = [
@@ -100,7 +100,7 @@ export function RefutationTree() {
                         onClick={startGame}
                         disabled={isRunning}
                     >
-                        <Play className="w-3 h-3 mr-1" /> Jugar
+                        <Play className="w-3 h-3 mr-1" /> Ejecutar
                     </Button>
                 </div>
 
@@ -131,8 +131,8 @@ export function RefutationTree() {
                     <div className="flex gap-2">
                         <AlertTriangle className="w-4 h-4 shrink-0 text-yellow-500" />
                         <p>
-                            <strong>Concepto:</strong> Encontrar una contradicción en 2-SAT es fácil (P).
-                            En 3-SAT (NP), la "prueba" de que no hay solución se vuelve inmanejable, atrapando al refutador en un laberinto rwPHP.
+                            <strong>Fundamento:</strong> En 2-SAT, la refutación es decidible en tiempo lineal.
+                            En 3-SAT (NP-completo), la búsqueda de fallos en demostraciones falsas (rwPHP) exhibe una complejidad exponencial, ilustrando la barrera entre $\mathsf{P}$ y $\mathsf{TFNP}$.
                         </p>
                     </div>
                 </div>

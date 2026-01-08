@@ -208,10 +208,10 @@ export function CausalCone() {
                 <div className="mb-4 p-3 bg-purple-500/10 rounded-lg border border-purple-500/30">
                     <div className="flex items-center justify-between mb-2">
                         <span className="text-xs text-purple-300 font-medium">
-                            👁️ Observer Insight K(O)
+                            Insight del Observador $K(\mathcal{O})$
                         </span>
                         <span className="text-xs font-mono text-purple-400">
-                            {observerInsight === 0 ? 'Clásico' : observerInsight === 1 ? 'Oráculo' : (observerInsight * 100).toFixed(0) + '%'}
+                            {observerInsight === 0 ? 'Límite Clásico' : observerInsight === 1 ? 'Límite Oráculo' : (observerInsight * 100).toFixed(0) + '%'}
                         </span>
                     </div>
                     <input
@@ -226,26 +226,25 @@ export function CausalCone() {
 
                     {/* Ghosh Equation Display (Ashtavakra Complexity) */}
                     <div className="mt-3 p-2 bg-black/30 rounded font-mono text-xs">
-                        <div className="text-purple-300 mb-1">Ghosh (2025) Ashtavakra Complexity:</div>
+                        <div className="text-purple-300 mb-1">Complejidad de Ashtavakra (Ghosh 2025):</div>
                         <div className="text-white flex items-center gap-1 flex-wrap">
-                            <span>AC = α·</span>
+                            <span>$AC = \alpha \cdot$</span>
                             <span className={`px-1 rounded transition-colors ${observerInsight > 0.5 ? 'bg-green-500/30 text-green-300' : 'bg-red-500/30 text-red-300'}`}>
-                                K(x|O)={((1 - observerInsight) * 10).toFixed(1)}
+                                $K(x|\mathcal{O})$={((1 - observerInsight) * 10).toFixed(1)}
                             </span>
-                            <span>+ β·(1/A) + γ·Φ(S)</span>
+                            <span>$+ \beta \cdot (1/A) + \gamma \cdot \Phi(S)$</span>
                         </div>
                         <div className="text-purple-200/50 mt-1 text-[10px]">
-                            K(x|O)↓ cuando K(O)↑ → El "muro" de NP es la medida de nuestra ignorancia
+                            La complejidad decrece monótonamente respecto al conocimiento del observador.
                         </div>
                     </div>
 
-                    {/* Refuter Game Status */}
                     <div className="mt-2 flex items-center gap-2">
-                        <span className="text-[10px] text-gray-400">rwPHP Status:</span>
+                        <span className="text-[10px] text-gray-400">Estatus rwPHP:</span>
                         {adjustedViolation ? (
-                            <span className="text-[10px] text-red-400">🔁 Bucle Infinito (Refuter activo)</span>
+                            <span className="text-[10px] text-red-400">🔁 No convergencia detectada (Refuter activo)</span>
                         ) : (
-                            <span className="text-[10px] text-green-400">✓ Error local encontrado (paso {Math.floor(12 + observerInsight * 8)})</span>
+                            <span className="text-[10px] text-green-400">✓ Certificado verificado localmente (paso {Math.floor(12 + observerInsight * 8)})</span>
                         )}
                     </div>
                 </div>

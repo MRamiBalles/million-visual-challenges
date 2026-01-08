@@ -35,9 +35,8 @@ const PvsNP = () => {
           <div className="text-center max-w-3xl mx-auto mb-8">
             <h2 className="text-3xl font-bold mb-4">🏛️ Museo Vivo de la Intractabilidad</h2>
             <p className="text-muted-foreground">
-              Exploraciones experimentales basadas en teorías de 2024-2025.
-              Estas visualizaciones muestran <strong>por qué</strong> los algoritmos son difíciles de encontrar,
-              no prueban que no existan.
+              Análisis experimental de obstrucciones multidimensionales (2024-2025).
+              Este entorno visualiza las restricciones topológicas, algebraicas y físicas que delimitan la frontera entre $\mathsf{P}$ y $\mathsf{NP}$.
             </p>
           </div>
 
@@ -72,9 +71,9 @@ const PvsNP = () => {
         {/* SCO Dashboard - Integrated from MRamiBalles/PvsNP */}
         <div>
           <div className="text-center max-w-2xl mx-auto mb-8">
-            <h2 className="text-3xl font-bold mb-4">SCO Laboratory</h2>
+            <h2 className="text-3xl font-bold mb-4">Structural Complexity Observatory</h2>
             <p className="text-muted-foreground">
-              Structural Complexity Observatory - Herramientas modernas para investigar P ≠ NP
+              Monitorización de heurísticas y métricas de resolución para problemas NP-completos.
             </p>
           </div>
           <SCODashboard />

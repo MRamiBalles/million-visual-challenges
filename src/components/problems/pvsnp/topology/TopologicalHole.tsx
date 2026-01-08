@@ -121,7 +121,7 @@ export function TopologicalHole() {
                         variant="outline"
                         className={showHole ? "bg-red-500/20 text-red-300 border-red-500/30" : "bg-green-500/20 text-green-300 border-green-500/30"}
                     >
-                        H1 = {effectiveH1}
+                        $H^1$ = {effectiveH1}
                         {lineModelMode && " (Line Model)"}
                     </Badge>
                 </div>
@@ -220,13 +220,13 @@ export function TopologicalHole() {
                                 onClick={() => setIsHard(false)}
                                 className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${!isHard ? 'bg-green-500/20 text-green-300 border border-green-500/50' : 'bg-gray-800 text-gray-400 border border-gray-700'}`}
                             >
-                                P (Easy)
+                                Instancia P-tiempo
                             </button>
                             <button
                                 onClick={() => setIsHard(true)}
                                 className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${isHard ? 'bg-red-500/20 text-red-300 border border-red-500/50' : 'bg-gray-800 text-gray-400 border border-gray-700'}`}
                             >
-                                NP (Hard)
+                                Instancia NP-completa
                             </button>
                         </div>
 
@@ -242,7 +242,7 @@ export function TopologicalHole() {
                                 />
                             </div>
                             <p className="text-[10px] text-purple-200/60 leading-tight">
-                                Elimina falsos negativos (como el escenario de Hardy) evaluando secciones sobre pares de contextos adyacentes.
+                                Evalúa la consistencia de secciones sobre la cobertura de líneas del escenario (Carù 2018), eliminando falsos negativos de Hardy.
                             </p>
                         </div>
 
@@ -274,15 +274,14 @@ export function TopologicalHole() {
                 </div>
 
                 {/* Legend/Note */}
-                <div className="mt-4 p-3 bg-yellow-500/10 rounded-lg border border-yellow-500/30 flex gap-3">
+                <div className="mt-4 p-3 bg-yellow-500/5 rounded-lg border border-yellow-500/20 flex gap-3">
                     <AlertTriangle className="w-4 h-4 text-yellow-400 flex-shrink-0 mt-0.5" />
                     <p className="text-xs text-yellow-200/80">
-                        <strong>Concepto:</strong> NP es una obstrucción global.
-                        A veces el H1 estándar falla (falsos negativos), pero el
-                        <strong> Modelo de Línea</strong> revela la inconsistencia oculta.
+                        <strong>Interpretación:</strong> La intratabilidad se manifiesta como una obstrucción circular en el haz lógico. Un $H^1 \neq 0$ indica que las soluciones locales no pueden unificarse en una sección global coherente.
                     </p>
                 </div>
             </CardContent>
         </Card>
     );
 }
+```
