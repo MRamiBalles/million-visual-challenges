@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
-import { Play, Pause } from "lucide-react";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { LineChart, Info } from "lucide-react";
+import curvesData from "@/data/curves.json";
 
 export const LFunctionPlot = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const [selectedCurve, setSelectedCurve] = useState("32a3"); // Rank 1 as default
     const [isPlaying, setIsPlaying] = useState(true);
-    const [rank, setRank] = useState(1);
-    const animationRef = useRef<number>();
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -16,175 +16,185 @@ export const LFunctionPlot = () => {
         const ctx = canvas.getContext("2d");
         if (!ctx) return;
 
-        canvas.width = canvas.offsetWidth;
-        canvas.height = canvas.offsetHeight;
+        const dpr = window.devicePixelRatio || 1;
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        ctx.scale(dpr, dpr);
 
-        const centerX = canvas.width / 2;
-        const centerY = canvas.height / 2;
-        const scale = 40;
-        let time = 0;
+        const width = rect.width;
+        const height = rect.height;
+        const centerX = width / 2;
+        const centerY = height / 2;
+        const scale = 50;
+
+        const curve = (curvesData as any)[selectedCurve];
+        const { rank, l_values } = curve;
 
         const animate = () => {
-            if (!isPlaying) {
-                animationRef.current = requestAnimationFrame(animate);
-                return;
+            ctx.clearRect(0, 0, width, height);
+
+            // Draw Background Grid
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
+            ctx.lineWidth = 1;
+            for (let i = -5; i <= 5; i++) {
+                const x = centerX + i * scale;
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, height);
+                ctx.stroke();
+
+                const y = centerY + i * scale;
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(width, y);
+                ctx.stroke();
             }
 
-            ctx.fillStyle = "#000";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            time += 0.01;
-
             // Draw axes
-            ctx.strokeStyle = '#444';
-            ctx.lineWidth = 1;
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
+            ctx.lineWidth = 2;
             ctx.beginPath();
-            ctx.moveTo(50, centerY);
-            ctx.lineTo(canvas.width - 20, centerY);
-            ctx.stroke();
-
-            // Y-axis
-            ctx.beginPath();
-            ctx.moveTo(50, 20);
-            ctx.lineTo(50, canvas.height - 20);
+            ctx.moveTo(0, centerY);
+            ctx.lineTo(width, centerY);
+            ctx.moveTo(centerX, 0);
+            ctx.lineTo(centerX, height);
             ctx.stroke();
 
             // Labels
-            ctx.fillStyle = '#aaa';
-            ctx.font = '12px sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText('Re(s)', canvas.width - 30, centerY + 20);
-            ctx.textAlign = 'right';
-            ctx.fillText('L(s)', 45, 30);
+            ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
+            ctx.font = "12px Inter, sans-serif";
+            ctx.fillText("s = 1", centerX + 5, 20);
+            ctx.fillText("L(E, s)", 10, centerY - 10);
 
-            // Critical line annotation
-            ctx.strokeStyle = '#ff4444';
+            // Highlight s=1 (Critical Point)
             ctx.setLineDash([5, 5]);
+            ctx.strokeStyle = "#fbbf24";
             ctx.beginPath();
-            ctx.moveTo(centerX, 20);
-            ctx.lineTo(centerX, canvas.height - 20);
+            ctx.moveTo(centerX, 0);
+            ctx.lineTo(centerX, height);
             ctx.stroke();
             ctx.setLineDash([]);
 
-            ctx.fillStyle = '#ff4444';
-            ctx.font = '11px sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText('s = 1 (crítico)', centerX, 15);
+            // Plot L-function approximation (Taylor expansion near s=1)
+            // L(s) ≈ (a_r / r!) * (s-1)^r
+            const ar = rank === 0 ? l_values.L_at_1 :
+                rank === 1 ? l_values.L_prime_at_1 :
+                    l_values.L_double_prime_at_1;
 
-            // Draw L-function approximation
-            ctx.strokeStyle = '#4488ff';
-            ctx.lineWidth = 2;
+            const factorial = (n: number): number => n <= 1 ? 1 : n * factorial(n - 1);
+            const coeff = ar / factorial(rank);
+
+            ctx.strokeStyle = "#3b82f6";
+            ctx.lineWidth = 3;
             ctx.beginPath();
 
             let firstPoint = true;
-            for (let px = 60; px < canvas.width - 30; px += 2) {
-                const s = ((px - 50) / (canvas.width - 70)) * 4; // s from 0 to 4
+            for (let px = padding; px < width - padding; px += 2) {
+                const s = (px - centerX) / scale + 1;
+                // Higher order terms for global "feel"
+                const ds = s - 1;
+                let y_val = coeff * Math.pow(ds, rank);
 
-                // Simplified L-function: has a zero at s=1 with multiplicity = rank
-                let L_val;
-                if (rank === 0) {
-                    // No zero at s=1
-                    L_val = 1 / (s + 0.5);
-                } else {
-                    // Zero of order 'rank' at s=1
-                    L_val = Math.pow(Math.abs(s - 1), rank) / ((s + 0.5) * (s + 1));
-                }
+                // Add a decay factor to keep it on screen for large s
+                y_val /= (1 + 0.1 * ds * ds);
 
-                const y = centerY - L_val * scale * 2;
+                const screenY = centerY - y_val * scale;
 
-                if (y >= 20 && y <= canvas.height - 20) {
+                if (screenY > 0 && screenY < height) {
                     if (firstPoint) {
-                        ctx.moveTo(px, y);
+                        ctx.moveTo(px, screenY);
                         firstPoint = false;
                     } else {
-                        ctx.lineTo(px, y);
+                        ctx.lineTo(px, screenY);
                     }
                 }
             }
             ctx.stroke();
 
-            // Highlight zero at s=1 if rank > 0
+            // Draw rank markers
             if (rank > 0) {
-                const zeroX = 50 + ((canvas.width - 70) / 4) * 1; // s=1
-
-                for (let i = 0; i < rank; i++) {
-                    const gradient = ctx.createRadialGradient(zeroX, centerY, 0, zeroX, centerY, 15 + i * 5);
-                    gradient.addColorStop(0, `hsla(60, 100%, 60%, ${0.8})`);
-                    gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
-
-                    ctx.fillStyle = gradient;
-                    ctx.beginPath();
-                    ctx.arc(zeroX, centerY, 15 + i * 5 + 5 * Math.sin(time + i), 0, Math.PI * 2);
-                    ctx.fill();
-                }
-
-                ctx.fillStyle = '#fff';
+                ctx.fillStyle = "#3b82f6";
                 ctx.beginPath();
-                ctx.arc(zeroX, centerY, 5, 0, Math.PI * 2);
+                ctx.arc(centerX, centerY, 5, 0, Math.PI * 2);
                 ctx.fill();
+                ctx.font = "bold 14px Inter";
+                ctx.fillText(`Cero de orden ${rank}`, centerX + 10, centerY - 10);
+            } else {
+                const intersectY = centerY - l_values.L_at_1 * scale;
+                ctx.fillStyle = "#22c55e";
+                ctx.beginPath();
+                ctx.arc(centerX, intersectY, 5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillText(`L(1) = ${l_values.L_at_1.toFixed(3)}`, centerX + 10, intersectY - 10);
             }
-
-            // Info panel
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
-            ctx.fillRect(10, canvas.height - 120, 320, 110);
-
-            ctx.fillStyle = '#fff';
-            ctx.font = 'bold 14px monospace';
-            ctx.textAlign = 'left';
-            ctx.fillText(`Rango analítico: ${rank}`, 20, canvas.height - 95);
-
-            ctx.fillStyle = '#aaa';
-            ctx.font = '11px sans-serif';
-            ctx.fillText('La conjetura BSD predice:', 20, canvas.height - 75);
-            ctx.fillText('• Orden del cero en s=1 = rango del grupo de puntos', 20, canvas.height - 55);
-            ctx.fillText(`• Actual: cero de orden ${rank}`, 20, canvas.height - 35);
-            ctx.fillText(`• Predicción: rango algebraico = ${rank}`, 20, canvas.height - 15);
-
-            animationRef.current = requestAnimationFrame(animate);
         };
 
+        const padding = 20;
         animate();
-
-        return () => {
-            if (animationRef.current) {
-                cancelAnimationFrame(animationRef.current);
-            }
-        };
-    }, [isPlaying, rank]);
+    }, [selectedCurve]);
 
     return (
-        <div className="space-y-4">
-            <canvas
-                ref={canvasRef}
-                className="w-full h-96 bg-black rounded-lg border border-border"
-            />
-
-            <div className="flex items-center gap-4 flex-wrap">
-                <Button variant="outline" size="sm" onClick={() => setIsPlaying(!isPlaying)}>
-                    {isPlaying ? <Pause className="w-4 h-4 mr-2" /> : <Play className="w-4 h-4 mr-2" />}
-                    {isPlaying ? "Pausar" : "Reproducir"}
-                </Button>
-
-                <div className="flex items-center gap-2 flex-1 min-w-[250px]">
-                    <span className="text-sm text-muted-foreground whitespace-nowrap">Rango:</span>
-                    <Slider
-                        value={[rank]}
-                        onValueChange={(v) => setRank(v[0])}
-                        min={0}
-                        max={3}
-                        step={1}
-                        className="flex-1"
-                    />
-                    <span className="text-sm font-mono w-8 text-right">{rank}</span>
+        <Card className="bg-black/95 border-blue-500/20 overflow-hidden">
+            <CardHeader className="border-b border-white/5 bg-white/5">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-blue-500/20 rounded-lg">
+                            <LineChart className="w-5 h-5 text-blue-400" />
+                        </div>
+                        <div>
+                            <CardTitle className="text-lg text-white/90">Análisis Analítico: L(E, s)</CardTitle>
+                            <p className="text-xs text-white/40">Comportamiento de la función L en el punto crítico s=1</p>
+                        </div>
+                    </div>
+                    <Tabs value={selectedCurve} onValueChange={setSelectedCurve} className="w-full md:w-auto">
+                        <TabsList className="bg-black/40 border border-white/10">
+                            <TabsTrigger value="496a1" className="text-xs">Rango 0</TabsTrigger>
+                            <TabsTrigger value="32a3" className="text-xs">Rango 1</TabsTrigger>
+                            <TabsTrigger value="389a1" className="text-xs">Rango 2</TabsTrigger>
+                        </TabsList>
+                    </Tabs>
                 </div>
-            </div>
+            </CardHeader>
+            <CardContent className="p-0">
+                <div className="relative aspect-[16/9] md:aspect-[21/9] bg-[#020202]">
+                    <canvas ref={canvasRef} className="w-full h-full" />
 
-            <p className="text-sm text-muted-foreground">
-                Gráfica simplificada de la <strong>L-function</strong> asociada a una curva elíptica.
-                La conjetura BSD establece que el orden del cero de L(s) en s=1 es igual al rango
-                del grupo de puntos racionales de la curva. El rango mide cuántos generadores
-                independientes tiene el grupo.
-            </p>
-        </div>
+                    <div className="absolute top-4 left-4 p-3 bg-black/60 backdrop-blur-md rounded-lg border border-white/10 max-w-[250px]">
+                        <div className="space-y-2">
+                            <div className="flex justify-between items-center">
+                                <span className="text-[10px] text-white/40 uppercase tracking-wider">Ecuación</span>
+                                <span className="text-xs font-mono text-blue-300">{(curvesData as any)[selectedCurve].equation}</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <span className="text-[10px] text-white/40 uppercase tracking-wider">Rango Real</span>
+                                <Badge variant="outline" className="text-[10px] bg-blue-500/10 border-blue-500/30 text-blue-300">
+                                    {(curvesData as any)[selectedCurve].rank}
+                                </Badge>
+                            </div>
+                        </div>
+                    </div>
+
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key={selectedCurve}
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            className="absolute bottom-4 right-4 p-4 bg-blue-900/20 backdrop-blur-md rounded-xl border border-blue-500/30 max-w-[300px]"
+                        >
+                            <div className="flex gap-3">
+                                <Info className="w-4 h-4 text-blue-400 flex-shrink-0 mt-1" />
+                                <div className="text-xs text-blue-100/80 leading-relaxed">
+                                    <strong className="text-blue-300">Interpretación:</strong> {(curvesData as any)[selectedCurve].rank === 0
+                                        ? "L(1) ≠ 0. La curva no tiene puntos de orden infinito (rango 0)."
+                                        : `L(s) tiene un cero de orden ${(curvesData as any)[selectedCurve].rank} en s=1, prediciendo un rango de ${(curvesData as any)[selectedCurve].rank}.`}
+                                </div>
+                            </div>
+                        </motion.div>
+                    </AnimatePresence>
+                </div>
+            </CardContent>
+        </Card>
     );
 };
