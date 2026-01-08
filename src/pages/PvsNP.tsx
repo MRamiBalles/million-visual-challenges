@@ -3,6 +3,7 @@ import { TSPVisualizer } from "@/components/visualizations/TSPVisualizer";
 import { ComplexityGraph } from "@/components/problems/pvsnp/ComplexityGraph";
 import { TuringMachineDemo } from "@/components/problems/pvsnp/TuringMachineDemo";
 import { VerificationDemo } from "@/components/problems/pvsnp/VerificationDemo";
+import { SCODashboard } from "@/components/sco/SCODashboard";
 import { useActivityTracker } from "@/hooks/useActivityTracker";
 import { Card } from "@/components/ui/card";
 import { useSearchParams } from "react-router-dom";
@@ -19,6 +20,17 @@ const PvsNP = () => {
       visualizer={<TSPVisualizer seed={seed} />}
     >
       <div className="space-y-16 mt-16 border-t border-border pt-16">
+
+        {/* SCO Dashboard - Integrated from MRamiBalles/PvsNP */}
+        <div>
+          <div className="text-center max-w-2xl mx-auto mb-8">
+            <h2 className="text-3xl font-bold mb-4">SCO Laboratory</h2>
+            <p className="text-muted-foreground">
+              Structural Complexity Observatory - Herramientas modernas para investigar P ≠ NP
+            </p>
+          </div>
+          <SCODashboard />
+        </div>
 
         {/* Intro Section for Deep Dives */}
         <div className="text-center max-w-2xl mx-auto">
