@@ -28,11 +28,14 @@ La distribución de ángulos de Frobenius es suave, sin picos anormales. Esto va
 
 ## La Validación: Semáforo de la Fórmula de Irán
 
-| Curva | Ratio (L*/Denom) | Estado | Interpretación |
-|-------|------------------|--------|----------------|
-| 32a3 | 1.00000 | ✅ PASS | Recuperación perfecta de |Ш| |
+| Curva | Ratio (L*/Denom) | Estado | Interpretación (v2.1 Audit) |
+|-------|------------------|--------|----------------------------|
+| 32a3 | 1.00000 | ✅ PASS | Recuperación perfecta (Rango 1) |
 | 496a1 | 0.25000 | ⚠️ ANOMALY | Defecto de torsión (1/|T|²) |
 | 389a1 | 2.00000 | ⚠️ ANOMALY | Defecto de periodo (c_∞ = 2) |
+
+> [!NOTE]
+> **Estatus de la Fórmula de Irán**: Marco propuesto bajo calibración (*Proposed Framework under Calibration*). El laboratorio confirma la convergencia asintótica, pero la discrepancia de 2.0 sugiere fallas en la normalización de periodos en el paso de $\Gamma_0$ a $\Gamma_1$.
 
 ---
 
@@ -60,7 +63,7 @@ El defecto de 2.0 en 389a1 NO es un cuadrado perfecto. Esto indica que:
 | Integralidad p=2 | ⚠️ Abierta |
 | Construcción de Puntos | ❌ Pendiente |
 
-**Veredicto Final**: Los métodos espectrales de Whittaker (2025) y Matak (2025) **resuelven la inestabilidad analítica** del BSD en rangos altos. La barrera del Rango ≥2 está siendo abordada actualmente mediante la variación discreta (**Números de Kurihara** $\tilde{\delta}_n$) y la densidad espectral (**UESDF**), abandonando la construcción directa de puntos a favor de la pureza cohomológica recuperada mediante morfismos de periodos extendidos.
+**Veredicto Final**: Los métodos espectrales de Whittaker (2025) y Matak (2025) **resuelven la inestabilidad analítica** del BSD en rangos altos. La barrera del Rango ≥2 está siendo abordada actualmente mediante la variación discreta (**Números de Kurihara** $\tilde{\delta}_n$) y la densidad espectral (**UESDF**), abandonando la construcción directa de puntos a favor de la pureza cohomológica recuperada mediante **Morfismos de Períodos Extendidos** (Guo-Yang 2025) en modelos singulares.
 
 ---
 

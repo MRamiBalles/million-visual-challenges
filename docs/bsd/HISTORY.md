@@ -14,8 +14,7 @@ Bryan Birch y Peter Swinnerton-Dyer comienzan a experimentar con la computadora 
 - **Manjul Bhargava**: Utiliza geometría de números para demostrar que una fracción positiva de curvas elípticas satisfacen BSD. Sus métodos permiten acotar el rango promedio por debajo de 1.
 
 ## 2025: La Vindicación Estadística y Espectral
-### Alexander Smith y el Premio Sastra Ramanujan
-Alexander Smith resuelve la **Conjetura de Goldfeld**, demostrando que para el 100% de las familias de giros cuadráticos, el rango es 0 o 1 (distribución 50/50). Esto confirma que los rangos altos (r≥2) son excepciones estadísticas raras.
+Alexander Smith resuelve la **Conjetura de Goldfeld** para familias de giros cuadráticos, demostrando que el 100% de los **2^\infty-grupos de Selmer** tienen el corango predicho por la paridad. La distribución 50/50 del Rango Algebraico se deduce incondicionalmente para Selmer, pero sigue siendo condicional a BSD/Sha para el rango de puntos racionales.
 
 ### La Revolución Espectral (UESDF)
 Andrew P. Whittaker propone el **Marco Determinista Unificado de Energía-Espacio (UESDF)**. Reformula el rango no como un objeto geométrico, sino como una transición de fase en el espectro de autovalores de un operador hamiltoniano.

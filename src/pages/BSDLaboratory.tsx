@@ -80,13 +80,12 @@ const BSDLaboratory = () => {
                                 </Badge>
                             </div>
                             <div className="p-6 bg-blue-500/5 rounded-2xl border border-blue-500/20">
-                                <h3 className="text-lg font-bold text-white mb-2">Fórmula de Irán</h3>
+                                <h3 className="text-lg font-bold text-white mb-2">Fórmula de Irán (Matak 2025)</h3>
                                 <p className="text-sm text-white/50 leading-relaxed">
-                                    Unificación de la derivada logarítmica para aislar el rango analítico.
-                                    Resuelve la inestabilidad de Taylor en curvas de rango ≥ 2.
+                                    Candidato teórico para la unificación analítico-aritmética. El laboratorio detectó un factor residual de 2.0 en Rango 2, sugiriendo la necesidad de refinamiento en factores de Tamagawa locales.
                                 </p>
                                 <Badge variant="outline" className="mt-4 border-blue-500/30 text-blue-300">
-                                    Source: Matak 2025
+                                    Status: Proposed Framework under Calibration
                                 </Badge>
                             </div>
                         </div>

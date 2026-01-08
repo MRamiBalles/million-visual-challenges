@@ -290,8 +290,8 @@ export const SpectralLandscape = () => {
                     "bg-purple-500/5 border-purple-500/20"
                 }`}>
                 <h4 className={`font-bold text-sm mb-1 ${rank === 0 ? "text-amber-400" :
-                        rank === 1 ? "text-green-400" :
-                            "text-purple-400"
+                    rank === 1 ? "text-green-400" :
+                        "text-purple-400"
                     }`}>
                     {rank === 0 && "Interpretación UESDF: Paseo Aleatorio (Rango 0)"}
                     {rank === 1 && "Interpretación UESDF: Deriva Lineal (Rango 1)"}
@@ -299,8 +299,8 @@ export const SpectralLandscape = () => {
                 </h4>
                 <p className="text-xs text-white/60 leading-relaxed">
                     {rank === 0 && "Sin transición de fase en s=1. La trayectoria espectral no muestra sesgo direccional, comportándose como ruido estadístico."}
-                    {rank === 1 && "Transición de fase simple en s=1. El sesgo lineal en la fase acumulada refleja la contribución del punto racional generador."}
-                    {rank === 2 && "Transición de fase crítica en s=1. La 'doble densidad' de estados genera la estructura parabólica característica del Factor 2.0."}
+                    {rank === 1 && "Transición de fase simple en s=1. El sesgo lineal en la fase acumulada refleja la contribución del punto racional generador. Requiere Mapa de Abel-Jacobi p-ádico (BDP) para su construcción física."}
+                    {rank === 2 && "Transición de fase crítica en s=1. La 'doble densidad' de estados genera la estructura parabólica característica del Factor 2.0. La construcción del punto requiere ciclos diagonales en variedades de Kuga-Sato."}
                 </p>
             </div>
         </motion.div>

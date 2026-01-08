@@ -222,12 +222,10 @@ export const PrismaticIntegrity = () => {
                 }`}>
                 <h4 className={`font-bold text-sm mb-1 ${defectClass === "INTEGRAL" ? "text-green-400" : "text-cyan-400"
                     }`}>
-                    Contexto Teórico: Cohomología Prismática
+                    Contexto Teórico (Audit v2.1): Proxy Geométrico
                 </h4>
                 <p className="text-xs text-white/60 leading-relaxed">
-                    La teoría prismática de Bhatt-Scholze (2019) y los avances de Carmeli-Feng (2025) unifican la cohomología
-                    sintómica. Al probar la simplecticidad en p=2, se valida que |Sha| es siempre un cuadrado perfecto,
-                    eliminando el último obstáculo para la exactitud aritmética de BSD.
+                    Este motor utiliza las **operaciones de Steenrod sintómicas** (Carmeli & Feng 2025) como un **proxy geométrico**. Aunque probaron la simplecticidad para el grupo de Brauer $Br(X)$ de superficies sobre cuerpos finitos, aquí extrapolamos la estructura a $Sha(E/\mathbb{Q})$. La transferencia directa es condicional a la finitud de Sha y la conjetura de Tate para divisores.
                 </p>
             </div>
         </motion.div>

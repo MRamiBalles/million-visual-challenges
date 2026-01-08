@@ -58,7 +58,17 @@ Whittaker (2025) propone un operador cuya autovalores codifican los factores ari
 
 | 389a1 | 2.00 | ⚠️ NO (√2 irracional) | **ALERTA** |
 
-**Implicación**: El defecto de 2.0 en 389a1 NO es un cuadrado perfecto. El test de simplecticidad de Carmeli & Feng (2025) utiliza la **Álgebra de Steenrod Sintómica** para validar el grupo de Brauer como proxy geométrico de Sha(E), resolviendo la obstrucción histórica en característica 2.
+### 8. Test de Simplecticidad en p=2 (Proxy Geométrico)
+> [!WARNING]
+> Verificación crítica: ¿El "Defecto de Integridad" residual es un cuadrado perfecto?
+
+| Curva | Defecto | ¿Cuadrado Perfecto? | Estado |
+|-------|---------|---------------------|--------|
+| 496a1 | 0.25 = 1/4 | ✅ (1/2)² | VÁLIDO |
+| 32a3  | 1.00 | ✅ 1² | INTEGRAL |
+| 389a1 | 2.00 | ⚠️ NO (√2 irracional) | **ALERTA** |
+
+**Implicación**: El defecto de 2.0 en 389a1 NO es un cuadrado perfecto. Este laboratorio utiliza las **operaciones de Steenrod sintómicas** (Carmeli & Feng 2025) como un **proxy geométrico**. Aunque probaron la simplecticidad para el grupo de Brauer $Br(X)$ de superficies sobre cuerpos finitos, aquí extrapolamos la estructura a $Sha(E/\mathbb{Q})$ asumiendo la compatibilidad vía conjetura de Tate. La validez para curvas sobre $\mathbb{Q}$ es condicional a la finitud de Sha.
 
 ### 9. El Eslabón Perdido: Mapa de Realización
 > [!CAUTION]

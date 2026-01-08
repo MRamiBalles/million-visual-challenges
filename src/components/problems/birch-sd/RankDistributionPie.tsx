@@ -82,8 +82,10 @@ export const RankDistributionPie = () => {
                     <div className="flex items-start gap-3">
                         <Target className="w-4 h-4 text-amber-500 mt-1 flex-shrink-0" />
                         <p className="text-[10px] text-white/50 leading-relaxed">
-                            <span className="text-white font-bold block mb-1">Vindicación de Smith</span>
-                            Alexander Smith probó que para el 100% de los giros cuadráticos, la distribución de Selmer es 50/50 (Incondicional). La distribución del Rango es 50/50 asumiendo BSD (Condicional).
+                            <span className="text-white font-bold block mb-1">Vindicación de Smith (2025)</span>
+                            <span className="text-green-400">Incondicional:</span> Corango de Selmer $2^\infty$ para el 100% de giros cuadráticos.
+                            <br />
+                            <span className="text-amber-400">Condicional:</span> Distribución 50/50 del Rango Algebraico asumiendo finitud de Sha (BSD).
                         </p>
                     </div>
                     <div className="flex items-start gap-3">
