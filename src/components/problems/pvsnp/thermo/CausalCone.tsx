@@ -101,6 +101,9 @@ export function CausalCone() {
     const [data, setData] = useState<CausalData | null>(null);
     const [showNP, setShowNP] = useState(true);
     const [isLoading, setIsLoading] = useState(true);
+    // Ashtavakra Complexity: Observer Insight K(O) - range 0 to 1
+    // 0 = Classical observer (narrow cone), 1 = "Enlightened" observer (expanded perception)
+    const [observerInsight, setObserverInsight] = useState(0);
 
     useEffect(() => {
         fetch('/data/log_causality.json')
@@ -130,12 +133,29 @@ export function CausalCone() {
         ? data.visualization_data.np_trajectory
         : data.visualization_data.p_trajectory;
 
-    // Combine trajectory with cone reference
-    const chartData = trajectory.map((pt, i) => ({
-        ...pt,
-        cone_limit: pt.tau, // Light cone boundary: ξ = τ
-        index: i,
-    }));
+    // Apply Ashtavakra transformation:
+    // - Higher K(O) "compresses" the problem trajectory (xi shrinks)
+    // - OR equivalently, expands the causal cone (cone_limit grows)
+    // Effect: At high insight, even NP problems fit inside the cone
+    const compressionFactor = 1 - observerInsight * 0.6; // 0 -> 1.0, 1 -> 0.4
+    const coneExpansion = 1 + observerInsight * 0.8; // 0 -> 1.0, 1 -> 1.8
+
+    const chartData = trajectory.map((pt, i) => {
+        const adjustedXi = pt.xi * compressionFactor;
+        const adjustedCone = pt.tau * coneExpansion;
+        return {
+            tau: pt.tau,
+            xi: adjustedXi,
+            cone_limit: adjustedCone,
+            in_cone: adjustedXi <= adjustedCone,
+            index: i,
+        };
+    });
+
+    // Recalculate violation based on observer insight
+    const adjustedViolation = chartData.some(pt => !pt.in_cone);
+    const adjustedEntropy = analysis.entropy_cost * compressionFactor;
+
 
     return (
         <Card className="bg-black/40 border-cyan-500/30 backdrop-blur-sm">
@@ -148,27 +168,27 @@ export function CausalCone() {
                     <Badge
                         variant="outline"
                         className={
-                            analysis.violates_causality
+                            adjustedViolation
                                 ? 'bg-red-500/20 text-red-300 border-red-500/30'
                                 : 'bg-green-500/20 text-green-300 border-green-500/30'
                         }
                     >
-                        {analysis.violates_causality ? '⚠️ VIOLACIÓN CAUSAL' : '✅ CAUSAL'}
+                        {adjustedViolation ? '⚠️ VIOLACIÓN CAUSAL' : '✅ CAUSAL'}
                     </Badge>
                 </div>
                 <p className="text-xs text-cyan-200/60 font-mono">
-                    Métrica: ds² = -e<sup>2τ</sup>dτ² + e<sup>2ξ</sup>dξ² | Landauer: {analysis.entropy_cost.toFixed(1)} k<sub>B</sub>T
+                    Métrica: ds² = -e<sup>2τ</sup>dτ² + e<sup>2ξ</sup>dξ² | Landauer: {adjustedEntropy.toFixed(1)} k<sub>B</sub>T
                 </p>
             </CardHeader>
 
             <CardContent>
-                {/* Toggle */}
+                {/* Problem Type Toggle */}
                 <div className="flex gap-2 mb-4">
                     <button
                         onClick={() => setShowNP(false)}
                         className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${!showNP
-                                ? 'bg-green-500/20 text-green-300 border border-green-500/50'
-                                : 'bg-gray-800 text-gray-400 border border-gray-700'
+                            ? 'bg-green-500/20 text-green-300 border border-green-500/50'
+                            : 'bg-gray-800 text-gray-400 border border-gray-700'
                             }`}
                     >
                         P (2-SAT)
@@ -176,13 +196,39 @@ export function CausalCone() {
                     <button
                         onClick={() => setShowNP(true)}
                         className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${showNP
-                                ? 'bg-red-500/20 text-red-300 border border-red-500/50'
-                                : 'bg-gray-800 text-gray-400 border border-gray-700'
+                            ? 'bg-red-500/20 text-red-300 border border-red-500/50'
+                            : 'bg-gray-800 text-gray-400 border border-gray-700'
                             }`}
                     >
                         NP (3-SAT Crítico)
                     </button>
                 </div>
+
+                {/* Ashtavakra Observer Insight Slider */}
+                <div className="mb-4 p-3 bg-purple-500/10 rounded-lg border border-purple-500/30">
+                    <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs text-purple-300 font-medium">
+                            👁️ Observer Insight K(O)
+                        </span>
+                        <span className="text-xs font-mono text-purple-400">
+                            {observerInsight === 0 ? 'Clásico' : observerInsight === 1 ? 'Oráculo' : (observerInsight * 100).toFixed(0) + '%'}
+                        </span>
+                    </div>
+                    <input
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="0.1"
+                        value={observerInsight}
+                        onChange={(e) => setObserverInsight(parseFloat(e.target.value))}
+                        className="w-full h-2 bg-purple-900 rounded-lg appearance-none cursor-pointer accent-purple-500"
+                    />
+                    <p className="text-xs text-purple-200/60 mt-2">
+                        <strong>Ashtavakra:</strong> La complejidad es relativa al observador.
+                        Un observador con más "insight" percibe el problema como más simple.
+                    </p>
+                </div>
+
 
                 {/* Chart */}
                 <div className="h-64 mb-4">
@@ -256,8 +302,8 @@ export function CausalCone() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     className={`p-3 rounded-lg border mb-4 ${analysis.violates_causality
-                            ? 'bg-red-500/10 border-red-500/30'
-                            : 'bg-green-500/10 border-green-500/30'
+                        ? 'bg-red-500/10 border-red-500/30'
+                        : 'bg-green-500/10 border-green-500/30'
                         }`}
                 >
                     <div className="grid grid-cols-2 gap-4 text-sm">
