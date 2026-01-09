@@ -18,6 +18,7 @@ import { millenniumProblems } from "@/data/millennium-problems";
 import { FluidSimulation } from "@/components/problems/navier-stokes/FluidSimulation";
 import { VortexFormation } from "@/components/problems/navier-stokes/VortexFormation";
 import { VelocityField } from "@/components/problems/navier-stokes/VelocityField";
+import { RealityGap } from "@/components/problems/navier-stokes/RealityGap";
 
 const NavierStokes = () => {
     const navigate = useNavigate();
@@ -179,9 +180,24 @@ const NavierStokes = () => {
                     }
                 />
 
+                import {RealityGap} from "@/components/problems/navier-stokes/RealityGap";
+
+                // ... inside the component, before the first VisualizationContainer ...
                 {/* Visualizations Section */}
                 <div className="space-y-12">
-                    <h2 className="text-4xl font-bold mb-8">Visualizaciones Interactivas</h2>
+                    <h2 className="text-4xl font-bold mb-8 italic tracking-tight">Crossover 2026: La Brecha de Realidad</h2>
+
+                    <div className="prose prose-invert max-w-none mb-12">
+                        <p className="text-slate-400 text-lg">
+                            Para resolver Navier-Stokes, primero debemos entender por qué nuestros simuladores
+                            nos han mentido durante décadas. El motor de auditoría abajo compara el estándar de la industria
+                            (Stable Fluids) con la realidad matemática descubierta por la IA en 2025.
+                        </p>
+                    </div>
+
+                    <RealityGap />
+
+                    <h2 className="text-3xl font-bold mt-20 mb-8">Visualizaciones Tradicionales</h2>
 
                     <VisualizationContainer
                         title="Simulación de Fluido 2D"
