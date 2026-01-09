@@ -138,8 +138,8 @@ const SingularityViewer: React.FC = () => {
                         onClick={() => setIsPerturbed(true)}
                         disabled={isPerturbed}
                         className={`mt-4 w-full py-2 px-4 rounded font-bold transition-all ${isPerturbed
-                                ? 'bg-slate-700 text-slate-400 cursor-not-allowed'
-                                : 'bg-red-600 hover:bg-red-700 text-white animate-pulse shadow-[0_0_15px_rgba(220,38,38,0.5)]'
+                            ? 'bg-slate-700 text-slate-400 cursor-not-allowed'
+                            : 'bg-red-600 hover:bg-red-700 text-white animate-pulse shadow-[0_0_15px_rgba(220,38,38,0.5)]'
                             }`}
                     >
                         {isPerturbed ? 'DECOHERENCIA EN CURSO...' : 'INTRODUCIR PERTURBACIÓN (ε)'}

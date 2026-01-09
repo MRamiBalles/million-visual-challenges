@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -18,8 +18,9 @@ import { millenniumProblems } from "@/data/millennium-problems";
 import { FluidSimulation } from "@/components/problems/navier-stokes/FluidSimulation";
 import { VortexFormation } from "@/components/problems/navier-stokes/VortexFormation";
 import { VelocityField } from "@/components/problems/navier-stokes/VelocityField";
-import { RealityGap } from "@/components/problems/navier-stokes/RealityGap";
+import RealityGap from "@/components/problems/navier-stokes/RealityGap";
 import SingularityViewer from "@/components/problems/navier-stokes/SingularityViewer";
+import FluidSimulationWebGPU from "@/components/problems/navier-stokes/FluidSimulationWebGPU";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
 
@@ -225,6 +226,18 @@ const NavierStokes = () => {
                             </Canvas>
                         </div>
                     </VisualizationContainer>
+
+                    <h2 className="text-4xl font-bold mt-20 mb-8 italic tracking-tight">Acto 3: Auditoría de Fluidez (WebGPU 2026)</h2>
+
+                    <div className="prose prose-invert max-w-none mb-12">
+                        <p className="text-slate-400 text-lg">
+                            Para ir más allá de los perfiles estáticos, desplegamos un motor de partículas <span className="text-blue-500 font-bold">MLS-MPM</span>
+                            ejecutándose nativamente en WebGPU. Esto permite simular la no-unicidad y las bifurcaciones en tiempo real,
+                            resolviendo la física con precisión de máquina.
+                        </p>
+                    </div>
+
+                    <FluidSimulationWebGPU />
 
                     <h2 className="text-3xl font-bold mt-20 mb-8">Visualizaciones Tradicionales</h2>
 
