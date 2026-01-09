@@ -19,6 +19,7 @@ import { useActivityTracker } from '@/hooks/useActivityTracker';
 import { GlueballSpectrum } from '@/components/problems/yang-mills/GlueballSpectrum';
 import { MERARenormalization } from '@/components/problems/yang-mills/MERARenormalization';
 import { KarazoupisParadox } from '@/components/problems/yang-mills/KarazoupisParadox';
+import { BoundarySaturation } from '@/components/problems/yang-mills/BoundarySaturation';
 
 const YangMills = () => {
     const [activePhase, setActivePhase] = useState<'crisis' | 'evidence' | 'resolution'>('crisis');
@@ -57,8 +58,8 @@ const YangMills = () => {
                     <button
                         onClick={() => setActivePhase('crisis')}
                         className={`p-4 rounded-xl border transition-all text-left ${activePhase === 'crisis'
-                                ? 'bg-red-500/10 border-red-500/30'
-                                : 'bg-white/5 border-white/10'
+                            ? 'bg-red-500/10 border-red-500/30'
+                            : 'bg-white/5 border-white/10'
                             }`}
                     >
                         <ShieldAlert className={`w-5 h-5 mb-2 ${activePhase === 'crisis' ? 'text-red-400' : 'text-slate-500'}`} />
@@ -69,8 +70,8 @@ const YangMills = () => {
                     <button
                         onClick={() => setActivePhase('evidence')}
                         className={`p-4 rounded-xl border transition-all text-left ${activePhase === 'evidence'
-                                ? 'bg-cyan-500/10 border-cyan-500/30'
-                                : 'bg-white/5 border-white/10'
+                            ? 'bg-cyan-500/10 border-cyan-500/30'
+                            : 'bg-white/5 border-white/10'
                             }`}
                     >
                         <Beaker className={`w-5 h-5 mb-2 ${activePhase === 'evidence' ? 'text-cyan-400' : 'text-slate-500'}`} />
@@ -81,8 +82,8 @@ const YangMills = () => {
                     <button
                         onClick={() => setActivePhase('resolution')}
                         className={`p-4 rounded-xl border transition-all text-left ${activePhase === 'resolution'
-                                ? 'bg-indigo-500/10 border-indigo-500/30'
-                                : 'bg-white/5 border-white/10'
+                            ? 'bg-indigo-500/10 border-indigo-500/30'
+                            : 'bg-white/5 border-white/10'
                             }`}
                     >
                         <Network className={`w-5 h-5 mb-2 ${activePhase === 'resolution' ? 'text-indigo-400' : 'text-slate-500'}`} />
@@ -187,6 +188,10 @@ const YangMills = () => {
                                     </span>
                                     <ArrowRight className="w-3 h-3" />
                                 </Button>
+                                <div className="p-3 bg-black/40 border border-white/5 rounded-lg">
+                                    <p className="text-[9px] text-slate-500 uppercase mb-2 font-mono">Saturation Audit (Δ=4)</p>
+                                    <BoundarySaturation />
+                                </div>
                                 <Button
                                     onClick={runAxiomCheck}
                                     disabled={isSimulating}
