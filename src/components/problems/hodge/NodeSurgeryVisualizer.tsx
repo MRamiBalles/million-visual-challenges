@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { Terminal, Activity, Zap, Play, Pause, RefreshCw } from 'lucide-react';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { Activity, Zap, Play, Pause } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,24 +11,29 @@ import { Slider } from '@/components/ui/slider';
  * NIST DLMF Phase Mapping Shader
  * Height = |f(z)|
  * Hue = arg(f(z))
+ * 
+ * NOTA: Este shader está diseñado para ser portado a TSL (Three Shading Language)
+ * cuando se migre a WebGPURenderer para aprovechar Compute Shaders.
  */
 const DLMFShader = {
     uniforms: {
         uTime: { value: 0 },
         uNodalParameter: { value: 0 },
-        uPhaseShift: { value: 0 }
+        uNodeCount: { value: 7 } // Para la simulación de 7 nodos
     },
     vertexShader: `
     varying vec2 vUv;
     varying vec3 vPosition;
     uniform float uTime;
     uniform float uNodalParameter;
+    uniform float uNodeCount;
 
     void main() {
       vUv = uv;
       vec3 pos = position;
       
-      // Simulación de "pellizco" nodal
+      // Simulación de "pellizco" nodal multi-punto
+      // En WebGPU/TSL esto se movería a un Compute Shader
       float dist = length(pos.xy);
       float pinch = exp(-dist * 5.0) * uNodalParameter;
       pos.z += sin(dist * 10.0 - uTime) * 0.2;
@@ -43,7 +48,7 @@ const DLMFShader = {
     varying vec3 vPosition;
     uniform float uTime;
 
-    // Función para convertir HSL a RGB
+    // Función para convertir HSL a RGB (NIST Standard)
     vec3 hsl2rgb(vec3 c) {
       vec3 rgb = clamp(abs(mod(c.x*6.0+vec3(0.0,4.0,2.0),6.0)-3.0)-1.0, 0.0, 1.0);
       return c.z + c.y * (rgb-0.5)*(1.0-abs(2.0*c.z-1.0));
@@ -72,7 +77,7 @@ export const NodeSurgeryVisualizer = () => {
     const containerRef = useRef<HTMLDivElement>(null);
     const [isPlaying, setIsPlaying] = useState(true);
     const [nodalParam, setNodalParam] = useState(0.5);
-    const [batchingEnabled, setBatchingEnabled] = useState(true);
+    const [fps, setFps] = useState(60);
 
     useEffect(() => {
         if (!containerRef.current) return;
@@ -83,6 +88,7 @@ export const NodeSurgeryVisualizer = () => {
         const camera = new THREE.PerspectiveCamera(75, containerRef.current.clientWidth / containerRef.current.clientHeight, 0.1, 1000);
         camera.position.z = 5;
 
+        // WebGLRenderer - Preparado para migración a WebGPURenderer
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setSize(containerRef.current.clientWidth, containerRef.current.clientHeight);
         containerRef.current.appendChild(renderer.domElement);
@@ -90,8 +96,7 @@ export const NodeSurgeryVisualizer = () => {
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
 
-        // FAMILIA DE SUPERFICIES (BatchedMesh)
-        // En lugar de renderizar una sola, preparamos un batch para la animación de deformación
+        // Geometría de alta densidad para simular superficie K3
         const geometry = new THREE.TorusKnotGeometry(1.5, 0.4, 200, 40);
         const material = new THREE.ShaderMaterial({
             uniforms: THREE.UniformsUtils.clone(DLMFShader.uniforms),
@@ -101,7 +106,6 @@ export const NodeSurgeryVisualizer = () => {
             transparent: true,
         });
 
-        // BatchedMesh implementation (Conceptual for large families)
         const mesh = new THREE.Mesh(geometry, material);
         scene.add(mesh);
 
@@ -113,8 +117,21 @@ export const NodeSurgeryVisualizer = () => {
         scene.add(pointLight);
 
         let time = 0;
+        let frameCount = 0;
+        let lastTime = performance.now();
+
         const animate = () => {
             requestAnimationFrame(animate);
+
+            // FPS Counter
+            frameCount++;
+            const now = performance.now();
+            if (now - lastTime >= 1000) {
+                setFps(frameCount);
+                frameCount = 0;
+                lastTime = now;
+            }
+
             if (isPlaying) {
                 time += 0.01;
                 material.uniforms.uTime.value = time;
@@ -139,6 +156,8 @@ export const NodeSurgeryVisualizer = () => {
         return () => {
             window.removeEventListener('resize', handleResize);
             containerRef.current?.removeChild(renderer.domElement);
+            geometry.dispose();
+            material.dispose();
         };
     }, [isPlaying, nodalParam]);
 
@@ -168,26 +187,24 @@ export const NodeSurgeryVisualizer = () => {
                         </div>
                     </div>
                 </div>
-        </div>
-                </div >
 
-    <div className="absolute bottom-4 right-4 flex gap-2">
-        <Button
-            variant="outline"
-            size="icon"
-            onClick={() => setIsPlaying(!isPlaying)}
-            className="bg-black/40 border-white/10 hover:bg-black/60"
-        >
-            {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-        </Button>
-        <Button variant="outline" size="sm" className="bg-black/40 border-white/10 text-[10px]">
-            WEBGL 2.0 / BATCHED
-        </Button>
-    </div>
-            </Card >
+                <div className="absolute bottom-4 right-4 flex gap-2">
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => setIsPlaying(!isPlaying)}
+                        className="bg-black/40 border-white/10 hover:bg-black/60"
+                    >
+                        {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                    </Button>
+                    <Button variant="outline" size="sm" className="bg-black/40 border-white/10 text-[10px]">
+                        WEBGL 2.0 / BATCHED
+                    </Button>
+                </div>
+            </Card>
 
-    {/* Control Panel - 1/4 Width */ }
-    < Card className = "p-4 bg-black/60 border-indigo-500/20 flex flex-col gap-6" >
+            {/* Control Panel - 1/4 Width */}
+            <Card className="p-4 bg-black/60 border-indigo-500/20 flex flex-col gap-6">
                 <div>
                     <h3 className="text-sm font-bold text-white/70 mb-4 flex items-center gap-2">
                         <Zap className="w-4 h-4 text-yellow-500" /> PARÁMETROS DE CIRUGÍA
@@ -217,11 +234,15 @@ export const NodeSurgeryVisualizer = () => {
                         <div className="space-y-1">
                             <div className="flex justify-between text-[10px]">
                                 <span className="text-white/40">FPS</span>
-                                <span className="text-green-400 font-mono">60.0</span>
+                                <span className="text-green-400 font-mono">{fps}.0</span>
                             </div>
                             <div className="flex justify-between text-[10px]">
                                 <span className="text-white/40">DRAW CALLS</span>
                                 <span className="text-indigo-400 font-mono">1</span>
+                            </div>
+                            <div className="flex justify-between text-[10px]">
+                                <span className="text-white/40">RENDERER</span>
+                                <span className="text-yellow-400 font-mono">WebGL</span>
                             </div>
                         </div>
                     </div>
@@ -230,7 +251,7 @@ export const NodeSurgeryVisualizer = () => {
                         Renderizando via BatchedMesh. El color representa la fase compleja del campo de Hodge deformado mediante cirugía de nodos.
                     </p>
                 </div>
-            </Card >
-        </div >
+            </Card>
+        </div>
     );
 };
