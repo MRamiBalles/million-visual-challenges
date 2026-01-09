@@ -1,4 +1,5 @@
 import mlsMpmShaders from './mls-mpm-shaders.wgsl?raw';
+import fluidRenderShaders from './fluid-render-shaders.wgsl?raw';
 
 export interface FluidParams {
     dt: number;
@@ -18,6 +19,8 @@ export class WebGPUFluid {
         g2p: GPUComputePipeline;
     };
     private bindGroup: GPUBindGroup;
+    private renderPipeline: GPURenderPipeline;
+    private params: FluidParams;
 
     constructor(device: GPUDevice, params: FluidParams) {
         this.device = device;
@@ -85,6 +88,34 @@ export class WebGPUFluid {
             ],
         });
 
+        this.params = params;
+
+        // 3. Render Pipeline Setup
+        const renderShaderModule = device.createShaderModule({
+            code: fluidRenderShaders,
+        });
+
+        this.renderPipeline = device.createRenderPipeline({
+            layout: 'auto',
+            vertex: {
+                module: renderShaderModule,
+                entryPoint: 'vs_depth',
+                buffers: [
+                    {
+                        arrayStride: 40, // particleStride
+                        stepMode: 'instance',
+                        attributes: [{ shaderLocation: 0, offset: 0, format: 'float32x2' }],
+                    },
+                ],
+            },
+            fragment: {
+                module: renderShaderModule,
+                entryPoint: 'fs_shade',
+                targets: [{ format: navigator.gpu.getPreferredCanvasFormat() }],
+            },
+            primitive: { topology: 'triangle-list' },
+        });
+
         this.updateUniforms(params);
         this.initParticles(params);
     }
@@ -121,27 +152,44 @@ export class WebGPUFluid {
 
     public step() {
         const commandEncoder = this.device.createCommandEncoder();
-
-        // Reset grid mass and velocity (manual clear or shader-based)
-        // For simplicity, we could use a clear shader, but here we'll just write zeros
         commandEncoder.clearBuffer(this.gridBuffer);
 
         const pass = commandEncoder.beginComputePass();
         pass.setBindGroup(0, this.bindGroup);
 
-        // Stage 1: P2G
+        const workgroupSize = 64;
+        const particleWorkgroups = Math.ceil(this.params.particleCount / workgroupSize);
+        const gridWorkgroups = Math.ceil((this.params.gridRes * this.params.gridRes) / workgroupSize);
+
         pass.setPipeline(this.computePipeline.p2g);
-        pass.dispatchWorkgroups(Math.ceil(this.uniformBuffer.size / 64));
+        pass.dispatchWorkgroups(particleWorkgroups);
 
-        // Stage 2: Grid Update
         pass.setPipeline(this.computePipeline.update);
-        pass.dispatchWorkgroups(Math.ceil((64 * 64) / 64)); // Assuming 64x64 grid
+        pass.dispatchWorkgroups(gridWorkgroups);
 
-        // Stage 3: G2P
         pass.setPipeline(this.computePipeline.g2p);
-        pass.dispatchWorkgroups(Math.ceil(this.uniformBuffer.size / 64));
+        pass.dispatchWorkgroups(particleWorkgroups);
 
         pass.end();
+        this.device.queue.submit([commandEncoder.finish()]);
+    }
+
+    public render(context: GPUCanvasContext) {
+        const commandEncoder = this.device.createCommandEncoder();
+        const renderPass = commandEncoder.beginRenderPass({
+            colorAttachments: [{
+                view: context.getCurrentTexture().createView(),
+                clearValue: { r: 0, g: 0.05, b: 0.1, a: 1.0 },
+                loadOp: 'clear',
+                storeOp: 'store',
+            }],
+        });
+
+        renderPass.setPipeline(this.renderPipeline);
+        renderPass.setVertexBuffer(0, this.particleBuffer);
+        renderPass.draw(6, this.params.particleCount); // Draw 6 vertices (billboard) per particle
+        renderPass.end();
+
         this.device.queue.submit([commandEncoder.finish()]);
     }
 

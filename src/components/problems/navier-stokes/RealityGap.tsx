@@ -1,45 +1,40 @@
-import React, { useEffect, useRef, useState } from 'react';
+import * as React from "react";
 import * as d3 from 'd3';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Play, RotateCcw, AlertTriangle } from 'lucide-react';
 
 interface DataPoint {
-    time: number;
+    t: number;
     stable: number;
     euler: number;
 }
 
 const RealityGap = () => {
-    const svgRef = useRef<SVGSVGElement>(null);
-    const [isPlaying, setIsPlaying] = useState(false);
-    const [progress, setProgress] = useState(0);
-    const [data, setData] = useState<DataPoint[]>([]);
+    const svgRef = React.useRef<SVGSVGElement>(null);
+    const [isPlaying, setIsPlaying] = React.useState(false);
+    const [time, setTime] = React.useState(0);
+    const [history, setHistory] = React.useState<DataPoint[]>([]);
 
-    const blowUpTime = 80; // Arbitrary units where blow-up occurs
+    const blowUpTime = 80;
 
-    useEffect(() => {
-        // Generate base data
+    React.useEffect(() => {
         const newData: DataPoint[] = [];
         for (let t = 0; t <= 100; t++) {
-            // Stable Fluids: Exponential decay due to numerical dissipation
             const stable = Math.exp(-t * 0.02);
-
-            // Euler: Energy conservation followed by singular blow-up
             let euler;
             if (t < blowUpTime) {
-                euler = 1 + 0.1 * Math.pow(t / blowUpTime, 4); // Slight growth/instability
+                euler = 1 + 0.1 * Math.pow(t / blowUpTime, 4);
             } else {
-                euler = 1.1 * Math.pow(1 / (1.01 - (t - blowUpTime) / 20), 2); // Explodes
+                euler = 1.1 * Math.pow(1 / (1.01 - (t - blowUpTime) / 20), 2);
             }
-
-            newData.push({ time: t, stable, euler: Math.min(euler, 5) });
+            newData.push({ t, stable, euler: Math.min(euler, 5) });
         }
-        setData(newData);
+        setHistory(newData);
     }, []);
 
-    useEffect(() => {
-        if (!svgRef.current || data.length === 0) return;
+    React.useEffect(() => {
+        if (!svgRef.current || history.length === 0) return;
 
         const margin = { top: 20, right: 30, bottom: 40, left: 50 };
         const width = 600 - margin.left - margin.right;
@@ -55,43 +50,39 @@ const RealityGap = () => {
         const x = d3.scaleLinear().domain([0, 100]).range([0, width]);
         const y = d3.scaleLinear().domain([0, 5]).range([height, 0]);
 
-        // Axes
         svg.append("g")
             .attr("transform", `translate(0,${height})`)
-            .call(d3.axisBottom(x as any).ticks(5).tickFormat(d => `t=${d}`));
+            .call(d3.axisBottom(x).ticks(5).tickFormat(d => `t=${d}`));
 
         svg.append("g")
             .call(d3.axisLeft(y).ticks(5).tickFormat(d => `${d}E`));
 
-        // Stable Fluids Line (Dissipation)
         const lineStable = d3.line<DataPoint>()
-            .x(d => x(d.time))
+            .x(d => x(d.t))
             .y(d => y(d.stable))
             .curve(d3.curveBasis);
 
         svg.append("path")
-            .datum(data.filter(d => d.time <= progress))
+            .datum(history.filter(d => d.t <= time))
             .attr("fill", "none")
-            .attr("stroke", "#94a3b8") // Slate-400
+            .attr("stroke", "#94a3b8")
             .attr("stroke-width", 2)
             .attr("stroke-dasharray", "4,4")
             .attr("d", lineStable);
 
-        // Euler Line (Blow-up)
         const lineEuler = d3.line<DataPoint>()
-            .x(d => x(d.time))
+            .x(d => x(d.t))
             .y(d => y(d.euler))
             .curve(d3.curveBasis);
 
         svg.append("path")
-            .datum(data.filter(d => d.time <= progress))
+            .datum(history.filter(d => d.t <= time))
             .attr("fill", "none")
-            .attr("stroke", "#ef4444") // Red-500
+            .attr("stroke", "#ef4444")
             .attr("stroke-width", 3)
             .attr("d", lineEuler);
 
-        // Labels
-        if (progress > 20) {
+        if (time > 20) {
             svg.append("text")
                 .attr("x", x(40))
                 .attr("y", y(0.5))
@@ -101,7 +92,7 @@ const RealityGap = () => {
                 .text("DISIPACIÓN NUMÉRICA (CGI)");
         }
 
-        if (progress >= blowUpTime) {
+        if (time >= blowUpTime) {
             svg.append("text")
                 .attr("x", x(blowUpTime) - 40)
                 .attr("y", y(4.5))
@@ -113,25 +104,24 @@ const RealityGap = () => {
 
             svg.append("circle")
                 .attr("cx", x(blowUpTime))
-                .attr("cy", y(data[blowUpTime].euler))
+                .attr("cy", y(history[blowUpTime].euler))
                 .attr("r", 6)
                 .attr("fill", "#ef4444")
                 .attr("stroke", "white");
         }
+    }, [history, time]);
 
-    }, [data, progress]);
-
-    useEffect(() => {
+    React.useEffect(() => {
         let timer: number;
-        if (isPlaying && progress < 100) {
+        if (isPlaying && time < 100) {
             timer = window.setInterval(() => {
-                setProgress(prev => Math.min(prev + 1, 100));
+                setTime(prev => Math.min(prev + 1, 100));
             }, 50);
         } else {
             setIsPlaying(false);
         }
         return () => clearInterval(timer);
-    }, [isPlaying, progress]);
+    }, [isPlaying, time]);
 
     return (
         <Card className="bg-slate-950 border-slate-800">
@@ -156,28 +146,17 @@ const RealityGap = () => {
                                 className="gap-2"
                             >
                                 <Play className={`w-4 h-4 ${isPlaying ? 'fill-current' : ''}`} />
-                                {progress === 100 ? 'Replay' : isPlaying ? 'Pausar' : 'Simular Auditoría'}
+                                {time === 100 ? 'Replay' : isPlaying ? 'Pausar' : 'Simular Auditoría'}
                             </Button>
                             <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => { setProgress(0); setIsPlaying(false); }}
+                                onClick={() => { setTime(0); setIsPlaying(false); }}
                                 className="gap-2 text-slate-400"
                             >
                                 <RotateCcw className="w-4 h-4" />
                                 Reset
                             </Button>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4 text-[11px] font-mono">
-                            <div className="p-3 bg-slate-900/50 rounded border border-slate-800">
-                                <p className="text-slate-400 uppercase mb-1">Algoritmo de Stam (Past)</p>
-                                <p className="text-slate-200">Disipación numérica oculta la física. El fluido se detiene por error algorítmico.</p>
-                            </div>
-                            <div className="p-3 bg-red-950/20 rounded border border-red-900/30">
-                                <p className="text-red-400 uppercase mb-1">Modelo Euler/NS (Real)</p>
-                                <p className="text-red-200">La vorticidad se concentra. La IA detecta la explosión de energía en t=80.</p>
-                            </div>
                         </div>
                     </div>
                 </div>

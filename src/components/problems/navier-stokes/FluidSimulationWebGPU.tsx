@@ -1,16 +1,16 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { WebGPUFluid, FluidParams } from '../../simulation/navier-stokes/WebGPUFluid';
+import * as React from 'react';
+import { WebGPUFluid, FluidParams } from './WebGPUFluid';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Play, Pause, RotateCcw, Droplets } from 'lucide-react';
 
 const FluidSimulationWebGPU: React.FC = () => {
-    const canvasRef = useRef<HTMLCanvasElement>(null);
-    const [engine, setEngine] = useState<WebGPUFluid | null>(null);
-    const [isPlaying, setIsPlaying] = useState(false);
-    const [fps, setFps] = useState(0);
+    const canvasRef = React.useRef<HTMLCanvasElement>(null);
+    const [engine, setEngine] = React.useState<WebGPUFluid | null>(null);
+    const [isPlaying, setIsPlaying] = React.useState(false);
+    const [fps, setFps] = React.useState(0);
 
-    useEffect(() => {
+    React.useEffect(() => {
         async function initWebGPU() {
             if (!navigator.gpu) {
                 console.error("WebGPU not supported");
@@ -29,28 +29,38 @@ const FluidSimulationWebGPU: React.FC = () => {
             };
 
             const fluidEngine = new WebGPUFluid(device, params);
+
+            if (canvasRef.current) {
+                const context = canvasRef.current.getContext('webgpu');
+                if (context) {
+                    context.configure({
+                        device,
+                        format: navigator.gpu.getPreferredCanvasFormat(),
+                        alphaMode: 'premultiplied',
+                    });
+                }
+            }
+
             setEngine(fluidEngine);
 
-            // Basic render loop (Point rendering for now)
-            const context = canvasRef.current?.getContext('webgpu');
-            if (!context) return;
-
-            // ... (WebGPU Render Pipeline Setup would go here for screen-space rendering)
-            // For the initial act, we will use the compute engine and a simple visualizer.
+            // Basic render logic setup...
         }
 
         initWebGPU();
     }, []);
 
-    useEffect(() => {
+    React.useEffect(() => {
         let animationFrame: number;
         let lastTime = performance.now();
         let frames = 0;
 
         function loop() {
-            if (engine && isPlaying) {
-                engine.step();
-                // Render logic here
+            if (engine && isPlaying && canvasRef.current) {
+                const context = canvasRef.current.getContext('webgpu');
+                if (context) {
+                    engine.step();
+                    engine.render(context);
+                }
 
                 frames++;
                 const now = performance.now();

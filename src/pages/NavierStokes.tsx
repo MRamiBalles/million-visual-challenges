@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import * as React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -14,7 +14,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useMillenniumProblem } from "@/hooks/useMillenniumProblem";
 import { useUserProgress } from "@/hooks/useUserProgress";
 import { useActivityTracker } from "@/hooks/useActivityTracker";
-import { millenniumProblems } from "@/data/millennium-problems";
+import { millenniumProblems, type MillenniumProblem } from "@/data/millennium-problems";
 import { FluidSimulation } from "@/components/problems/navier-stokes/FluidSimulation";
 import { VortexFormation } from "@/components/problems/navier-stokes/VortexFormation";
 import { VelocityField } from "@/components/problems/navier-stokes/VelocityField";
@@ -27,14 +27,24 @@ import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
 const NavierStokes = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
-    const [difficulty, setDifficulty] = useState<DifficultyLevel>("simple");
+    const [problem, setProblem] = React.useState<MillenniumProblem | null>(null);
+    const [difficulty, setDifficulty] = React.useState<DifficultyLevel>("simple");
+    const [loading, setLoading] = React.useState(true);
 
     // Fetch problem data from Supabase (fallback to local data during migration)
     const { data: problemData, isLoading } = useMillenniumProblem("navier-stokes");
-    const problem = problemData || millenniumProblems.find(p => p.slug === "navier-stokes")!;
+
+    React.useEffect(() => {
+        if (!isLoading) {
+            const fetchedProblem = problemData || millenniumProblems.find(p => p.slug === "navier-stokes")!;
+            setProblem(fetchedProblem);
+            setLoading(false);
+        }
+    }, [problemData, isLoading]);
 
     // User progress tracking
-    const problemId = problemData?.id || 3; // Fallback ID during migration
+    // Use optional chaining for problemId as problem might be null initially
+    const problemId = problem?.id || 3; // Fallback ID during migration
     const {
         updateLevel,
         toggleBookmark,
@@ -46,14 +56,14 @@ const NavierStokes = () => {
     useActivityTracker("navier-stokes", "overview");
 
     // Sync difficulty level with user progress
-    useEffect(() => {
+    React.useEffect(() => {
         if (user) {
             updateLevel(difficulty);
         }
     }, [difficulty, user]);
 
     // Track time spent (update every 30 seconds)
-    useEffect(() => {
+    React.useEffect(() => {
         if (!user) return;
 
         const interval = setInterval(() => {
@@ -183,11 +193,6 @@ const NavierStokes = () => {
                         </div>
                     }
                 />
-
-                import {RealityGap} from "@/components/problems/navier-stokes/RealityGap";
-
-                // ... inside the component, before the first VisualizationContainer ...
-                {/* Visualizations Section */}
                 <div className="space-y-12">
                     <h2 className="text-4xl font-bold mb-8 italic tracking-tight">Crossover 2026: La Brecha de Realidad</h2>
 
