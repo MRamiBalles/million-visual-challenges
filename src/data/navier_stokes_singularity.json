@@ -1,0 +1,127 @@
+{
+    "metadata": {
+        "equation": "3D Euler / CCF Model",
+        "description": "Unstable Singularity Profile (Type II) discovered via PINN",
+        "reference": "Wang, Lai, Buckmaster, et al. (DeepMind, 2025)",
+        "lambda_param": 0.47132422,
+        "precision": "approx_float64",
+        "is_stable": false,
+        "blowup_time": 1.0
+    },
+    "simulation_config": {
+        "domain_y": [
+            -10,
+            10
+        ],
+        "resolution": 200,
+        "alpha_scaling": 2.0
+    },
+    "profile": [
+        {
+            "y_coord": -5.0,
+            "vorticity": 0.02,
+            "velocity": -4.8
+        },
+        {
+            "y_coord": -4.5,
+            "vorticity": 0.05,
+            "velocity": -4.5
+        },
+        {
+            "y_coord": -4.0,
+            "vorticity": 0.12,
+            "velocity": -4.1
+        },
+        {
+            "y_coord": -3.5,
+            "vorticity": -0.85,
+            "velocity": -3.8
+        },
+        {
+            "y_coord": -3.0,
+            "vorticity": 8.50,
+            "velocity": -3.2
+        },
+        {
+            "y_coord": -2.5,
+            "vorticity": 2.10,
+            "velocity": -2.5
+        },
+        {
+            "y_coord": -2.0,
+            "vorticity": 0.85,
+            "velocity": -1.9
+        },
+        {
+            "y_coord": -1.5,
+            "vorticity": 0.45,
+            "velocity": -1.2
+        },
+        {
+            "y_coord": -1.0,
+            "vorticity": 0.25,
+            "velocity": -0.7
+        },
+        {
+            "y_coord": -0.5,
+            "vorticity": 0.15,
+            "velocity": -0.3
+        },
+        {
+            "y_coord": 0.0,
+            "vorticity": 0.00,
+            "velocity": 0.0
+        },
+        {
+            "y_coord": 0.5,
+            "vorticity": -0.15,
+            "velocity": 0.3
+        },
+        {
+            "y_coord": 1.0,
+            "vorticity": -0.25,
+            "velocity": 0.7
+        },
+        {
+            "y_coord": 1.5,
+            "vorticity": -0.45,
+            "velocity": 1.2
+        },
+        {
+            "y_coord": 2.0,
+            "vorticity": -0.85,
+            "velocity": 1.9
+        },
+        {
+            "y_coord": 2.5,
+            "vorticity": -2.10,
+            "velocity": 2.5
+        },
+        {
+            "y_coord": 3.0,
+            "vorticity": -8.50,
+            "velocity": 3.2
+        },
+        {
+            "y_coord": 3.5,
+            "vorticity": 0.85,
+            "velocity": 3.8
+        },
+        {
+            "y_coord": 4.0,
+            "vorticity": -0.12,
+            "velocity": 4.1
+        },
+        {
+            "y_coord": 4.5,
+            "vorticity": -0.05,
+            "velocity": 4.5
+        },
+        {
+            "y_coord": 5.0,
+            "vorticity": -0.02,
+            "velocity": 4.8
+        }
+    ],
+    "note": "Synthetic data approximating the high-gradient peaks at y ~ +/- 3 observed in the 2nd unstable solution (Wang et al. 2025)"
+}
