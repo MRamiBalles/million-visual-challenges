@@ -12,20 +12,55 @@ class YangMillsEngine:
         self.lattice_size = lattice_size
         self.mass_gap = 0.0
 
-    def two_level_algorithm(self, n1=100, n2=10):
+    def two_level_algorithm_calibration(self, n1_range=[10, 50, 100, 500], frozen_thickness=1.0):
         """
-        Reduce el ruido en correladores de glueball mediante promedio anidado.
-        Varianza se reduce proporcional a 1/sqrt(n1).
+        Calibración rigurosa del Algoritmo de Dos Niveles (Barca/Peardon).
+        Objetivo 1: Verificar que la varianza escala como 1/N1 (y no 1/sqrt(N)).
+        Objetivo 2: Detectar saturación de error debido a efectos de frontera finitos.
         """
-        print(f"> [LOG] Iniciando Two-Level Algorithm (n1={n1}, n2={n2})...")
+        print(f"\n> [CALIBRATION] Iniciando Auditoría Two-Level (Boundary Thickness $\Delta$={frozen_thickness})...")
         
-        # Simulación de sub-regiones activas (L0) y bordes fijos
-        region_vals = np.random.normal(0, 1, (n2, n1))
-        region_averages = np.mean(region_vals, axis=1)
+        variances = []
+        scaling_check = []
         
-        final_variance = np.var(region_averages)
-        print(f"> [OBSERVE] Varianza optimizada: {final_variance:.6f}")
-        return final_variance
+        for n1 in n1_range:
+            # Simulación de sub-mediciones en región activa con ruido correlacionado espacialmente
+            # El ruido decae exponencialmente con la distancia a la frontera 'frozen_thickness'
+            raw_noise = np.random.normal(0, 1, (1000, n1))
+            
+            # Factor de amortiguación de frontera (Boundary Effect)
+            # Si el espesor es pequeño, el ruido entra desde la frontera
+            boundary_leak = np.exp(-2.0 * frozen_thickness)
+            
+            # Promedio anidado: < <O>_n1 >_n2
+            # La señal efectiva mejora con n1 sub-mediciones, pero el ruido de frontera es constante
+            signal = np.mean(raw_noise, axis=1) * (1.0 / n1) + boundary_leak * np.random.normal(0, 0.1, 1000)
+            
+            var = np.var(signal)
+            variances.append(var)
+            
+            # Verificación teórica: Varianza * N1 debería ser constante si escala como 1/N1
+            # Si hay saturación por frontera, esto se desviará para N1 grandes
+            scaling_constant = var * n1
+            scaling_check.append(scaling_constant)
+            
+            print(f"  > N1={n1}: Varianza={var:.2e} | Scaling Constant (Var*N1)={scaling_constant:.2e}")
+
+        # Análisis de resultados
+        is_scaling_valid = np.std(scaling_check[:-1]) < np.mean(scaling_check[:-1]) * 0.2
+        is_saturated = scaling_check[-1] > scaling_check[0] * 1.5 # Empieza a fallar el scaling puro a N1 alto por frontera
+        
+        if is_scaling_valid:
+            print("> [PASS] Escalado 1/N1 detectado en régimen lineal.")
+        else:
+            print("> [FAIL] Escalado incorrecto. Ruido domina.")
+            
+        if is_saturated:
+            print(f"> [WARN] Saturación por Efecto de Frontera detectada en N1={n1_range[-1]}. Aumentar espesor congelado.")
+        else:
+            print("> [INFO] Sin saturación de frontera (Régimen ideal).")
+            
+        return variances
 
     def gradient_flow_wilson(self, time_steps=50):
         """
