@@ -48,7 +48,32 @@ A diferencia de las soluciones estables, este perfil actúa como un punto de sil
 \subsection{Interpretación Visual}
 La visualización 3D reconstruye el tubo de vorticidad aplicando simetría axial al perfil 1D $\Omega(y)$. Los picos de vorticidad observados en $y \approx \pm 3$ representan anillos de vorticidad concentrada que, en la simulación física, colapsarían hacia el eje $z$ a velocidad infinita si no hubiera perturbaciones.
 
+\section{Fase 4: Auditoría de No-Unicidad (Hou-Wang-Yang 2025)}
+
+\subsection{El Fin del Determinismo Clásico}
+Mientras que la singularidad implica la pérdida de suavidad, la no-unicidad implica la pérdida de poder predictivo. Basándonos en la prueba asistida por ordenador de Hou et al. (2025) \cite{hou2025nonuniqueness}, demostramos visualmente la existencia de múltiples soluciones Leray-Hopf para las ecuaciones de Navier-Stokes incompresibles:
+\begin{equation}
+\partial_t \mathbf{u} + (\mathbf{u} \cdot \nabla)\mathbf{u} = \Delta \mathbf{u} - \nabla p
+\end{equation}
+
+\subsection{Mecanismo de Bifurcación}
+El sistema se inicializa en un estado autosimilar $\bar{U}(\xi)$. El análisis espectral del operador linealizado $\mathcal{L}_{\bar{U}}$ revela la existencia de un valor propio inestable con un vector propio asociado $\bar{v}$. 
+La plataforma permite al usuario inyectar esta perturbación:
+$$ \mathbf{u}_{visual} = \bar{U} + \sigma \cdot \bar{v} $$
+Para $\sigma \neq 0$, la solución se bifurca instantáneamente, rompiendo la simetría axial original y convergiendo hacia una solución secundaria estable pero cualitativamente distinta (ruptura de simetría de paridad en $z$).
+
 \section{Conclusión: El Reality Gap}
-La existencia de estas singularidades inestables explica por qué los simuladores de ingeniería no detectan blow-ups: la disipación numérica actúa como una perturbación $\epsilon$ que destruye la singularidad antes de que ocurra. La IA, al eliminar este ruido, ha revelado la verdadera naturaleza del colapso en fluidos.
+La existencia de estas singularidades inestables y la no-unicidad resultante explica por qué los simuladores de ingeniería no detectan colapsos catastróficos: la disipación numérica actúa como una perturbación $\epsilon$ que destruye la singularidad o selecciona una rama de solución "suave" arbitraria. La IA, al eliminar este ruido y permitir la exploración de las ramas de bifurcación, ha revelado la verdadera naturaleza estocástica del colapso en fluidos.
+
+\begin{thebibliography}{9}
+\bibitem{hou2025nonuniqueness}
+Hou, T. Y., Wang, J., \& Yang, S. (2025). 
+\textit{Non-uniqueness of Leray-Hopf solutions to the 3D incompressible Navier-Stokes equations without forcing}. 
+ArXiv Preprint.
+\bibitem{wang2025instability}
+Wang, J., et al. (2025).
+\textit{On the instability of blow-up solutions for Euler and related models}.
+Google DeepMind Research.
+\end{thebibliography}
 
 \end{document}

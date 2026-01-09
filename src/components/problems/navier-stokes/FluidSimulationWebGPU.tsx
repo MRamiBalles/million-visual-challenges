@@ -7,8 +7,10 @@ import { Play, Pause, RotateCcw, Droplets } from 'lucide-react';
 const FluidSimulationWebGPU: React.FC = () => {
     const canvasRef = React.useRef<HTMLCanvasElement>(null);
     const [engine, setEngine] = React.useState<WebGPUFluid | null>(null);
-    const [isPlaying, setIsPlaying] = React.useState(false);
+    const [isPlaying, setIsPlaying] = React.useState(true);
     const [fps, setFps] = React.useState(0);
+    const [particleCount] = React.useState(50000);
+    const [sigma, setSigma] = React.useState(0);
 
     React.useEffect(() => {
         async function initWebGPU() {
@@ -77,6 +79,20 @@ const FluidSimulationWebGPU: React.FC = () => {
         return () => cancelAnimationFrame(animationFrame);
     }, [engine, isPlaying]);
 
+    const toggleSimulation = () => setIsPlaying(!isPlaying);
+
+    const triggerBifurcation = () => {
+        if (engine) {
+            engine.injectPerturbation(sigma);
+        }
+    };
+
+    const resetSymmetric = () => {
+        if (engine) {
+            engine.reinitBifurcation();
+        }
+    };
+
     return (
         <Card className="bg-slate-900 border-slate-800 overflow-hidden">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -86,21 +102,45 @@ const FluidSimulationWebGPU: React.FC = () => {
                 </CardTitle>
                 <div className="flex items-center gap-2">
                     <span className="text-xs font-mono text-slate-500">{fps} FPS</span>
-                    <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => setIsPlaying(!isPlaying)}
-                        className="h-8 w-8 p-0"
-                    >
-                        {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                    </Button>
-                    <Button
-                        size="sm"
-                        variant="ghost"
-                        className="h-8 w-8 p-0"
-                    >
-                        <RotateCcw className="w-4 h-4" />
-                    </Button>
+                    <div className="flex items-center gap-4">
+                        <Button
+                            variant={isPlaying ? "outline" : "default"}
+                            onClick={toggleSimulation}
+                            className="bg-blue-600 hover:bg-blue-700 text-white border-none"
+                        >
+                            {isPlaying ? "Pausar" : "Simular"}
+                        </Button>
+
+                        <div className="flex items-center gap-2 bg-slate-900 px-3 py-1.5 rounded-md border border-slate-800">
+                            <span className="text-xs text-slate-400 font-mono">$\sigma$:</span>
+                            <input
+                                type="range"
+                                min="0"
+                                max="1"
+                                step="0.01"
+                                value={sigma}
+                                onChange={(e) => setSigma(parseFloat(e.target.value))}
+                                className="w-24 h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer"
+                            />
+                            <span className="text-xs text-blue-400 font-mono w-8">{sigma.toFixed(2)}</span>
+                        </div>
+
+                        <Button
+                            variant="outline"
+                            onClick={triggerBifurcation}
+                            className="text-amber-400 border-amber-900/50 hover:bg-amber-900/20"
+                        >
+                            Inyectar $\bar{v}$
+                        </Button>
+
+                        <Button
+                            variant="ghost"
+                            onClick={resetSymmetric}
+                            className="text-slate-500 hover:text-white"
+                        >
+                            Reset Simetría
+                        </Button>
+                    </div>
                 </div>
             </CardHeader>
             <CardContent>

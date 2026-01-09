@@ -1,5 +1,6 @@
 import mlsMpmShaders from './mls-mpm-shaders.wgsl?raw';
 import fluidRenderShaders from './fluid-render-shaders.wgsl?raw';
+import initBifurcationShaders from './InitBifurcation.wgsl?raw';
 
 export interface FluidParams {
     dt: number;
@@ -13,10 +14,13 @@ export class WebGPUFluid {
     private particleBuffer: GPUBuffer;
     private gridBuffer: GPUBuffer;
     private uniformBuffer: GPUBuffer;
+    private sigmaBuffer: GPUBuffer;
     private computePipeline: {
         p2g: GPUComputePipeline;
         update: GPUComputePipeline;
         g2p: GPUComputePipeline;
+        initBifurcation: GPUComputePipeline;
+        applyPerturbation: GPUComputePipeline;
     };
     private bindGroup: GPUBindGroup;
     private renderPipeline: GPURenderPipeline;
@@ -47,6 +51,11 @@ export class WebGPUFluid {
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
         });
 
+        this.sigmaBuffer = device.createBuffer({
+            size: 4, // sigma (f32)
+            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+        });
+
         // 2. Load Shaders & Pipelines
         const shaderModule = device.createShaderModule({
             code: mlsMpmShaders,
@@ -64,6 +73,10 @@ export class WebGPUFluid {
             bindGroupLayouts: [bindGroupLayout],
         });
 
+        const initModule = device.createShaderModule({
+            code: initBifurcationShaders,
+        });
+
         this.computePipeline = {
             p2g: device.createComputePipeline({
                 layout: pipelineLayout,
@@ -76,6 +89,29 @@ export class WebGPUFluid {
             g2p: device.createComputePipeline({
                 layout: pipelineLayout,
                 compute: { module: shaderModule, entryPoint: 'g2p' },
+            }),
+            initBifurcation: device.createComputePipeline({
+                layout: device.createPipelineLayout({
+                    bindGroupLayouts: [device.createBindGroupLayout({
+                        entries: [
+                            { binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'storage' } },
+                            { binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'uniform' } },
+                        ]
+                    })]
+                }),
+                compute: { module: initModule, entryPoint: 'init_bifurcation' },
+            }),
+            applyPerturbation: device.createComputePipeline({
+                layout: device.createPipelineLayout({
+                    bindGroupLayouts: [device.createBindGroupLayout({
+                        entries: [
+                            { binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'storage' } },
+                            { binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'uniform' } },
+                            { binding: 2, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'uniform' } },
+                        ]
+                    })]
+                }),
+                compute: { module: initModule, entryPoint: 'apply_perturbation' },
             }),
         };
 
@@ -195,5 +231,48 @@ export class WebGPUFluid {
 
     public getParticleBuffer() {
         return this.particleBuffer;
+    }
+
+    public reinitBifurcation() {
+        const commandEncoder = this.device.createCommandEncoder();
+        const bindGroup = this.device.createBindGroup({
+            layout: this.computePipeline.initBifurcation.getBindGroupLayout(0),
+            entries: [
+                { binding: 0, resource: { buffer: this.particleBuffer } },
+                { binding: 1, resource: { buffer: this.uniformBuffer } },
+            ],
+        });
+
+        const pass = commandEncoder.beginComputePass();
+        pass.setBindGroup(0, bindGroup);
+        pass.setPipeline(this.computePipeline.initBifurcation);
+        pass.dispatchWorkgroups(Math.ceil(this.params.particleCount / 64));
+        pass.end();
+
+        this.device.queue.submit([commandEncoder.finish()]);
+    }
+
+    public injectPerturbation(sigma: number) {
+        // Write sigma to buffer
+        const sigmaData = new Float32Array([sigma]);
+        this.device.queue.writeBuffer(this.sigmaBuffer, 0, sigmaData);
+
+        const commandEncoder = this.device.createCommandEncoder();
+        const bindGroup = this.device.createBindGroup({
+            layout: this.computePipeline.applyPerturbation.getBindGroupLayout(0),
+            entries: [
+                { binding: 0, resource: { buffer: this.particleBuffer } },
+                { binding: 1, resource: { buffer: this.uniformBuffer } },
+                { binding: 2, resource: { buffer: this.sigmaBuffer } },
+            ],
+        });
+
+        const pass = commandEncoder.beginComputePass();
+        pass.setBindGroup(0, bindGroup);
+        pass.setPipeline(this.computePipeline.applyPerturbation);
+        pass.dispatchWorkgroups(Math.ceil(this.params.particleCount / 64));
+        pass.end();
+
+        this.device.queue.submit([commandEncoder.finish()]);
     }
 }
