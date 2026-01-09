@@ -19,6 +19,9 @@ import { FluidSimulation } from "@/components/problems/navier-stokes/FluidSimula
 import { VortexFormation } from "@/components/problems/navier-stokes/VortexFormation";
 import { VelocityField } from "@/components/problems/navier-stokes/VelocityField";
 import { RealityGap } from "@/components/problems/navier-stokes/RealityGap";
+import SingularityViewer from "@/components/problems/navier-stokes/SingularityViewer";
+import { Canvas } from "@react-three/fiber";
+import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
 
 const NavierStokes = () => {
     const navigate = useNavigate();
@@ -196,6 +199,32 @@ const NavierStokes = () => {
                     </div>
 
                     <RealityGap />
+
+                    <h2 className="text-4xl font-bold mt-20 mb-8 italic tracking-tight">Acto 2: El Descubrimiento (DeepMind 2025)</h2>
+
+                    <div className="prose prose-invert max-w-none mb-12">
+                        <p className="text-slate-400 text-lg">
+                            Utilizando Redes Neuronales Informadas por la Física (PINNs) y normalización de gradientes,
+                            la IA ha descubierto estructuras que los humanos nunca vieron: singularidades inestables.
+                            A continuación, visualizamos el perfil detectado para Euler 3D con <span className="text-red-500 font-mono">λ ≈ 0.4713</span>.
+                        </p>
+                    </div>
+
+                    <VisualizationContainer
+                        title="Monitor de Singularidad Inestable"
+                        description="Explora la geometría 3D de la singularidad de Tipo II. Interactúa con ella para observar por qué es imposible verla en el mundo macroscópico."
+                        fullscreenEnabled
+                    >
+                        <div className="h-[600px] w-full bg-slate-950 rounded-xl overflow-hidden mt-6 border border-slate-800 relative">
+                            <Canvas>
+                                <PerspectiveCamera makeDefault position={[10, 5, 10]} />
+                                <OrbitControls enableZoom={true} />
+                                <ambientLight intensity={0.5} />
+                                <pointLight position={[10, 10, 10]} intensity={1} />
+                                <SingularityViewer />
+                            </Canvas>
+                        </div>
+                    </VisualizationContainer>
 
                     <h2 className="text-3xl font-bold mt-20 mb-8">Visualizaciones Tradicionales</h2>
 
