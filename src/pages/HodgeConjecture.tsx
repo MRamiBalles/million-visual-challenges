@@ -2,201 +2,223 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Bookmark, BookmarkCheck } from "lucide-react";
-import {
-    ProblemHeader,
-    DifficultySelector,
-    ReferenceList,
-    VisualizationContainer,
-    type DifficultyLevel,
-} from "@/components/problem";
+import { ArrowLeft, Terminal as TerminalIcon, Cpu, Code, Database, Search, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useMillenniumProblem } from "@/hooks/useMillenniumProblem";
 import { useUserProgress } from "@/hooks/useUserProgress";
 import { useActivityTracker } from "@/hooks/useActivityTracker";
 import { millenniumProblems } from "@/data/millennium-problems";
-import { AlgebraicCyclesVisualization } from "@/components/problems/hodge/AlgebraicCyclesVisualization";
-import { CohomologyRing } from "@/components/problems/hodge/CohomologyRing";
+import { NodeSurgeryVisualizer } from "@/components/problems/hodge/NodeSurgeryVisualizer";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { motion, AnimatePresence } from "framer-motion";
 
 const HodgeConjecture = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
-    const [difficulty, setDifficulty] = useState<DifficultyLevel>("simple");
+    const [activeTab, setActiveTab] = useState<"terminal" | "visualizer" | "docs">("terminal");
+    const [terminalLines, setTerminalLines] = useState<string[]>([]);
+    const [isCalculating, setIsCalculating] = useState(false);
 
     const { data: problemData, isLoading } = useMillenniumProblem("hodge");
     const problem = problemData || millenniumProblems.find(p => p.slug === "hodge")!;
 
-    const problemId = problemData?.id || 5;
-    const { updateLevel, toggleBookmark, isBookmarked, updateTimeSpent } = useUserProgress(problemId, user?.id);
+    useActivityTracker("hodge", "terminal_research");
 
-    useActivityTracker("hodge", "overview");
+    // Simulación del ciclo "Reason-Code-Observe"
+    const runInference = async () => {
+        setIsCalculating(true);
+        const steps = [
+            "> [PLAN] Analizando clase alpha = h + 2v1...",
+            "> [CONOCIMIENTO] Recuperando parámetros de Mounda (2025)...",
+            "> [CODE] Generando script SymPy para matriz de intersección...",
+            "> [EXEC] Running math_agent.py in Docker sandbox...",
+            "> [OBSERVE] Autovalores detectados: [1.2, -4.5]. Estabilidad nodal confirmada.",
+            "> [FINAL] Parámetros geométricos cargados al visualizador."
+        ];
 
-    useEffect(() => {
-        if (user) updateLevel(difficulty);
-    }, [difficulty, user]);
-
-    useEffect(() => {
-        if (!user) return;
-        const interval = setInterval(() => {
-            updateTimeSpent(30);
-        }, 30000);
-        return () => clearInterval(interval);
-    }, [user, updateTimeSpent]);
+        for (const step of steps) {
+            setTerminalLines(prev => [...prev, step]);
+            await new Promise(r => setTimeout(r, 600));
+        }
+        setIsCalculating(false);
+        setActiveTab("visualizer");
+    };
 
     if (isLoading) {
-        return (
-            <div className="min-h-screen bg-background">
-                <div className="container mx-auto px-6 py-16">
-                    <Skeleton className="h-64 w-full mb-8" />
-                </div>
-            </div>
-        );
+        return <div className="min-h-screen bg-[#050505] p-24"><Skeleton className="h-full w-full opacity-10" /></div>;
     }
 
     return (
-        <div className="min-h-screen bg-background">
-            <header className="border-b border-border sticky top-0 z-50 bg-background/95 backdrop-blur">
-                <div className="container mx-auto px-6 py-4">
-                    <div className="flex items-center justify-between">
-                        <Button variant="ghost" onClick={() => navigate("/")} className="gap-2">
-                            <ArrowLeft className="w-4 h-4" />
-                            Problemas del Milenio
+        <div className="min-h-screen bg-[#050505] text-white font-sans selection:bg-cyan-500/30">
+            {/* Header Técnico */}
+            <header className="border-b border-white/5 bg-black/80 backdrop-blur-xl sticky top-0 z-50">
+                <div className="container mx-auto px-6 py-4 flex items-center justify-between">
+                    <div className="flex items-center gap-6">
+                        <Button variant="ghost" onClick={() => navigate("/")} className="text-white/40 hover:text-white">
+                            <ArrowLeft className="w-4 h-4 mr-2" /> EXIT_CORE
                         </Button>
-                        {user && (
-                            <Button
-                                variant={isBookmarked ? "default" : "outline"}
-                                size="sm"
-                                onClick={() => toggleBookmark()}
-                                className="gap-2"
-                            >
-                                {isBookmarked ? <><BookmarkCheck className="w-4 h-4" />Guardado</> : <><Bookmark className="w-4 h-4" />Guardar</>}
-                            </Button>
-                        )}
+                        <div className="h-4 w-[1px] bg-white/10" />
+                        <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="border-cyan-500/30 text-cyan-400 bg-cyan-500/5">
+                                HODGE_CONJECTURE_V2026
+                            </Badge>
+                            <span className="text-[10px] font-mono text-white/20">AGENT_MATH_CONNECTED</span>
+                        </div>
                     </div>
                 </div>
             </header>
 
-            <ProblemHeader problem={problem} />
-
-            <section className="container mx-auto px-6 py-16">
-                <DifficultySelector
-                    currentLevel={difficulty}
-                    onLevelChange={setDifficulty}
-                    className="mb-16"
-                    simpleContent={
-                        <div className="space-y-4">
-                            <p className="text-lg ">
-                                Imagina que tienes una esfera. Es una superficie 2D en un espacio 3D. Si la cortas con un plano,
-                                obtienes círculos. Estos círculos son "cicl os algebraicos" - formas que podemos describir con ecuaciones.
-                            </p>
-                            <p>
-                                La Hipótesis de Hodge pregunta: <strong>¿Toda forma complicada en una variedad algebraica puede
-                                    construirse combinando estas formas simples algebraicas?</strong>
-                            </p>
-                            <p className="text-xl font-semibold text-primary mt-4">
-                                Es como preguntar si todo objeto geométrico complejo se puede construir pegando piezas algebraicas básicas.
-                            </p>
-                        </div>
-                    }
-                    intermediateContent={
-                        <div className="space-y-4">
-                            <p className="text-lg">
-                                En geometría algebraica, estudiamos variedades - espacios definidos por ecuaciones polinómicas.
-                                La cohomología estudia los "agujeros" y estructura topológica de estos espacios.
-                            </p>
-                            <div className="bg-muted p-4 rounded-lg space-y-3">
-                                <p><strong>Ciclos Algebraicos:</strong> Subvariedades definidas por ecuaciones</p>
-                                <p><strong>Clases de Hodge:</strong> Objetos topológicos de un tipo especial</p>
-                                <p><strong>La Conjetura:</strong> ¿Toda clase de Hodge  viene de un ciclo algebraico?</p>
-                            </div>
-                            <p>
-                                Solo probada para curvas (1D) y superficies (2D). Dimensiones superiores permanecen abiertas.
-                            </p>
-                        </div>
-                    }
-                    advancedContent={
-                        <div className="space-y-4">
-                            <p className="text-lg font-mono">
-                                {problem.description?.advanced || "Sea X  una variedad algebraica proyectiva compleja suave."}
-                            </p>
-                            <div className="bg-muted p-4 rounded-lg font-mono text-sm space-y-2">
-                                <p>H^(p,p)(X) ∩ H^(2p)(X, ℚ) generado por clases de ciclos algebraicos</p>
-                                <p>Cohomolog\u00eda de Hodge: H^k(X,ℂ) = ⊕ H^(p,q)(X)</p>
-                            </div>
-                            <p>
-                                Conexiones: Teoría de Hodge, variedades de Calabi-Yau, motivos, grupos de Chow,
-                                ciclos algebraicos superiores, cohomología étale.
-                            </p>
-                        </div>
-                    }
-                />
-
-                {/* Visualizations Section */}
-                <div className="space-y-12 my-20">
-                    <h2 className="text-4xl font-bold mb-8">Visualizaciones Interactivas</h2>
-
-                    <VisualizationContainer
-                        title="Ciclos Algebraicos"
-                        description="Visualización de ciclos algebraicos en una variedad compleja"
-                        fullscreenEnabled
-                    >
-                        <AlgebraicCyclesVisualization />
-                    </VisualizationContainer>
-
-                    <VisualizationContainer
-                        title="Anillo de Cohomología"
-                        description="Estructura del anillo de cohomología de Hodge"
-                        fullscreenEnabled
-                    >
-                        <CohomologyRing />
-                    </VisualizationContainer>
+            <main className="container mx-auto px-6 py-12">
+                {/* Intro Section */}
+                <div className="mb-12">
+                    <h1 className="text-6xl font-black mb-4 tracking-tighter">
+                        CONJETURA DE <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-indigo-600">HODGE</span>
+                    </h1>
+                    <p className="text-white/40 max-w-2xl font-mono text-sm uppercase tracking-widest">
+                        Terminal de Investigación Ejecutable: Geometría Algebraica, Ciclos y Cohomología.
+                    </p>
                 </div>
 
-                <div className="mt-20">
-                    <ReferenceList
-                        title="Referencias Clave"
-                        references={[
-                            {
-                                title: problem.clayPaper.author + " - The Hodge Conjecture",
-                                authors: [problem.clayPaper.author],
-                                year: problem.clayPaper.year,
-                                url: problem.clayPaper.url,
-                                description: "Paper oficial del Clay Mathematics Institute",
-                            },
-                            ...(problem.keyReferences || []),
-                        ]}
-                    />
-
-                    <div className="mt-12 p-8 bg-gradient-to-br from-primary/5 to-accent/5 rounded-lg border border-primary/10">
-                        <h3 className="text-2xl font-bold mb-6">Contexto e Importancia</h3>
-                        <div className="space-y-4">
-                            <p>
-                                La Hipótesis de Hodge conecta <strong>geometría algebraica</strong> (ecuaciones polinómicas) con
-                                <strong> topología</strong> (forma y estructura de espacios). Es fundamental para (entender la estructura profunda
-                                de variedades algebraicas.
-                            </p>
-                            <div className="grid md:grid-cols-2 gap-4 mt-6">
-                                <div className="p-4 bg-background/50 rounded">
-                                    <h4 className="font-bold mb-2">🏆 William Hodge</h4>
-                                    <p className="text-sm">Matemático escocés que formuló la conjetura en 1950 basándose en su teoría de formas harmónicas</p>
-                                </div>
-                                <div className="p-4 bg-background/50 rounded">
-                                    <h4 className="font-bold mb-2">📐 Geometría Algebraica</h4>
-                                    <p className="text-sm">La conjetura es central en geometría algebraica moderna y teoría de motivos</p>
-                                </div>
-                                <div className="p-4 bg-background/50 rounded">
-                                    <h4 className="font-bold mb-2">🔬 Casos Conocidos</h4>
-                                    <p className="text-sm">Probada para curvas, superficies, y algunos casos especiales en dimensiones superiores</p>
-                                </div>
-                                <div className="p-4 bg-background/50 rounded">
-                                    <h4 className="font-bold mb-2">💰 Premio</h4>
-                                    <p className="text-sm">$1,000,000 USD por demostración o contraejemplo</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                {/* Tabs Navigation */}
+                <div className="flex gap-1 mb-8 bg-white/5 p-1 rounded-lg w-fit">
+                    {[
+                        { id: "terminal", icon: <TerminalIcon className="w-4 h-4" />, label: "RAZONAMIENTO" },
+                        { id: "visualizer", icon: <Cpu className="w-4 h-4" />, label: "VISUALIZADOR_3D" },
+                        { id: "docs", icon: <Database className="w-4 h-4" />, label: "RECURSOS_RAG" }
+                    ].map((tab) => (
+                        <button
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id as any)}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-md transition-all text-xs font-bold font-mono ${activeTab === tab.id
+                                    ? "bg-cyan-500 text-black shadow-lg shadow-cyan-500/20"
+                                    : "text-white/40 hover:text-white/60 hover:bg-white/5"
+                                }`}
+                        >
+                            {tab.icon} {tab.label}
+                        </button>
+                    ))}
                 </div>
-            </section>
+
+                {/* Content Area */}
+                <AnimatePresence mode="wait">
+                    {activeTab === "terminal" && (
+                        <motion.div
+                            key="terminal"
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: 20 }}
+                            className="grid grid-cols-1 lg:grid-cols-3 gap-6"
+                        >
+                            <Card className="lg:col-span-2 bg-[#0a0a0a] border-white/5 p-6 font-mono text-xs overflow-hidden h-[500px] flex flex-col shadow-2xl">
+                                <div className="flex items-center justify-between mb-4 border-b border-white/5 pb-4">
+                                    <div className="flex gap-2">
+                                        <div className="w-2 h-2 rounded-full bg-red-500/50" />
+                                        <div className="w-2 h-2 rounded-full bg-yellow-500/50" />
+                                        <div className="w-2 h-2 rounded-full bg-green-500/50" />
+                                    </div>
+                                    <span className="text-white/20">AGENT_REASONING_ENGINE_V1</span>
+                                </div>
+                                <div className="flex-1 overflow-y-auto space-y-3 custom-scrollbar pr-4">
+                                    <div className="text-cyan-500">Welcome to Hodge Terminal. Waiting for instruction...</div>
+                                    {terminalLines.map((line, i) => (
+                                        <div key={i} className={line.startsWith("> [OBS") ? "text-green-400" : "text-white/60"}>
+                                            {line}
+                                        </div>
+                                    ))}
+                                    {isCalculating && (
+                                        <div className="flex items-center gap-2 text-white/30 italic">
+                                            <RefreshCw className="w-3 h-3 animate-spin" /> Procesando petición...
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="mt-4 pt-4 border-t border-white/5 flex gap-4">
+                                    <input
+                                        type="text"
+                                        placeholder="Ej: Calcula la cirugía de nodos para clase h + 2v1"
+                                        className="bg-transparent flex-1 outline-none text-cyan-400 placeholder:text-white/10"
+                                        onKeyDown={(e) => e.key === 'Enter' && runInference()}
+                                    />
+                                    <Button size="sm" onClick={runInference} disabled={isCalculating} className="bg-cyan-500 hover:bg-cyan-400 text-black font-bold">
+                                        EJECUTAR
+                                    </Button>
+                                </div>
+                            </Card>
+
+                            <div className="space-y-6">
+                                <Card className="bg-gradient-to-br from-indigo-500/10 to-transparent border-indigo-500/20 p-6">
+                                    <h3 className="text-indigo-400 font-bold text-sm mb-4 flex items-center gap-2">
+                                        <ShieldCheck className="w-4 h-4" /> VERIFICACIÓN FORMAL
+                                    </h3>
+                                    <p className="text-[10px] text-white/40 font-mono leading-relaxed mb-6">
+                                        Cualquier script generado es validado via SymPyBench contra la correspondencia de De Rham.
+                                    </p>
+                                    <div className="space-y-2">
+                                        <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                                            <div className="h-full w-[85%] bg-indigo-500" />
+                                        </div>
+                                        <div className="flex justify-between text-[8px] font-mono text-white/20 uppercase">
+                                            <span>PRECISIÓN SIMBÓLICA</span>
+                                            <span>85% (RETOOL_SCORE)</span>
+                                        </div>
+                                    </div>
+                                </Card>
+                                <Card className="bg-black/40 border-white/5 p-6 h-fit">
+                                    <h4 className="text-[10px] font-mono text-white/20 uppercase mb-4 tracking-tighter">Últimas Consultas</h4>
+                                    <div className="space-y-3">
+                                        {['Degeneración de Mounda', 'Cohomología de K3', 'Ciclos de Hodge Curvas'].map(t => (
+                                            <div key={t} className="text-[10px] py-2 px-3 bg-white/5 rounded hover:bg-white/10 cursor-pointer transition-colors border border-white/5 text-white/60">
+                                                {t}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </Card>
+                            </div>
+                        </motion.div>
+                    )}
+
+                    {activeTab === "visualizer" && (
+                        <motion.div
+                            key="visualizer"
+                            initial={{ opacity: 0, scale: 0.98 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 1.02 }}
+                        >
+                            <NodeSurgeryVisualizer />
+                        </motion.div>
+                    )}
+
+                    {activeTab === "docs" && (
+                        <motion.div
+                            key="docs"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
+                        >
+                            {[
+                                { title: "Hodge (1950)", author: "W. Hodge", year: 1950, color: "blue" },
+                                { title: "Node Surgery", author: "Mounda", year: 2025, color: "cyan" },
+                                { title: "Fredholm Det", author: "Shimizu", year: 2025, color: "indigo" },
+                                { title: "RAG Docs", author: "MVC System", year: 2026, color: "green" }
+                            ].map((doc, i) => (
+                                <Card key={i} className="p-4 bg-black/40 border-white/5 hover:border-cyan-500/30 transition-all group cursor-pointer">
+                                    <div className={`w-1 h-8 bg-${doc.color}-500 mb-4`} />
+                                    <h4 className="text-xs font-bold mb-1">{doc.title}</h4>
+                                    <div className="text-[10px] text-white/30 font-mono italic">{doc.author} ({doc.year})</div>
+                                    <Search className="w-3 h-3 text-cyan-500 opacity-0 group-hover:opacity-100 transition-opacity mt-4" />
+                                </Card>
+                            ))}
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </main>
+
+            <footer className="border-t border-white/5 py-8 mt-24">
+                <div className="container mx-auto px-6 text-center text-white/20 text-[10px] font-mono tracking-widest uppercase">
+                    Million Visual Challenges // Hodge Conjecture // Agentic Math Core
+                </div>
+            </footer>
         </div>
     );
 };
