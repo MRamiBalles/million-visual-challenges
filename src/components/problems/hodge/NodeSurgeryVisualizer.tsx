@@ -153,34 +153,41 @@ export const NodeSurgeryVisualizer = () => {
                     <Badge className="bg-cyan-500/10 text-cyan-400 border-cyan-500/20 backdrop-blur-md">
                         ESTÁNDAR NIST DLMF: FASE COMPLEJA
                     </Badge>
-                    <div className="p-3 bg-black/60 backdrop-blur border border-white/10 rounded-lg max-w-[200px]">
-                        <p className="text-[10px] text-cyan-500/70 font-mono mb-1">DEFORMACIÓN DE MOUNDA (t)</p>
+                    <div className="p-3 bg-black/60 backdrop-blur border border-white/10 rounded-lg max-w-[250px]">
+                        <p className="text-[10px] text-cyan-500/70 font-mono mb-1">CLASE: α = h + 3v₁ - 4v₂</p>
+                        <p className="text-[10px] text-white/50 font-mono mb-2">TARGET: 7 SINGULARIDADES (NODOS)</p>
                         <div className="h-1 bg-white/5 rounded-full overflow-hidden">
                             <div
                                 className="h-full bg-cyan-500 transition-all duration-300"
                                 style={{ width: `${nodalParam * 100}%` }}
                             />
                         </div>
+                        <div className="flex justify-between mt-1 text-[8px] text-white/30 font-mono">
+                            <span>SUAVE (t=1)</span>
+                            <span>CRÍTICO (t=0)</span>
+                        </div>
                     </div>
                 </div>
+        </div>
+                </div >
 
-                <div className="absolute bottom-4 right-4 flex gap-2">
-                    <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => setIsPlaying(!isPlaying)}
-                        className="bg-black/40 border-white/10 hover:bg-black/60"
-                    >
-                        {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                    </Button>
-                    <Button variant="outline" size="sm" className="bg-black/40 border-white/10 text-[10px]">
-                        WEBGL 2.0 / BATCHED
-                    </Button>
-                </div>
-            </Card>
+    <div className="absolute bottom-4 right-4 flex gap-2">
+        <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setIsPlaying(!isPlaying)}
+            className="bg-black/40 border-white/10 hover:bg-black/60"
+        >
+            {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+        </Button>
+        <Button variant="outline" size="sm" className="bg-black/40 border-white/10 text-[10px]">
+            WEBGL 2.0 / BATCHED
+        </Button>
+    </div>
+            </Card >
 
-            {/* Control Panel - 1/4 Width */}
-            <Card className="p-4 bg-black/60 border-indigo-500/20 flex flex-col gap-6">
+    {/* Control Panel - 1/4 Width */ }
+    < Card className = "p-4 bg-black/60 border-indigo-500/20 flex flex-col gap-6" >
                 <div>
                     <h3 className="text-sm font-bold text-white/70 mb-4 flex items-center gap-2">
                         <Zap className="w-4 h-4 text-yellow-500" /> PARÁMETROS DE CIRUGÍA
@@ -223,7 +230,7 @@ export const NodeSurgeryVisualizer = () => {
                         Renderizando via BatchedMesh. El color representa la fase compleja del campo de Hodge deformado mediante cirugía de nodos.
                     </p>
                 </div>
-            </Card>
-        </div>
+            </Card >
+        </div >
     );
 };

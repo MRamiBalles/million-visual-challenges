@@ -25,21 +25,22 @@ const HodgeConjecture = () => {
 
     useActivityTracker("hodge", "terminal_research");
 
-    // Simulación del ciclo "Reason-Code-Observe"
+    // Simulación del ciclo "Reason-Code-Observe" para la Simulación de Estrés
     const runInference = async () => {
         setIsCalculating(true);
         const steps = [
-            "> [PLAN] Analizando clase alpha = h + 2v1...",
-            "> [CONOCIMIENTO] Recuperando parámetros de Mounda (2025)...",
-            "> [CODE] Generando script SymPy para matriz de intersección...",
-            "> [EXEC] Running math_agent.py in Docker sandbox...",
-            "> [OBSERVE] Autovalores detectados: [1.2, -4.5]. Estabilidad nodal confirmada.",
-            "> [FINAL] Parámetros geométricos cargados al visualizador."
+            "> [PLAN] Solicitud: Cirugía Nodal para clase alpha = h + 3v1 - 4v2...",
+            "> [THOUGHT] Calculando número de nodos k = |3| + |-4| = 7.",
+            "> [CHECK] Verificando límite de Mounda: 7 <= 10 (Cuártica). OK.",
+            "> [CODE] Generando script para sistema ⟨alpha, gamma_i⟩ = -2m_i...",
+            "> [EXEC] Ejecutando solver en Docker Sandbox (scipy.linalg)...",
+            "> [OBSERVE] Matriz de intersección NO singular. 7 Nodos localizados en p_1...p_7.",
+            "> [FINAL] Transfiriendo coordenadas de nodos al BatchedMesh Shader."
         ];
 
         for (const step of steps) {
             setTerminalLines(prev => [...prev, step]);
-            await new Promise(r => setTimeout(r, 600));
+            await new Promise(r => setTimeout(r, 800));
         }
         setIsCalculating(false);
         setActiveTab("visualizer");
@@ -91,8 +92,8 @@ const HodgeConjecture = () => {
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id as any)}
                             className={`flex items-center gap-2 px-4 py-2 rounded-md transition-all text-xs font-bold font-mono ${activeTab === tab.id
-                                    ? "bg-cyan-500 text-black shadow-lg shadow-cyan-500/20"
-                                    : "text-white/40 hover:text-white/60 hover:bg-white/5"
+                                ? "bg-cyan-500 text-black shadow-lg shadow-cyan-500/20"
+                                : "text-white/40 hover:text-white/60 hover:bg-white/5"
                                 }`}
                         >
                             {tab.icon} {tab.label}
