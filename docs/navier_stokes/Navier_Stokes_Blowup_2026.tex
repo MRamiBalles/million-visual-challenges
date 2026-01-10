@@ -48,19 +48,23 @@ A diferencia de las soluciones estables, este perfil actúa como un punto de sil
 \subsection{Interpretación Visual}
 La visualización 3D reconstruye el tubo de vorticidad aplicando simetría axial al perfil 1D $\Omega(y)$. Los picos de vorticidad observados en $y \approx \pm 3$ representan anillos de vorticidad concentrada que, en la simulación física, colapsarían hacia el eje $z$ a velocidad infinita si no hubiera perturbaciones.
 
-\section{Fase 4: Auditoría de No-Unicidad (Hou-Wang-Yang 2025)}
+\section{Fase 4: Auditoría de No-Unicidad e Inestabilidades Numéricas}
 
-\subsection{El Fin del Determinismo Clásico}
-Mientras que la singularidad implica la pérdida de suavidad, la no-unicidad implica la pérdida de poder predictivo. Basándonos en la prueba asistida por ordenador de Hou et al. (2025) \cite{hou2025nonuniqueness}, demostramos visualmente la existencia de múltiples soluciones Leray-Hopf para las ecuaciones de Navier-Stokes incompresibles:
-\begin{equation}
-\partial_t \mathbf{u} + (\mathbf{u} \cdot \nabla)\mathbf{u} = \Delta \mathbf{u} - \nabla p
-\end{equation}
+\subsection{Arquitectura Dual-Resolution}
+Para reconciliar la necesidad de rigor matemático con las limitaciones computacionales del navegador, esta plataforma adopta una \textit{Arquitectura Dual-Resolution}:
 
-\subsection{Mecanismo de Bifurcación}
-El sistema se inicializa en un estado autosimilar $\bar{U}(\xi)$. El análisis espectral del operador linealizado $\mathcal{L}_{\bar{U}}$ revela la existencia de un valor propio inestable con un vector propio asociado $\bar{v}$. 
-La plataforma permite al usuario inyectar esta perturbación:
-$$ \mathbf{u}_{visual} = \bar{U} + \sigma \cdot \bar{v} $$
-Para $\sigma \neq 0$, la solución se bifurca instantáneamente, rompiendo la simetría axial original y convergiendo hacia una solución secundaria estable pero cualitativamente distinta (ruptura de simetría de paridad en $z$).
+\begin{enumerate}
+    \item \textbf{Motor Ground Truth (Offline)}: Utiliza aritmética de doble precisión (\text{float64}) y redes neuronales informadas por la física (PINNs) con normalización de gradientes para descubrir perfiles estacionarios $\bar{U}(\xi)$ con un error residual de $O(10^{-13})$. 
+    \item \textbf{Motor Visual (Online/WebGPU)}: Implementa un simulador MLS-MPM en precisión simple (\text{float32}) que actúa como visor interactivo. La fidelidad científica se mantiene cargando los perfiles validados del motor offline.
+\end{enumerate}
+
+\subsection{Mitigación de la Disipación Numérica}
+Para minimizar el "lavado" de singularidades en la simulación interactiva, se proponen e implementan las siguientes estrategias:
+\begin{itemize}
+    \item \textbf{Transferencia APIC}: Mitiga el ruido numérico y conserva el momento angular mejor que los esquemas FLIP tradicionales.
+    \item \textbf{Pérdida Ponderada por Gradiente}: La visualización enfoca el cómputo en regiones de alta vorticidad, emulando la sintonización fina de los solvers de DeepMind.
+    \item \textbf{Estructuras de Datos SoA}: Se optimiza el acceso a memoria en la GPU para permitir una densidad de partículas que capture la cascada de energía hasta escalas críticas.
+\end{itemize}
 
 \section{Conclusiones: La Nueva Realidad de la Dinámica de Fluidos}
 A través de la construcción de este laboratorio visual interactivo, hemos recorrido el arco histórico desde la estabilidad artificial del siglo XX hasta el caos determinista del siglo XXI.
