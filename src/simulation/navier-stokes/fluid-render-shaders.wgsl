@@ -6,13 +6,15 @@ struct VertexOutput {
     @location(1) particle_uv: vec2<f32>,
 };
 
+@group(0) @binding(0) var<storage, read> p_pos: array<vec2<f32>>;
+@group(0) @binding(1) var<storage, read> p_vel: array<vec2<f32>>;
+
 @vertex
 fn vs_depth(
-    @location(0) particle_pos: vec2<f32>,
     @builtin(vertex_index) vertex_idx: u32,
     @builtin(instance_index) instance_idx: u32
 ) -> VertexOutput {
-    var out: VertexOutput;
+    let particle_pos = p_pos[instance_idx];
     
     // Define quad offsets for a billboard
     let quad = array<vec2<f32>, 6>(

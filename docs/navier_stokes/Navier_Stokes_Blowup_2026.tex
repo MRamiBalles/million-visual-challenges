@@ -48,22 +48,21 @@ A diferencia de las soluciones estables, este perfil actúa como un punto de sil
 \subsection{Interpretación Visual}
 La visualización 3D reconstruye el tubo de vorticidad aplicando simetría axial al perfil 1D $\Omega(y)$. Los picos de vorticidad observados en $y \approx \pm 3$ representan anillos de vorticidad concentrada que, en la simulación física, colapsarían hacia el eje $z$ a velocidad infinita si no hubiera perturbaciones.
 
-\section{Fase 4: Auditoría de No-Unicidad e Inestabilidades Numéricas}
+\section{Fase 5: Auditoría de Rigor Científico y Mitigación del Reality Gap}
 
-\subsection{Arquitectura Dual-Resolution}
-Para reconciliar la necesidad de rigor matemático con las limitaciones computacionales del navegador, esta plataforma adopta una \textit{Arquitectura Dual-Resolution}:
-
-\begin{enumerate}
-    \item \textbf{Motor Ground Truth (Offline)}: Utiliza aritmética de doble precisión (\text{float64}) y redes neuronales informadas por la física (PINNs) con normalización de gradientes para descubrir perfiles estacionarios $\bar{U}(\xi)$ con un error residual de $O(10^{-13})$. 
-    \item \textbf{Motor Visual (Online/WebGPU)}: Implementa un simulador MLS-MPM en precisión simple (\text{float32}) que actúa como visor interactivo. La fidelidad científica se mantiene cargando los perfiles validados del motor offline.
-\end{enumerate}
-
-\subsection{Mitigación de la Disipación Numérica}
-Para minimizar el "lavado" de singularidades en la simulación interactiva, se proponen e implementan las siguientes estrategias:
+\subsection{Refinamiento del Motor PINN: Multi-Stage y Normalización}
+Para alcanzar la precisión requerida en la detección de señales débiles en regímenes de alto gradiente, el motor de inferencia ha sido refactorizado:
 \begin{itemize}
-    \item \textbf{Transferencia APIC}: Mitiga el ruido numérico y conserva el momento angular mejor que los esquemas FLIP tradicionales.
-    \item \textbf{Pérdida Ponderada por Gradiente}: La visualización enfoca el cómputo en regiones de alta vorticidad, emulando la sintonización fina de los solvers de DeepMind.
-    \item \textbf{Estructuras de Datos SoA}: Se optimiza el acceso a memoria en la GPU para permitir una densidad de partículas que capture la cascada de energía hasta escalas críticas.
+    \item \textbf{Loss Normalizada por Gradiente}: Se implementó una función de pérdida que escala el residuo por la magnitud de la vorticidad (Wang et al. 2025), evitando que los picos de singularidad oculten errores en el dominio global.
+    \item \textbf{Entrenamiento Multi-Stage}: Una red de Stage 1 captura la morfología global, mientras que una Stage 2 aprende el residuo fino, permitiendo una convergencia de "precisión de máquina".
+\end{itemize}
+
+\subsection{Determinismo y Fidelidad en WebGPU}
+La simulación interactiva se elevó a estándares de rigor industrial mediante:
+\begin{itemize}
+    \item \textbf{Atomics de Punto Fijo}: Reemplaza las operaciones no deterministas en el paso P2G por acumulaciones atómicas mediante escalado entero, garantizando repetibilidad bit-a-bit.
+    \item \textbf{Advección BFECC}: Implementación de \textit{Back and Forth Error Compensation and Correction} para reducir drásticamente la viscosidad numérica, preservando estructuras turbulentas que antes se disipaban prematuramente.
+    \item \textbf{Sub-stepping Temporal}: Permite al usuario ajustar la resolución temporal dinámicamente, cerrando la brecha entre la visualización fluida y la integración física precisa.
 \end{itemize}
 
 \section{Conclusiones: La Nueva Realidad de la Dinámica de Fluidos}

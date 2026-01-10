@@ -11,6 +11,7 @@ const FluidSimulationWebGPU: React.FC = () => {
     const [fps, setFps] = React.useState(0);
     const [particleCount] = React.useState(50000);
     const [sigma, setSigma] = React.useState(0);
+    const [substeps, setSubsteps] = React.useState(2);
 
     React.useEffect(() => {
         async function initWebGPU() {
@@ -60,7 +61,7 @@ const FluidSimulationWebGPU: React.FC = () => {
             if (engine && isPlaying && canvasRef.current) {
                 const context = canvasRef.current.getContext('webgpu');
                 if (context) {
-                    engine.step();
+                    engine.step(substeps);
                     engine.render(context);
                 }
 
@@ -125,6 +126,20 @@ const FluidSimulationWebGPU: React.FC = () => {
                             <span className="text-xs text-blue-400 font-mono w-8">{sigma.toFixed(2)}</span>
                         </div>
 
+                        <div className="flex items-center gap-2 bg-slate-900 px-3 py-1.5 rounded-md border border-slate-800" title="Sub-stepping (Reduce viscosidad numérica)">
+                            <span className="text-xs text-slate-400 font-mono">$\Delta t_{sub}$:</span>
+                            <input
+                                type="range"
+                                min="1"
+                                max="10"
+                                step="1"
+                                value={substeps}
+                                onChange={(e) => setSubsteps(parseInt(e.target.value))}
+                                className="w-16 h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer"
+                            />
+                            <span className="text-xs text-green-400 font-mono w-4">{substeps}</span>
+                        </div>
+
                         <Button
                             variant="outline"
                             onClick={triggerBifurcation}
@@ -161,8 +176,9 @@ const FluidSimulationWebGPU: React.FC = () => {
                         <p>Algoritmo: MLS-MPM</p>
                     </div>
                     <div className="p-2 bg-slate-800/50 rounded">
-                        <p>Precisión: f32 (Atomic Bit-cast)</p>
-                        <p>Render: Screen-Space Fluid</p>
+                        <p>Precisión: f32 (Fixed-Point Atomics)</p>
+                        <p>Advección: BFECC (High-Fidelity)</p>
+                        <p>Layout: Structure of Arrays (SoA)</p>
                     </div>
                 </div>
             </CardContent>

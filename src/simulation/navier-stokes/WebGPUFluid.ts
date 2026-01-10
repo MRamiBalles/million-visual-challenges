@@ -11,7 +11,10 @@ export interface FluidParams {
 
 export class WebGPUFluid {
     private device: GPUDevice;
-    private particleBuffer: GPUBuffer;
+    private pPosBuffer: GPUBuffer;
+    private pVelBuffer: GPUBuffer;
+    private pCBuffer: GPUBuffer;
+    private pMassBuffer: GPUBuffer;
     private gridBuffer: GPUBuffer;
     private uniformBuffer: GPUBuffer;
     private sigmaBuffer: GPUBuffer;
@@ -23,24 +26,34 @@ export class WebGPUFluid {
         applyPerturbation: GPUComputePipeline;
     };
     private bindGroup: GPUBindGroup;
+    private renderBindGroup: GPUBindGroup;
     private renderPipeline: GPURenderPipeline;
     private params: FluidParams;
 
     constructor(device: GPUDevice, params: FluidParams) {
         this.device = device;
 
-        // 1. Create Buffers
-        const particleSize = 8 * 4; // pos (vec2), vel (vec2), C (mat2x2), mass (f32), pad (f32)
-        // Correction: mat2x2 in WGSL is 2 * vec2. So 2 * 8 = 16 bytes.
-        // Total: pos(8) + vel(8) + C(16) + mass(4) + pad(4) = 40 bytes.
-        const particleStride = 40;
-        this.particleBuffer = device.createBuffer({
-            size: params.particleCount * particleStride,
-            usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.VERTEX,
+        // 1. Create SoA Buffers
+        const usage = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST;
+        this.pPosBuffer = device.createBuffer({
+            size: params.particleCount * 8, // vec2<f32>
+            usage: usage | GPUBufferUsage.VERTEX // Vertex for fallback if needed
+        });
+        this.pVelBuffer = device.createBuffer({
+            size: params.particleCount * 8, // vec2<f32>
+            usage: usage
+        });
+        this.pCBuffer = device.createBuffer({
+            size: params.particleCount * 16, // mat2x2<f32>
+            usage: usage
+        });
+        this.pMassBuffer = device.createBuffer({
+            size: params.particleCount * 4, // f32
+            usage: usage
         });
 
-        // Grid node: velocity (vec2), mass (f32), pad (f32) = 16 bytes
-        const gridStride = 16;
+        // Grid node: atomic<i32> x 3 (vel_x, vel_y, mass) = 12 bytes
+        const gridStride = 12;
         this.gridBuffer = device.createBuffer({
             size: params.gridRes * params.gridRes * gridStride,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
@@ -56,16 +69,18 @@ export class WebGPUFluid {
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
         });
 
-        // 2. Load Shaders & Pipelines
         const shaderModule = device.createShaderModule({
             code: mlsMpmShaders,
         });
 
         const bindGroupLayout = device.createBindGroupLayout({
             entries: [
-                { binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'storage' } },
-                { binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'storage' } },
-                { binding: 2, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'uniform' } },
+                { binding: 0, visibility: GPUShaderStage.COMPUTE | GPUShaderStage.VERTEX, buffer: { type: 'storage' } }, // p_pos
+                { binding: 1, visibility: GPUShaderStage.COMPUTE | GPUShaderStage.VERTEX, buffer: { type: 'storage' } }, // p_vel
+                { binding: 2, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'storage' } }, // p_C
+                { binding: 3, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'storage' } }, // p_mass
+                { binding: 4, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'storage' } }, // grid
+                { binding: 5, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'uniform' } }, // params
             ],
         });
 
@@ -75,6 +90,17 @@ export class WebGPUFluid {
 
         const initModule = device.createShaderModule({
             code: initBifurcationShaders,
+        });
+
+        const initBindGroupLayout = device.createBindGroupLayout({
+            entries: [
+                { binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'storage' } }, // p_pos
+                { binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'storage' } }, // p_vel
+                { binding: 2, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'storage' } }, // p_C
+                { binding: 3, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'storage' } }, // p_mass
+                { binding: 4, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'uniform' } }, // params
+                { binding: 5, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'uniform' } }, // sigma (optional)
+            ]
         });
 
         this.computePipeline = {
@@ -91,26 +117,11 @@ export class WebGPUFluid {
                 compute: { module: shaderModule, entryPoint: 'g2p' },
             }),
             initBifurcation: device.createComputePipeline({
-                layout: device.createPipelineLayout({
-                    bindGroupLayouts: [device.createBindGroupLayout({
-                        entries: [
-                            { binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'storage' } },
-                            { binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'uniform' } },
-                        ]
-                    })]
-                }),
+                layout: device.createPipelineLayout({ bindGroupLayouts: [initBindGroupLayout] }),
                 compute: { module: initModule, entryPoint: 'init_bifurcation' },
             }),
             applyPerturbation: device.createComputePipeline({
-                layout: device.createPipelineLayout({
-                    bindGroupLayouts: [device.createBindGroupLayout({
-                        entries: [
-                            { binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'storage' } },
-                            { binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'uniform' } },
-                            { binding: 2, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'uniform' } },
-                        ]
-                    })]
-                }),
+                layout: device.createPipelineLayout({ bindGroupLayouts: [initBindGroupLayout] }),
                 compute: { module: initModule, entryPoint: 'apply_perturbation' },
             }),
         };
@@ -118,10 +129,26 @@ export class WebGPUFluid {
         this.bindGroup = device.createBindGroup({
             layout: bindGroupLayout,
             entries: [
-                { binding: 0, resource: { buffer: this.particleBuffer } },
-                { binding: 1, resource: { buffer: this.gridBuffer } },
-                { binding: 2, resource: { buffer: this.uniformBuffer } },
+                { binding: 0, resource: { buffer: this.pPosBuffer } },
+                { binding: 1, resource: { buffer: this.pVelBuffer } },
+                { binding: 2, resource: { buffer: this.pCBuffer } },
+                { binding: 3, resource: { buffer: this.pMassBuffer } },
+                { binding: 4, resource: { buffer: this.gridBuffer } },
+                { binding: 5, resource: { buffer: this.uniformBuffer } },
             ],
+        });
+
+        this.renderBindGroup = device.createBindGroup({
+            layout: device.createBindGroupLayout({
+                entries: [
+                    { binding: 0, visibility: GPUShaderStage.VERTEX, buffer: { type: 'read-only-storage' } },
+                    { binding: 1, visibility: GPUShaderStage.VERTEX, buffer: { type: 'read-only-storage' } },
+                ]
+            }),
+            entries: [
+                { binding: 0, resource: { buffer: this.pPosBuffer } },
+                { binding: 1, resource: { buffer: this.pVelBuffer } },
+            ]
         });
 
         this.params = params;
@@ -136,18 +163,17 @@ export class WebGPUFluid {
             vertex: {
                 module: renderShaderModule,
                 entryPoint: 'vs_depth',
-                buffers: [
-                    {
-                        arrayStride: 40, // particleStride
-                        stepMode: 'instance',
-                        attributes: [{ shaderLocation: 0, offset: 0, format: 'float32x2' }],
-                    },
-                ],
             },
             fragment: {
                 module: renderShaderModule,
                 entryPoint: 'fs_shade',
-                targets: [{ format: navigator.gpu.getPreferredCanvasFormat() }],
+                targets: [{
+                    format: navigator.gpu.getPreferredCanvasFormat(),
+                    blend: {
+                        color: { srcFactor: 'src-alpha', dstFactor: 'one', operation: 'add' },
+                        alpha: { srcFactor: 'zero', dstFactor: 'one', operation: 'add' }
+                    }
+                }],
             },
             primitive: { topology: 'triangle-list' },
         });
@@ -167,46 +193,60 @@ export class WebGPUFluid {
     }
 
     private initParticles(params: FluidParams) {
-        const particleStride = 40;
-        const data = new Float32Array((params.particleCount * particleStride) / 4);
+        const posData = new Float32Array(params.particleCount * 2);
+        const velData = new Float32Array(params.particleCount * 2);
+        const cData = new Float32Array(params.particleCount * 4);
+        const massData = new Float32Array(params.particleCount);
+
         for (let i = 0; i < params.particleCount; i++) {
-            const offset = i * (particleStride / 4);
             // Random position in the middle
-            data[offset + 0] = params.gridRes * 0.4 + Math.random() * params.gridRes * 0.2;
-            data[offset + 1] = params.gridRes * 0.4 + Math.random() * params.gridRes * 0.2;
+            posData[i * 2 + 0] = params.gridRes * 0.4 + Math.random() * params.gridRes * 0.2;
+            posData[i * 2 + 1] = params.gridRes * 0.4 + Math.random() * params.gridRes * 0.2;
             // Velocity
-            data[offset + 2] = 0;
-            data[offset + 3] = 0;
+            velData[i * 2 + 0] = 0;
+            velData[i * 2 + 1] = 0;
             // C (mat2x2)
-            data[offset + 4] = 0; data[offset + 5] = 0;
-            data[offset + 6] = 0; data[offset + 7] = 0;
+            cData[i * 4 + 0] = 0; cData[i * 4 + 1] = 0;
+            cData[i * 4 + 2] = 0; cData[i * 4 + 3] = 0;
             // Mass
-            data[offset + 8] = 1.0;
+            massData[i] = 1.0;
         }
-        this.device.queue.writeBuffer(this.particleBuffer, 0, data);
+
+        this.device.queue.writeBuffer(this.pPosBuffer, 0, posData);
+        this.device.queue.writeBuffer(this.pVelBuffer, 0, velData);
+        this.device.queue.writeBuffer(this.pCBuffer, 0, cData);
+        this.device.queue.writeBuffer(this.pMassBuffer, 0, massData);
     }
 
-    public step() {
+    public step(substeps: number = 2) {
         const commandEncoder = this.device.createCommandEncoder();
-        commandEncoder.clearBuffer(this.gridBuffer);
 
-        const pass = commandEncoder.beginComputePass();
-        pass.setBindGroup(0, this.bindGroup);
+        // Multi-stepping for higher fidelity
+        for (let s = 0; s < substeps; s++) {
+            commandEncoder.clearBuffer(this.gridBuffer);
 
-        const workgroupSize = 64;
-        const particleWorkgroups = Math.ceil(this.params.particleCount / workgroupSize);
-        const gridWorkgroups = Math.ceil((this.params.gridRes * this.params.gridRes) / workgroupSize);
+            const pass = commandEncoder.beginComputePass();
+            pass.setBindGroup(0, this.bindGroup);
 
-        pass.setPipeline(this.computePipeline.p2g);
-        pass.dispatchWorkgroups(particleWorkgroups);
+            const workgroupSize = 64;
+            const particleWorkgroups = Math.ceil(this.params.particleCount / workgroupSize);
+            const gridWorkgroups = Math.ceil((this.params.gridRes * this.params.gridRes) / workgroupSize);
 
-        pass.setPipeline(this.computePipeline.update);
-        pass.dispatchWorkgroups(gridWorkgroups);
+            // 1. P2G (Particle to Grid) - Deterministic Atomics
+            pass.setPipeline(this.computePipeline.p2g);
+            pass.dispatchWorkgroups(particleWorkgroups);
 
-        pass.setPipeline(this.computePipeline.g2p);
-        pass.dispatchWorkgroups(particleWorkgroups);
+            // 2. Grid Update
+            pass.setPipeline(this.computePipeline.update);
+            pass.dispatchWorkgroups(gridWorkgroups);
 
-        pass.end();
+            // 3. G2P (Grid to Particle) - BFECC Advection
+            pass.setPipeline(this.computePipeline.g2p);
+            pass.dispatchWorkgroups(particleWorkgroups);
+
+            pass.end();
+        }
+
         this.device.queue.submit([commandEncoder.finish()]);
     }
 
@@ -222,15 +262,15 @@ export class WebGPUFluid {
         });
 
         renderPass.setPipeline(this.renderPipeline);
-        renderPass.setVertexBuffer(0, this.particleBuffer);
-        renderPass.draw(6, this.params.particleCount); // Draw 6 vertices (billboard) per particle
+        renderPass.setBindGroup(0, this.renderBindGroup);
+        renderPass.draw(6, this.params.particleCount);
         renderPass.end();
 
         this.device.queue.submit([commandEncoder.finish()]);
     }
 
-    public getParticleBuffer() {
-        return this.particleBuffer;
+    public getPosBuffer() {
+        return this.pPosBuffer;
     }
 
     public reinitBifurcation() {
@@ -238,8 +278,11 @@ export class WebGPUFluid {
         const bindGroup = this.device.createBindGroup({
             layout: this.computePipeline.initBifurcation.getBindGroupLayout(0),
             entries: [
-                { binding: 0, resource: { buffer: this.particleBuffer } },
-                { binding: 1, resource: { buffer: this.uniformBuffer } },
+                { binding: 0, resource: { buffer: this.pPosBuffer } },
+                { binding: 1, resource: { buffer: this.pVelBuffer } },
+                { binding: 2, resource: { buffer: this.pCBuffer } },
+                { binding: 3, resource: { buffer: this.pMassBuffer } },
+                { binding: 4, resource: { buffer: this.uniformBuffer } },
             ],
         });
 
@@ -253,7 +296,6 @@ export class WebGPUFluid {
     }
 
     public injectPerturbation(sigma: number) {
-        // Write sigma to buffer
         const sigmaData = new Float32Array([sigma]);
         this.device.queue.writeBuffer(this.sigmaBuffer, 0, sigmaData);
 
@@ -261,9 +303,12 @@ export class WebGPUFluid {
         const bindGroup = this.device.createBindGroup({
             layout: this.computePipeline.applyPerturbation.getBindGroupLayout(0),
             entries: [
-                { binding: 0, resource: { buffer: this.particleBuffer } },
-                { binding: 1, resource: { buffer: this.uniformBuffer } },
-                { binding: 2, resource: { buffer: this.sigmaBuffer } },
+                { binding: 0, resource: { buffer: this.pPosBuffer } },
+                { binding: 1, resource: { buffer: this.pVelBuffer } },
+                { binding: 2, resource: { buffer: this.pCBuffer } },
+                { binding: 3, resource: { buffer: this.pMassBuffer } },
+                { binding: 4, resource: { buffer: this.uniformBuffer } },
+                { binding: 5, resource: { buffer: this.sigmaBuffer } },
             ],
         });
 

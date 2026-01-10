@@ -2,13 +2,10 @@
 // Based on: "Moving Least Squares Material Point Method" (Hu et al. 2018)
 // And 2025 implementation standards for WebGPU.
 
-struct Particle {
-    pos: vec2<f32>,
-    vel: vec2<f32>,
-    C: mat2x2<f32>,
-    mass: f32,
-    padding: f32,
-};
+@group(0) @binding(0) var<storage, read_write> p_pos: array<vec2<f32>>;
+@group(0) @binding(1) var<storage, read_write> p_vel: array<vec2<f32>>;
+@group(0) @binding(2) var<storage, read_write> p_C: array<mat2x2<f32>>;
+@group(0) @binding(3) var<storage, read_write> p_mass: array<f32>;
 
 struct GridNode {
     vel_x: atomic<i32>,
@@ -16,8 +13,7 @@ struct GridNode {
     mass: atomic<i32>,
 };
 
-@group(0) @binding(0) var<storage, read_write> particles: array<Particle>;
-@group(0) @binding(1) var<storage, read_write> grid: array<GridNode>;
+@group(0) @binding(4) var<storage, read_write> grid: array<GridNode>;
 
 const FIXED_POINT_SCALE: f32 = 1000000.0;
 
@@ -44,28 +40,25 @@ fn p2g(@builtin(global_invocation_id) id: vec3<u32>) {
     let p_idx = id.x;
     if (p_idx >= params.particle_count) { return; }
 
-    var p = particles[p_idx];
-    let base_coord = vec2<i32>(floor(p.pos * inv_dx - 0.5));
-    let fx = p.pos * inv_dx - vec2<f32>(base_coord);
+    let pos = p_pos[p_idx];
+    let vel = p_vel[p_idx];
+    let mass = p_mass[p_idx];
+    let affine = p_C[p_idx];
 
-    // Quadratic B-spline weights
-    let w = array<vec2<f32>, 3>(
-        0.5 * pow(1.5 - fx, vec2<f32>(2.0)),
-        0.75 - pow(fx - 1.0, vec2<f32>(2.0)),
-        0.5 * pow(fx - 0.5, vec2<f32>(2.0))
-    );
-
-    let stress = -params.dt * 4.0 * inv_dx * inv_dx * p.mass; // Simplified stress
-    let affine = p.C;
+    let base_coord = vec2<i32>(floor(pos * inv_dx - 0.5));
+    let fx = pos * inv_dx - vec2<f32>(base_coord);
 
     for (var i: u32 = 0; i < 3; i++) {
         for (var j: u32 = 0; j < 3; j++) {
             let offset = vec2<i32>(i32(i), i32(j));
             let weight = w[i].x * w[j].y;
+            let dpos = (vec2<f32>(offset) - fx) * dx;
+            let momentum = mass * (vel + affine * dpos);
+            
             let g_idx = get_grid_idx(u32(base_coord.x + offset.x), u32(base_coord.y + offset.y));
             
             // --- DETERMINISTIC P2G via FIXED-POINT ATOMICS ---
-            let m_inc = i32(weight * p.mass * FIXED_POINT_SCALE);
+            let m_inc = i32(weight * mass * FIXED_POINT_SCALE);
             let v_x_inc = i32(weight * momentum.x * FIXED_POINT_SCALE);
             let v_y_inc = i32(weight * momentum.y * FIXED_POINT_SCALE);
             
@@ -143,22 +136,22 @@ fn g2p(@builtin(global_invocation_id) id: vec3<u32>) {
     let p_idx = id.x;
     if (p_idx >= params.particle_count) { return; }
 
-    var p = particles[p_idx];
+    var pos = p_pos[p_idx];
     
     // --- BFECC ADVECTION (Back and Forth Error Compensation) ---
     // 1. Forward step estimate
-    let v_fwd = sample_grid_vel(p.pos);
+    let v_fwd = sample_grid_vel(pos);
     
     // 2. Backward step estimate
-    let pos_back = p.pos - params.dt * v_fwd;
+    let pos_back = pos - params.dt * v_fwd;
     let v_back = sample_grid_vel(pos_back);
     
     // 3. Corrected velocity (reduces dissipation/viscosity)
     let v_corr = v_fwd + 0.5 * (v_fwd - v_back);
     
     // --- AFFINE UPDATE (APIC) ---
-    let base_coord = vec2<i32>(floor(p.pos * inv_dx - 0.5));
-    let fx = p.pos * inv_dx - vec2<f32>(base_coord);
+    let base_coord = vec2<i32>(floor(pos * inv_dx - 0.5));
+    let fx = pos * inv_dx - vec2<f32>(base_coord);
     let w = array<vec2<f32>, 3>(
         0.5 * pow(1.5 - fx, vec2<f32>(2.0)),
         0.75 - pow(fx - 1.0, vec2<f32>(2.0)),
@@ -180,11 +173,10 @@ fn g2p(@builtin(global_invocation_id) id: vec3<u32>) {
         }
     }
 
-    p.vel = v_corr;
-    p.pos += params.dt * p.vel;
-    p.C = new_C;
+    p_vel[p_idx] = v_corr;
+    p_pos[p_idx] = pos + params.dt * v_corr;
+    p_C[p_idx] = new_C;
     
     // Boundary clamping
-    p.pos = clamp(p.pos, vec2<f32>(3.0), vec2<f32>(f32(params.grid_res) - 4.0));
-    particles[p_idx] = p;
+    p_pos[p_idx] = clamp(p_pos[p_idx], vec2<f32>(3.0), vec2<f32>(f32(params.grid_res) - 4.0));
 }
