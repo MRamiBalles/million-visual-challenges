@@ -82,11 +82,14 @@ def compute_trace_entropy(trace: List[np.ndarray]) -> float:
     
     # Discretize for entropy calculation
     bins = 50
-    hist, _ = np.histogram(flat_trace, bins=bins, density=True)
-    hist = hist[hist > 0]  # Remove zeros
+    hist, _ = np.histogram(flat_trace, bins=bins, range=(0, 1))
     
-    # Shannon entropy
-    entropy = -np.sum(hist * np.log2(hist + 1e-10)) / np.log2(bins)
+    # Convert to probability mass function
+    pmf = hist / np.sum(hist)
+    pmf = pmf[pmf > 0]  # Remove zeros
+    
+    # Shannon entropy (normalized to 0-1)
+    entropy = -np.sum(pmf * np.log2(pmf + 1e-10)) / np.log2(bins)
     
     return entropy
 
