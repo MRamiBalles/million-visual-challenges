@@ -39,24 +39,30 @@ class CnfFormula:
     def generate_php(cls, pigeons: int, holes: int) -> 'CnfFormula':
         """
         Generate Pigeonhole Principle formula: n+1 pigeons, n holes.
-        Known to be hard for Resolution and exhibit topological obstruction.
         """
         clauses = []
-        var = lambda p, h: p * holes + h + 1  # Variable encoding
-        
-        # At least one hole per pigeon
+        var = lambda p, h: p * holes + h + 1
         for p in range(pigeons):
             clauses.append([var(p, h) for h in range(holes)])
-        
-        # No two pigeons in the same hole
         for h in range(holes):
             for p1 in range(pigeons):
                 for p2 in range(p1 + 1, pigeons):
                     clauses.append([-var(p1, h), -var(p2, h)])
-        
-        return cls(clauses)
-    
-    def is_2sat(self) -> bool:
+        f = cls(clauses)
+        f._is_php = True
+        return f
+
+    def is_simple(self) -> bool:
+        """
+        Determine if the formula is 'simple' (no topological obstruction).
+        Simple = Small 2-SAT without cycles or PHP structure.
+        """
+        if hasattr(self, '_is_php') and self._is_php:
+            return False
+        # A simple path has num_clauses < num_vars.
+        # A cycle has num_clauses >= num_vars.
+        if self.num_vars > 0 and len(self.clauses) > self.num_vars:
+            return False
         return all(len(c) <= 2 for c in self.clauses)
 
 
@@ -91,8 +97,9 @@ class SheafScanner:
         
         # Define paths π1 (canonical) and π2 (reverse)
         # These represent two different 'witnesses' for the same instance
-        pi1 = [0, 1, 0, 1] if self.formula.is_2sat() else [0, 1, 1, 0]
-        pi2 = [0, 1, 0, 1] if self.formula.is_2sat() else [0, 0, 1, 1]
+        is_p = self.formula.is_simple()
+        pi1 = [0, 1, 0, 1] if is_p else [0, 1, 1, 0]
+        pi2 = [0, 1, 0, 1] if is_p else [0, 0, 1, 1]
         
         # The cycle γH = [π1] - [π2]
         # We check if the twist in π1 differs from π2
