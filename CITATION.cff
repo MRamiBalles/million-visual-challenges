@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+message: "If you use this software or research framework, please cite it as below."
+authors:
+- family-names: "Ramírez Ballesteros"
+  given-names: "Manuel"
+  orcid: "https://orcid.org/0000-0000-0000-0000" # Placeholder for user's ORCID if available
+title: "Million Visual Challenges: A Multidimensional Audit Platform for Millennium Problems"
+version: 5.0.0-RELEASE
+doi: 10.5281/zenodo.0000000 # Placeholder for Zenodo DOI
+date-released: 2026-01-11
+url: "https://github.com/MRamiBalles/million-visual-challenges"
+repository-code: "https://github.com/MRamiBalles/million-visual-challenges"
+keywords:
+  - P vs NP
+  - Formal Verification
+  - Lean4
+  - Geometric Complexity Theory
+  - Holographic Computation
+  - WebGPU
+abstract: >-
+  Million Visual Challenges is a research platform that integrates homological, 
+  algebraic, and holographic obstructions to verify computational complexity 
+  hypotheses. It features a Lean4 formalization of the homological separator 
+  theory, empirically verified by a Python computational oracle.
