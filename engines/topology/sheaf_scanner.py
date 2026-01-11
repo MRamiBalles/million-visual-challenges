@@ -39,19 +39,6 @@ class LocalAssignment:
     values: Dict[str, int]
 
 @dataclass
-class CnfFormula:
-    """Structural representation of a SAT problem."""
-    clauses: List[List[int]]
-    is_hard: bool = False
-    
-    @classmethod
-    def from_clauses(cls, clauses: List[List[int]]):
-        # Heuristic: if number of clauses > 2*vars, consider it "hard" (unsat-prone)
-        vars_count = len(set(abs(l) for c in clauses for l in c))
-        is_hard = len(clauses) > 2.5 * vars_count
-        return cls(clauses, is_hard)
-
-@dataclass
 class SheafResult:
     """The result of a cohomology scan on a logical cycle."""
     cycle_size: int
@@ -60,47 +47,38 @@ class SheafResult:
     h1_value: float
     description: str
 
-class SheafScanner:
-    """
-    Engine to detect topological obstructions in logical problems.
-    """
-    def __init__(self, formula: Optional[Any] = None):
-        self.formula = formula
-
-    def scan_cycle(self, size: int, force_obstruction: bool = True) -> SheafResult:
-        """
-        Simulate a Čech cohomology scan on a cycle of logical constraints.
-        """
-        local_consistencies = [True] * size
-        
-        if force_obstruction:
-            h1_value = 1.0
-            global_obstruction = True
-            desc = "Global inconsistency detected: H1 != 0. Local solutions cannot be glued."
-        else:
-            h1_value = 0.0
-            global_obstruction = False
-            desc = "Global consistency confirmed: H1 = 0. A global solution exists."
-            
-        return SheafResult(
-            cycle_size=size,
-            local_consistencies=local_consistencies,
-            global_obstruction=global_obstruction,
-            h1_value=h1_value,
-            description=desc
-        )
-
-    def compute_homology_rank(self, n: int) -> int:
-        """
-        Stub for computing the rank of the n-th homology group.
-        Currently focused on H1 for SAT obstructions.
-        """
-        if self.formula and hasattr(self.formula, 'is_hard') and self.formula.is_hard:
-            return 1 if n == 1 else 0
-        return 0
-
 def scan_logical_cycle(size: int, force_obstruction: bool = True) -> SheafResult:
-    return SheafScanner().scan_cycle(size, force_obstruction)
+    """
+    Simulate a Čech cohomology scan on a cycle of logical constraints.
+    
+    In a sheaf, a global section exists if all local sections agree on overlaps.
+    For a cycle of variables X_0, X_1, ..., X_{n-1}:
+    Constraints: X_i = X_{i+1} (mod n)
+    If we force a contradiction (e.g., X_{n-1} != X_0), we get H1 != 0.
+    """
+    local_consistencies = [True] * size
+    
+    # We define n local sections. Each section i covers variable i and i+1.
+    # Overlap (i, i+1) must agree.
+    
+    if force_obstruction:
+        # Sum of differences around the cycle = 1 (mod 2)
+        # This implies no global assignment satisfies all local constraints.
+        h1_value = 1.0
+        global_obstruction = True
+        desc = "Global inconsistency detected: H1 != 0. Local solutions cannot be glued."
+    else:
+        h1_value = 0.0
+        global_obstruction = False
+        desc = "Global consistency confirmed: H1 = 0. A global solution exists."
+        
+    return SheafResult(
+        cycle_size=size,
+        local_consistencies=local_consistencies,
+        global_obstruction=global_obstruction,
+        h1_value=h1_value,
+        description=desc
+    )
 
 def generate_topology_data() -> Dict[str, Any]:
     print("=" * 60)
