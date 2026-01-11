@@ -6,10 +6,11 @@
   and algebraic obstructions to P ≼ NP, as hypothesized in Tang (2025) and 
   Lee (2025).
 
-  Note: The constructions provided here are specification-level stubs. 
-  Theorems are marked with 'sorry' where the formal connection between 
-  computational configuration spaces and simplicial homology is not yet 
-  fully established in Mathlib4.
+  AUDIT NOTE (2026-01-11):
+  All `sorry` stubs have been converted to explicit AXIOMS with [UNPROVEN] markers.
+  This makes the conditional nature of the main theorem explicit:
+  - Homological_Separation holds IF axioms 1-4 are true.
+  - The axioms themselves require Mathlib4 extensions not yet available.
 
   Primary Model: One-tape deterministic Turing Machine over Fin 2.
 -/
@@ -89,15 +90,15 @@ def NP_Class (L : ComputationalProblem) : Prop :=
 -- ============================================================================
 
 /-- A chain complex associated with a computational problem
-    This is the key innovation: viewing computation paths as simplicial chains -/
-noncomputable def computationChainComplex (L : ComputationalProblem) : Type :=
-  sorry  -- Stub: Would construct a ChainComplex from configurations
+    This is the key innovation: viewing computation paths as simplicial chains
+    [UNPROVEN] Axiom: We postulate existence without construction. -/
+axiom computationChainComplex : ComputationalProblem → Type
 
-/-- The n-th homology group of a problem's configuration space -/
-noncomputable def Homology_n (L : ComputationalProblem) (n : ℕ) : Type :=
-  sorry  -- Stub: Hn(Conf(L))
+/-- The n-th homology group of a problem's configuration space
+    [UNPROVEN] Axiom: Postulates Hn(Conf(L)) exists for any problem L. -/
+axiom Homology_n : ComputationalProblem → ℕ → Type
 
-/-- Trivial homology: all higher groups are zero -/
+/-- Trivial homology: all higher groups are isomorphic to the terminal type -/
 def hasTrivialHomology (L : ComputationalProblem) : Prop :=
   ∀ n > 0, Homology_n L n = PUnit  -- Using PUnit as zero object
 
@@ -107,33 +108,39 @@ def hasTrivialHomology (L : ComputationalProblem) : Prop :=
 -- ============================================================================
 
 /--
-  THEOREM 1: P implies Trivial Homology
+  AXIOM 1: P implies Trivial Homology [UNPROVEN]
   (Tang's Homological Obstruction Hypothesis)
 
   Claim: If a problem is in P, its configuration space is contractible,
   hence has trivial homology.
+
+  STATUS: This is an UNPROVEN AXIOM. Proof requires showing that
+  polynomial-time algorithms induce homotopy retracts on configuration spaces.
 -/
-theorem P_implies_TrivialHomology (L : ComputationalProblem) (h : P_Class L) :
-    hasTrivialHomology L := by
-  sorry  -- STUB: Would require showing P-time algorithms induce retracts
+axiom P_implies_TrivialHomology :
+  ∀ (L : ComputationalProblem), P_Class L → hasTrivialHomology L
 
 /--
-  THEOREM 2: SAT has Non-Trivial First Homology
+  AXIOM 2: SAT has Non-Trivial First Homology [UNPROVEN]
   (The Topological Obstruction)
 
   Claim: The configuration space of 3-SAT has H₁ ≠ 0, indicating
   "holes" that prevent efficient navigation.
+
+  STATUS: This is an UNPROVEN AXIOM. Proof requires constructing
+  the SAT configuration space and computing its simplicial homology.
 -/
-theorem SAT_NonTrivialH1 : ∃ (SAT : ComputationalProblem),
-    NP_Class SAT ∧ ¬hasTrivialHomology SAT := by
-  sorry  -- STUB: Requires constructing SAT and computing its homology
+axiom SAT_NonTrivialH1 :
+  ∃ (SAT : ComputationalProblem), NP_Class SAT ∧ ¬hasTrivialHomology SAT
 
 /--
-  THEOREM 3: Homological Separation (Conditional)
-  (The Main P ≠ NP Theorem - If assumptions hold)
+  THEOREM: Homological Separation (Conditional on Axioms 1 & 2)
+  (The Main P ≠ NP Theorem - VALID if axioms hold)
 
-  If all P problems have trivial homology AND SAT has non-trivial homology,
-  then P ≠ NP.
+  If all P problems have trivial homology AND some NP problem has non-trivial
+  homology, then P ≠ NP.
+
+  STATUS: ✅ PROVEN (conditional on axioms)
 -/
 theorem Homological_Separation :
     (∀ L, P_Class L → hasTrivialHomology L) →
@@ -145,8 +152,8 @@ theorem Homological_Separation :
   constructor
   · exact hNP_L
   · intro hP_L
-    have hTriv := hP hNP_L.1 -- This line is intentionally wrong to show incompleteness
-    sorry  -- STUB: Full proof would derive contradiction
+    have hTriv := hP L hP_L
+    exact hNonTriv hTriv
 
 
 -- ============================================================================
@@ -191,9 +198,9 @@ structure EpistemicBarrier where
 /--
   Subjective Complexity (Ashtavakra)
   Complexity is relative to the observer's prior knowledge K(O).
+  [UNPROVEN] Axiom: Postulates existence of conditional Kolmogorov complexity.
 -/
-def SubjectiveComplexity (x : Type) (observer_knowledge : ℕ) : ℕ :=
-  sorry  -- K(x | O) - K(x)
+axiom SubjectiveComplexity : Type → ℕ → ℕ
 
 /-- A problem appears simpler to a more knowledgeable observer -/
 axiom ashtavakra_principle :
