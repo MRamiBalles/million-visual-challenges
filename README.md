@@ -25,6 +25,15 @@
 6.  **Conjetura de Hodge** ✅ **Visualized**: Representación de ciclos de Cohomología Motívica.
 7.  **Conjetura de Poincaré** ✅ **Audited (Perelman/Hamilton Geometry)**.
 
+> [!WARNING]
+> **Dependencia de Axiomas (Lean4)**  
+> La validez del Axioma 2 (`SAT_NonTrivialH1`) en `lean4/Theorems.lean` depende de la correcta implementación de los motores Python:
+> - `engines/topology/sheaf_scanner.py` → Detección H₁ Čech
+> - `engines/algebra/kronecker_fault.py` → Umbral k=5 Lee (+29)
+> - `engines/holography/are_compressor.py` → Compresión √T Williams/Nye
+>
+> **Ejecute `pytest engines/tests/` ANTES de citar la prueba formal.**
+
 ---
 
 ### ⚡ WebGPU Performance Benchmarks (Singularity Lab)

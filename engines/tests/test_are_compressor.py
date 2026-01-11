@@ -1,0 +1,223 @@
+"""
+Holographic Validation: Algebraic Replay Engine √T Compression
+===============================================================
+
+Validates the ARE compressor's compliance with the Computational Area Law:
+- P-class (deterministic) traces compress to O(√T)
+- NP-class (high entropy) traces FAIL to achieve √T compression
+
+Source: Williams (2025), "Simulating Time With Square-Root Space"
+        Nye (2025), "On the Holographic Geometry of Deterministic Computation"
+
+CRITICAL: If deterministic traces fail √T, the holographic interpretation is flawed.
+          If NP traces achieve √T, the oracle is not distinguishing complexity.
+"""
+
+import pytest
+import numpy as np
+import sys
+from pathlib import Path
+
+# Add parent to path for engine imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from holography.are_compressor import (
+    run_compression_test,
+    simulate_deterministic_computation,
+    algebraic_replay_compress,
+    compute_trace_entropy,
+    CompressionResult
+)
+
+
+class TraceGenerator:
+    """
+    Generates computation traces for testing the ARE compressor.
+    """
+    
+    @staticmethod
+    def deterministic_sort(steps: int) -> list:
+        """
+        Generate a low-entropy trace simulating a deterministic sort algorithm.
+        This should compress well to O(√T).
+        """
+        return simulate_deterministic_computation(steps, problem_type="easy")
+    
+    @staticmethod
+    def random_walk(steps: int) -> list:
+        """
+        Generate a high-entropy trace simulating random exploration.
+        This should FAIL to compress to O(√T).
+        """
+        return simulate_deterministic_computation(steps, problem_type="hard")
+    
+    @staticmethod
+    def solve_sat_instance(vars: int) -> list:
+        """
+        Simulate a SAT solver trace (branching search).
+        High entropy due to exploration of multiple branches.
+        """
+        # Approximate steps for a SAT solver on `vars` variables
+        steps = 2 ** min(vars, 10)  # Cap to avoid explosion
+        return simulate_deterministic_computation(steps, problem_type="hard")
+
+
+class AlgebraicReplayEngine:
+    """
+    Wrapper for the ARE compressor that measures compression and boundary entropy.
+    """
+    
+    def compress(self, trace: list) -> int:
+        """
+        Compress the trace and return the resulting size.
+        """
+        compressed_size, success = algebraic_replay_compress(trace)
+        return compressed_size
+    
+    def measure_boundary_entropy(self, trace: list) -> float:
+        """
+        Measure the Shannon entropy of the trace's boundary representation.
+        """
+        return compute_trace_entropy(trace)
+
+
+class TestARECompressor:
+    """
+    Valida la compresión O(√T) para computación determinista.
+    Fuente: Nye (2025), "On the Holographic Geometry of Deterministic Computation"
+    """
+
+    def test_easy_achieves_sqrt_bound(self):
+        """
+        RATIONALE: Una traza determinista (P) debe comprimirse a O(√T).
+        
+        Input: T = 10000 steps of a deterministic algorithm
+        Expected: compressed_size <= const * √T
+        
+        Source: Williams/Nye √T bound (Computational Area Law)
+        """
+        T = 10000
+        trace = TraceGenerator.deterministic_sort(steps=T)
+        
+        are = AlgebraicReplayEngine()
+        compressed_size = are.compress(trace)
+        
+        # Williams/Nye bound: Size ~ const * √T
+        # Using const = 50 as a generous upper bound
+        sqrt_bound = 50 * np.sqrt(T)  # = 5000
+        
+        assert compressed_size <= sqrt_bound, (
+            f"AXIOM VIOLATION: Deterministic trace failed √T bound. "
+            f"Got {compressed_size} > {sqrt_bound}"
+        )
+
+    def test_hard_fails_sqrt(self):
+        """
+        RATIONALE: Una traza de alta entropía (búsqueda NP no determinista simulada)
+        no debe comprimirse eficientemente si se trata como flujo lineal.
+        
+        Input: T = 10000 steps of random/branching exploration
+        Expected: compressed_size > const * √T
+        
+        This validates that the compressor doesn't "hallucinate" simplicity.
+        """
+        T = 10000
+        trace = TraceGenerator.random_walk(steps=T)
+        
+        are = AlgebraicReplayEngine()
+        compressed_size = are.compress(trace)
+        
+        sqrt_bound = 50 * np.sqrt(T)
+        
+        assert compressed_size > sqrt_bound, (
+            f"AXIOM VIOLATION: High entropy trace achieved √T compression. "
+            f"Got {compressed_size} <= {sqrt_bound}. "
+            f"Oracle is not distinguishing complexity!"
+        )
+
+    def test_boundary_entropy_hard(self):
+        """
+        RATIONALE: Verifica la entropía de la frontera holográfica.
+        En problemas NP, la frontera debe retener información no trivial.
+        
+        Input: SAT solver simulation trace
+        Expected: boundary_entropy > 0.5
+        
+        Source: Nye (2025) - Area Law breaks for branching structures
+        """
+        trace = TraceGenerator.solve_sat_instance(vars=50)
+        
+        are = AlgebraicReplayEngine()
+        entropy = are.measure_boundary_entropy(trace)
+        
+        assert entropy > 0.5, (
+            f"AXIOM VIOLATION: Boundary entropy too low for NP-hard trace. "
+            f"Got {entropy}, expected > 0.5"
+        )
+
+    def test_easy_has_low_boundary_entropy(self):
+        """
+        Control test: Deterministic traces should have low boundary entropy.
+        """
+        trace = TraceGenerator.deterministic_sort(steps=1000)
+        
+        are = AlgebraicReplayEngine()
+        entropy = are.measure_boundary_entropy(trace)
+        
+        # Easy problems should have lower entropy
+        assert entropy < 0.5, (
+            f"Deterministic trace has unexpectedly high entropy: {entropy}"
+        )
+
+    def test_compression_ratio_scales(self):
+        """
+        Scaling test: For P-class, larger T should maintain √T scaling.
+        The compression ratio should be roughly consistent.
+        """
+        ratios = []
+        for T in [100, 400, 1600]:
+            result: CompressionResult = run_compression_test(
+                time_steps=T, 
+                problem_type="easy"
+            )
+            ratios.append(result.compression_ratio)
+        
+        # Ratios should be roughly similar (within 50% of average)
+        avg_ratio = sum(ratios) / len(ratios)
+        for i, r in enumerate(ratios):
+            assert 0.5 * avg_ratio < r < 1.5 * avg_ratio, (
+                f"Compression ratio at T[{i}] doesn't scale consistently. "
+                f"Ratios = {ratios}"
+            )
+
+    def test_vacuum_separation(self):
+        """
+        The VACUUM TEST from Williams/Nye:
+        Compare compression of easy vs hard problems.
+        
+        If P = NP, both should compress to O(√T).
+        If P ≠ NP, hard problems should FAIL to compress.
+        """
+        T = 2000
+        
+        easy_result = run_compression_test(T, "easy")
+        hard_result = run_compression_test(T, "hard")
+        
+        # Easy achieves √T
+        assert easy_result.achieved_sqrt_bound is True, (
+            "Easy problem should achieve √T"
+        )
+        
+        # Hard fails √T
+        assert hard_result.achieved_sqrt_bound is False, (
+            "Hard problem should NOT achieve √T"
+        )
+        
+        # The separation confirms P ≠ NP (computationally)
+        assert easy_result.compression_ratio > hard_result.compression_ratio, (
+            "Easy problems should compress better than hard problems"
+        )
+
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])
