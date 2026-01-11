@@ -148,6 +148,17 @@ def algebraic_replay_compress(trace: List[np.ndarray]) -> Tuple[int, bool]:
     return compressed_size, success
 
 
+class AlgebraicReplayEngine:
+    """
+    Engine for Holographic compression of computation traces.
+    """
+    def __init__(self, time_steps: int = 1000):
+        self.time_steps = time_steps
+
+    def run_simulation(self, is_hard: bool) -> CompressionResult:
+        problem_type = "hard" if is_hard else "easy"
+        return run_compression_test(self.time_steps, problem_type)
+
 def run_compression_test(time_steps: int, problem_type: str) -> CompressionResult:
     """
     Run a single compression test.

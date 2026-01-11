@@ -123,40 +123,57 @@ def lee_formula_k5(k: int) -> Tuple[int, float, str]:
     return value, discriminant, pattern
 
 
+class KroneckerCoefficient:
+    """
+    Engine to detect algebraic obstructions in Kronecker coefficients.
+    """
+    def __init__(self):
+        pass
+
+    def get_coefficient(self, k: int) -> int:
+        return staircase_hook_coefficient(k)
+
+    def get_prediction(self, k: int) -> int:
+        return hogben_polynomial(k)
+
+    def analyze_threshold(self, k: int) -> Dict[str, Any]:
+        actual = self.get_coefficient(k)
+        predicted = self.get_prediction(k)
+        correction = actual - predicted
+        
+        if k >= 5:
+            _, delta, pattern = lee_formula_k5(k)
+        else:
+            delta = 0.0
+            pattern = "Stable (polynomial factorizable)"
+            
+        return {
+            "actual": actual,
+            "predicted": predicted,
+            "correction": correction,
+            "discriminant": delta,
+            "pattern": pattern,
+            "is_stable": correction == 0
+        }
+
 def analyze_kronecker_sequence(max_k: int = 7) -> List[KroneckerResult]:
     """
     Analyze the Kronecker coefficient sequence looking for the Five Threshold.
     """
+    engine = KroneckerCoefficient()
     results = []
     
     for k in range(1, max_k + 1):
-        # Actual coefficient
-        actual = staircase_hook_coefficient(k)
-        
-        # Hogben prediction
-        hogben = hogben_polynomial(k)
-        
-        # Correction term C_k = A_k - T_{k² - k + 1}
-        correction = actual - hogben
-        
-        # Check stability
-        is_stable = correction == 0
-        
-        # For k >= 5, compute Lee's formula
-        if k >= 5:
-            _, discriminant, pattern = lee_formula_k5(k)
-        else:
-            discriminant = 0.0
-            pattern = "Stable (polynomial factorizable)"
+        data = engine.analyze_threshold(k)
         
         results.append(KroneckerResult(
             k=k,
-            actual_coefficient=actual,
-            hogben_prediction=hogben,
-            correction=correction,
-            is_stable=is_stable,
-            discriminant=discriminant,
-            factorization_pattern=pattern
+            actual_coefficient=data['actual'],
+            hogben_prediction=data['predicted'],
+            correction=data['correction'],
+            is_stable=data['is_stable'],
+            discriminant=data['discriminant'],
+            factorization_pattern=data['pattern']
         ))
     
     return results
