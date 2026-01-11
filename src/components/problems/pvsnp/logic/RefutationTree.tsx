@@ -168,7 +168,7 @@ export function RefutationTree() {
                     <div className="flex gap-2">
                         <AlertTriangle className="w-4 h-4 shrink-0 text-purple-500" />
                         <p>
-                            <strong>Cápsula rwPHP:</strong> La restricción aleatoria simplifica el árbol. Un problema en $\mathsf{P}$ colapsa y revela el error de inmediato. Un problema en $\mathsf{NP}$ resiste la simplificación, atrapando al refutador en ciclos locales inútiles (Haken/Razborov argument).
+                            <strong>Cápsula rwPHP:</strong> La restricción aleatoria simplifica el árbol. Un problema en P colapsa y revela el error de inmediato. Un problema en NP resiste la simplificación, atrapando al refutador en ciclos locales inútiles (Haken/Razborov argument).
                         </p>
                     </div>
                 </div>

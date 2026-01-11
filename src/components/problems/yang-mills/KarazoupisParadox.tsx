@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { AlertTriangle, ShieldAlert, Binary, Layers } from 'lucide-react';
 
 export const KarazoupisParadox = () => {
@@ -84,4 +84,4 @@ export const KarazoupisParadox = () => {
     );
 };
 
-const AnimatePresence = motion.AnimatePresence;
+// AnimatePresence imported from framer-motion above

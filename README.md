@@ -67,9 +67,9 @@ Visualizador 3D interactivo de tubos de vorticidad y estructuras de colapso de E
 | Documento | Contenido |
 |-----------|-----------|
 | **[Navier-Stokes Blowup](./docs/navier_stokes/Navier_Stokes_Blowup_2026.tex)** | Resolución formal y auditoría de no-unicidad. |
-| **[P vs NP Homology](./docs/pvsnp/P_neq_NP_Proof.tex)** | Prueba de la obstrucción homológica. |
-| **[Walkthrough Navier-Stokes](./.gemini/artifacts/walkthrough_navier_stokes.md)** | Detalles técnicos del motor WebGPU. |
-| **[Master Task List](./.gemini/artifacts/task.md)** | Cronograma de resolución de problemas. |
+| **[P vs NP Research](./docs/pvsnp/P_neq_NP_Research.tex)** | Análisis de la obstrucción homológica. |
+| **[Yang-Mills Solution](./docs/yang_mills/Yang_Mills_Solution_2026.tex)** | Investigación del Mass Gap. |
+| **[Riemann Verification](./docs/riemann/RH_Verification_Framework_2026.tex)** | Framework de verificación espectral. |
 
 ---
 

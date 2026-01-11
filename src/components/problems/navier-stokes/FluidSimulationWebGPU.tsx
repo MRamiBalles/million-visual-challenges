@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { WebGPUFluid, FluidParams } from './WebGPUFluid';
+import { WebGPUFluid, FluidParams } from '@/simulation/navier-stokes/WebGPUFluid';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Play, Pause, RotateCcw, Droplets } from 'lucide-react';
@@ -127,7 +127,7 @@ const FluidSimulationWebGPU: React.FC = () => {
                         </div>
 
                         <div className="flex items-center gap-2 bg-slate-900 px-3 py-1.5 rounded-md border border-slate-800" title="Sub-stepping (Reduce viscosidad numérica)">
-                            <span className="text-xs text-slate-400 font-mono">$\Delta t_{sub}$:</span>
+                            <span className="text-xs text-slate-400 font-mono">Δt_sub:</span>
                             <input
                                 type="range"
                                 min="1"
@@ -145,7 +145,7 @@ const FluidSimulationWebGPU: React.FC = () => {
                             onClick={triggerBifurcation}
                             className="text-amber-400 border-amber-900/50 hover:bg-amber-900/20"
                         >
-                            Inyectar $\bar{v}$
+                            Inyectar $\bar{"{"}v{"}"}$
                         </Button>
 
                         <Button

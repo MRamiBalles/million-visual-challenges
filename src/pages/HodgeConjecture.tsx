@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Terminal as TerminalIcon, Cpu, Code, Database, Search, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Terminal as TerminalIcon, Cpu, Code, Database, Search, ShieldCheck, RefreshCw } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useMillenniumProblem } from "@/hooks/useMillenniumProblem";
 import { useUserProgress } from "@/hooks/useUserProgress";

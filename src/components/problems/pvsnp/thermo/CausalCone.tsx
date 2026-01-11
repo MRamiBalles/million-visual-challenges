@@ -256,7 +256,7 @@ export function CausalCone({ thermalNoise = 0, onDecoherence }: CausalConeProps)
                 <div className={`mb-4 p-3 rounded-lg border transition-colors ${thermalNoise > 0.7 ? 'bg-red-900/10 border-red-500/30' : 'bg-purple-500/10 border-purple-500/30'}`}>
                     <div className="flex items-center justify-between mb-2">
                         <span className="text-xs text-purple-300 font-medium">
-                            Insight del Observador $K(\mathcal{O})$
+                            Insight del Observador K(𝒪)
                         </span>
                         <span className="text-xs font-mono text-purple-400">
                             {observerInsight === 0 ? 'Límite Clásico' : observerInsight === 1 ? 'Límite Oráculo' : (observerInsight * 100).toFixed(0) + '%'}
@@ -278,14 +278,14 @@ export function CausalCone({ thermalNoise = 0, onDecoherence }: CausalConeProps)
                     <div className="mt-3 p-2 bg-black/30 rounded font-mono text-xs">
                         <div className="text-purple-300 mb-1">Complejidad de Ashtavakra (Ghosh 2025):</div>
                         <div className="text-white flex items-center gap-1 flex-wrap">
-                            <span>$AC = \alpha \cdot$</span>
+                            <span>AC = α ·</span>
                             <span className={`px-1 rounded transition-colors ${observerInsight > 0.5 ? 'bg-green-500/30 text-green-300' : 'bg-red-500/30 text-red-300'}`}>
-                                $K(x|\mathcal{O})$={((1 - observerInsight) * 10).toFixed(1)}
+                                K(x|𝒪)={((1 - observerInsight) * 10).toFixed(1)}
                             </span>
-                            <span>$+ \beta \cdot (1/A) + \gamma \cdot \Phi(S)$</span>
+                            <span>+ β · (1/A) + γ · Φ(S)</span>
                         </div>
                         <div className="text-purple-200/50 mt-1 text-[10px]">
-                            La complejidad decrece monótonamente respecto al conocimiento del observador, pero aumenta con el ruido ($\eta={thermalNoise}$).
+                            La complejidad decrece monótonamente respecto al conocimiento del observador, pero aumenta con el ruido (η={thermalNoise}).
                         </div>
                     </div>
 
@@ -403,8 +403,8 @@ export function CausalCone({ thermalNoise = 0, onDecoherence }: CausalConeProps)
                 <div className="flex items-start gap-2 p-3 bg-yellow-500/10 rounded-lg border border-yellow-500/30">
                     <AlertTriangle className="w-4 h-4 text-yellow-400 flex-shrink-0 mt-0.5" />
                     <p className="text-xs text-yellow-200/80">
-                        <strong>Convergencia (Phase 14):</strong> La realidad física (ruido $\eta$) y la capacidad cognitiva ($K(\mathcal{O})$) son inseparables.
-                        El ruido reduce la correlación cuántica (Decoherencia), contrayendo el cono de luz efectivo y haciendo que $\mathsf{P} \neq \mathsf{NP}$ sea una verdad termodinámica para observadores finitos.
+                        <strong>Convergencia (Phase 14):</strong> La realidad física (ruido η) y la capacidad cognitiva K(𝒪) son inseparables.
+                        El ruido reduce la correlación cuántica (Decoherencia), contrayendo el cono de luz efectivo y haciendo que P ≠ NP sea una verdad termodinámica para observadores finitos.
                     </p>
                 </div>
             </CardContent>

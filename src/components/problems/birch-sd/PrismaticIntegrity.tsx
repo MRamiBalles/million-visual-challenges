@@ -225,7 +225,7 @@ export const PrismaticIntegrity = () => {
                     Contexto Teórico (Audit v2.1): Proxy Geométrico
                 </h4>
                 <p className="text-xs text-white/60 leading-relaxed">
-                    Este motor utiliza las **operaciones de Steenrod sintómicas** (Carmeli & Feng 2025) como un **proxy geométrico**. Aunque probaron la simplecticidad para el grupo de Brauer $Br(X)$ de superficies sobre cuerpos finitos, aquí extrapolamos la estructura a $Sha(E/\mathbb{Q})$. La transferencia directa es condicional a la finitud de Sha y la conjetura de Tate para divisores.
+                    Este motor utiliza las <strong>operaciones de Steenrod sintómicas</strong> (Carmeli & Feng 2025) como un <strong>proxy geométrico</strong>. Aunque probaron la simplecticidad para el grupo de Brauer Br(X) de superficies sobre cuerpos finitos, aquí extrapolamos la estructura a Sha(E/ℚ). La transferencia directa es condicional a la finitud de Sha y la conjetura de Tate para divisores.
                 </p>
             </div>
         </motion.div>
