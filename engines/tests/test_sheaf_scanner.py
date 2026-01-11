@@ -112,13 +112,13 @@ class SheafScanner:
 
 class TestSheafScanner:
     """
-    Valida la detección de Homología Computacional H1.
-    Fuente: Tang (2025), "A Homological Proof of P != NP"
+    Validates Computational Homology H1 detection.
+    Source: Tang (2025), "A Homological Proof of P != NP"
     """
 
     def test_2sat_trivial_homology(self):
         """
-        RATIONALE: 2-SAT ∈ P. Su complejo de cadenas debe ser contráctil (H_n = 0).
+        RATIONALE: 2-SAT ∈ P. Its chain complex must be contractible (H_n = 0).
         
         Input: (x1 ∨ x2) ∧ (¬x1 ∨ ¬x2) -> Satisfiable, linear chain
         Expected: H1 = 0
@@ -134,10 +134,10 @@ class TestSheafScanner:
 
     def test_3sat_pigeonhole_obstruction(self):
         """
-        RATIONALE: PHP (Pigeonhole Principle) es difícil para Resolución.
-        Debe exhibir H1 != 0 debido a ciclos de verificación persistentes.
+        RATIONALE: PHP (Pigeonhole Principle) is hard for Resolution.
+        It must exhibit H1 != 0 due to persistent verification cycles.
         
-        Input: PHP 3→2 (3 palomas, 2 nidos)
+        Input: PHP 3→2 (3 pigeons, 2 holes)
         Expected: H1 > 0
         
         Source: Tang (2025) predicts topological obstruction
@@ -153,10 +153,10 @@ class TestSheafScanner:
 
     def test_cycle_with_obstruction(self):
         """
-        RATIONALE: Un ciclo 'twisted' (Möbius-like) crea una obstrucción forzada.
+        RATIONALE: A 'twisted' (Möbius-like) cycle creates a forced obstruction.
         
-        Input: Codificación SAT de un ciclo de contradicción
-               x1 != x2, x2 != x3, x3 != x4, x4 != x1 (UNSAT en ciclo twisted)
+        Input: SAT encoding of a contradiction cycle
+               x1 != x2, x2 != x3, x3 != x4, x4 != x1 (UNSAT in twisted cycle)
         Expected: H1 > 0
         """
         formula = CnfFormula.from_clauses([
