@@ -91,8 +91,8 @@ class PolynomialStructure:
 
 class TestKroneckerFault:
     """
-    Valida el colapso estructural en k=5.
-    Fuente: Lee (2025), "Algebraic Obstructions and the Collapse of Elementary Structure"
+    Validates the structural collapse at k=5.
+    Source: Lee (2025), "Algebraic Obstructions and the Collapse of Elementary Structure"
     """
 
     @pytest.mark.parametrize("k, expected_stable", [
@@ -121,8 +121,8 @@ class TestKroneckerFault:
         """
         CRITICAL TEST: The "+29 correction" at k=5.
         
-        RATIONALE: En k=5, la predicción triangular es T_21 = 231.
-        El valor real es 260. La corrección debe ser exactamente +29.
+        RATIONALE: At k=5, the triangular prediction is T_21 = 231.
+        The actual value is 260. The correction must be exactly +29.
         
         Source: Lee (2025), Phenomenon 1.3 [8]
         
@@ -145,8 +145,8 @@ class TestKroneckerFault:
 
     def test_discriminant_obstruction(self):
         """
-        RATIONALE: En k=5, surge un factor cuadrático irreducible k² - 5k + 7.
-        Su discriminante debe ser negativo (-3).
+        RATIONALE: At k=5, an irreducible quadratic factor k² - 5k + 7 emerges.
+        Its discriminant must be negative (-3).
         
         Source: Lee (2025), Theorem 5.6 [9]
         

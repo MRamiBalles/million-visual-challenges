@@ -12,8 +12,8 @@
 
 ---
 
-## 📖 El Fin de una Era
-"Million Visual Challenges" no es solo una plataforma educativa; es el registro histórico de la resolución de los problemas más profundos de la humanidad mediante la sinergia entre la intuición humana y la computación avanzada de 2026.
+## Overview
+**Million Visual Challenges** is a research platform for exploring the Clay Mathematics Institute's Millennium Problems through interactive visualization and formal verification. The project combines WebGPU-accelerated simulations with Lean4 formalizations.
 
 ### Estado de los Problemas (Enero 2026)
 
@@ -96,8 +96,8 @@ npm run dev
 
 ---
 
-## 🎯 Conclusión
-Este proyecto demuestra que la "suavidad" del universo es una ilusión numérica. Al eliminar la disipación artificial de nuestros algoritmos, hemos encontrado un cosmos de singularidades, bifurcaciones y belleza matemática pura.
+## Conclusion
+This project provides a unified framework for visualizing and auditing conjectures related to the Millennium Problems. The computational engines serve as empirical validators for the formal axioms in Lean4.
 
 ---
 
