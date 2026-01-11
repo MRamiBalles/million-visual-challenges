@@ -45,7 +45,7 @@ const PvsNP = () => {
             <h2 className="text-3xl font-bold mb-4">🏛️ Museo Vivo de la Intractabilidad</h2>
             <p className="text-muted-foreground">
               Análisis experimental de obstrucciones multidimensionales (2024-2025).
-              Este entorno visualiza las restricciones topológicas, algebraicas y físicas que delimitan la frontera entre $\mathsf{P}$ y $\mathsf{NP}$.
+              Este entorno visualiza las restricciones topológicas, algebraicas y físicas que delimitan la frontera entre P y NP.
             </p>
           </div>
 

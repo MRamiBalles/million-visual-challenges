@@ -110,8 +110,8 @@ const YangMills = () => {
                                             <ShieldAlert className="w-4 h-4" /> AUDIT_LOG: AX_OS_VACUUM_COLLAPSE
                                         </h4>
                                         <p className="text-sm leading-relaxed text-slate-300">
-                                            La representación espectral en el continuo ($\mathbb{R}^4$) es incompatible con la libertad asintótica logarítmica. 
-                                            Para preservar el Gap de Masa ($\Delta > 0$), el continuo debe emerger de una red discreta.
+                                            La representación espectral en el continuo ($\mathbb{"{"}R{"}"}^4$) es incompatible con la libertad asintótica logarítmica. 
+                                            Para preservar el Gap de Masa ($\Delta {">"} 0$), el continuo debe emerger de una red discreta.
                                         </p>
                                     </Card>
                                 </motion.div>

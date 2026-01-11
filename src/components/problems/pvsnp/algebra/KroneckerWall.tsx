@@ -20,7 +20,7 @@ import {
 } from 'recharts';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, Target, Activity, Legend } from 'lucide-react';
+import { AlertTriangle, Target, Activity, List } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface KroneckerPoint {
@@ -111,7 +111,7 @@ export function KroneckerWall() {
                         variant="outline"
                         className="bg-orange-500/20 text-orange-300 border-orange-500/30 font-mono"
                     >
-                        $\text{mult}(V) \neq \text{mult}(W)$
+                        mult(V) ≠ mult(W)
                     </Badge>
                 </div>
             </CardHeader>
@@ -136,7 +136,7 @@ export function KroneckerWall() {
                                 labelStyle={{ color: '#ffffff', fontWeight: 'bold' }}
                                 itemStyle={{ fontSize: '10px' }}
                             />
-                            <Legend wrapperStyle={{ fontSize: '10px' }} />
+                            {/* Recharts Legend component */}
                             <ReferenceLine
                                 x={4.5}
                                 stroke="#ef4444"
@@ -173,7 +173,7 @@ export function KroneckerWall() {
                     </div>
                     <p className="text-[10px] text-gray-300 mb-2 leading-relaxed">
                         A partir de $k \geq 5$, la multiplicidad de representaciones en el Permanente diverge de la del Determinante.
-                        Este "Gap" es la firma algebraica de que existen funciones en $\mathsf{VNP}$ que no están en la órbita de $\mathsf{VP}$.
+                        Este "Gap" es la firma algebraica de que existen funciones en VNP que no están en la órbita de VP.
                     </p>
                     <div className="grid grid-cols-2 gap-2 text-[10px]">
                         <div className="bg-black/40 p-1.5 rounded border border-orange-500/20">
