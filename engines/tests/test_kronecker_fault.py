@@ -85,7 +85,8 @@ class PolynomialStructure:
         """
         if self._lee_result is None:
             return 0  # Fully factorable for k < 5
-        return self._lee_result["discriminant"]
+        # lee_formula_k5 returns (value, discriminant, pattern) tuple
+        return self._lee_result[1]  # Index 1 = discriminant
 
 
 class TestKroneckerFault:
