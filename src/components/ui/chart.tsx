@@ -58,6 +58,51 @@ const ChartContainer = React.forwardRef<
 });
 ChartContainer.displayName = "Chart";
 
+/**
+ * Validates CSS color values to prevent CSS injection attacks.
+ * Allows: hex colors, rgb/rgba, hsl/hsla, named colors, and CSS variables.
+ */
+const isValidCSSColor = (color: string): boolean => {
+  if (!color || typeof color !== 'string') return false;
+  
+  // Trim and limit length to prevent DoS
+  const trimmed = color.trim();
+  if (trimmed.length > 100) return false;
+  
+  // Block dangerous CSS injection patterns
+  const dangerousPatterns = [
+    /url\s*\(/i,           // url() can load external resources
+    /expression\s*\(/i,    // IE expression (legacy XSS vector)
+    /javascript:/i,        // javascript: protocol
+    /@import/i,            // @import can load external stylesheets
+    /behavior\s*:/i,       // IE behavior (legacy)
+    /<|>/,                 // HTML tags
+    /[{}]/,                // CSS block delimiters
+    /;/,                   // Statement terminators
+    /\/\*/,                // CSS comments
+  ];
+  
+  if (dangerousPatterns.some(pattern => pattern.test(trimmed))) {
+    console.warn('[Chart] Potentially dangerous color value rejected:', trimmed.substring(0, 50));
+    return false;
+  }
+  
+  // Allow valid CSS color formats
+  const validPatterns = [
+    /^#[0-9a-fA-F]{3,8}$/,                                    // Hex: #RGB, #RRGGBB, #RRGGBBAA
+    /^rgb\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*\)$/i,    // rgb(r, g, b)
+    /^rgba\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*[\d.]+\s*\)$/i, // rgba(r, g, b, a)
+    /^hsl\(\s*[\d.]+\s*,\s*[\d.]+%?\s*,\s*[\d.]+%?\s*\)$/i,   // hsl(h, s%, l%)
+    /^hsla\(\s*[\d.]+\s*,\s*[\d.]+%?\s*,\s*[\d.]+%?\s*,\s*[\d.]+\s*\)$/i, // hsla(h, s%, l%, a)
+    /^hsl\(\s*[\d.]+\s+[\d.]+%\s+[\d.]+%\s*\)$/i,             // Modern hsl(h s% l%)
+    /^hsl\(\s*[\d.]+\s+[\d.]+%\s+[\d.]+%\s*\/\s*[\d.]+%?\s*\)$/i, // hsl(h s% l% / a)
+    /^var\(--[a-zA-Z0-9-]+\)$/,                               // CSS variables
+    /^[a-zA-Z]+$/,                                             // Named colors (red, blue, etc.)
+  ];
+  
+  return validPatterns.some(pattern => pattern.test(trimmed));
+};
+
 const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
   const colorConfig = Object.entries(config).filter(([_, config]) => config.theme || config.color);
 
@@ -75,8 +120,13 @@ ${prefix} [data-chart=${id}] {
 ${colorConfig
   .map(([key, itemConfig]) => {
     const color = itemConfig.theme?.[theme as keyof typeof itemConfig.theme] || itemConfig.color;
-    return color ? `  --color-${key}: ${color};` : null;
+    // Validate color before including in CSS
+    if (!color || !isValidCSSColor(color)) {
+      return null;
+    }
+    return `  --color-${key}: ${color};`;
   })
+  .filter(Boolean)
   .join("\n")}
 }
 `,
