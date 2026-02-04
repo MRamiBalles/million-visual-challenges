@@ -73,7 +73,7 @@ const NavierStokes = () => {
         return () => clearInterval(interval);
     }, [user, updateTimeSpent]);
 
-    if (isLoading) {
+    if (isLoading || !problem) {
         return (
             <div className="min-h-screen bg-background">
                 <div className="container mx-auto px-6 py-16">
