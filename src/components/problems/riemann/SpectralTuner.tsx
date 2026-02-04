@@ -4,6 +4,26 @@ import { Slider } from "@/components/ui/slider";
 import { Zap, Radio, AlertTriangle } from "lucide-react";
 import { motion } from "framer-motion";
 
+interface SpectralTunerProps {
+    /**
+     * The target phase where resonance occurs.
+     * Default: Math.PI (Berry-Keating model)
+     * 
+     * Different hypotheses suggest different target phases:
+     * - π: Standard Berry-Keating model
+     * - π/2: Modified Rindler boundary conditions
+     * - 2π: Full period resonance
+     * 
+     * Making this configurable allows exploration of alternative theories.
+     */
+    targetPhase?: number;
+    
+    /**
+     * Label for the target phase in the UI
+     */
+    targetPhaseLabel?: string;
+}
+
 /**
  * SpectralTuner: Riemann Interferometer
  * Based on the models of Sierra (2007) and Shimizu (2011) connecting 
@@ -12,12 +32,19 @@ import { motion } from "framer-motion";
  * Conceptual Model:
  * The operator H has eigenvalues E_n only if the phase ϑ (theta) is "tuned".
  * Visualizes the spectral determinant det(H - E) as a function of phase.
+ * 
+ * CONFIGURABLE TARGET PHASE:
+ * The targetPhase prop allows exploration of alternative hypotheses.
+ * This addresses the "fine tuning" limitation documented in CRITIQUE_RISKS_RH.md.
  */
-
-export const SpectralTuner = () => {
+export const SpectralTuner = ({ 
+    targetPhase = Math.PI,
+    targetPhaseLabel = "π (Berry-Keating)"
+}: SpectralTunerProps) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [phase, setPhase] = useState(0); // Theta parameter 0 to 2PI
     const [tuningQuality, setTuningQuality] = useState(0);
+    const [customTargetPhase, setCustomTargetPhase] = useState(targetPhase);
 
     // Known Zeros (Im parts)
     const zeros = useMemo(() => [14.13, 21.02, 25.01, 30.42, 32.93, 37.58, 40.91, 43.32, 48.00, 49.77], []);
@@ -45,11 +72,10 @@ export const SpectralTuner = () => {
 
         // Calculate "Resonance" based on phase
         // In the Berry-Keating model, E_n are eigenvalues when phase cancels semiclassical action
-        // We simulate this by making the spectral peaks "sharp" only near a "Correct" phase (e.g. PI)
+        // We simulate this by making the spectral peaks "sharp" only near the configurable target phase
 
-        // Let's assume the "Nature's Phase" is PI (arbitrary for this sim)
-        const targetPhase = Math.PI;
-        const phaseError = Math.abs(phase - targetPhase);
+        // Use configurable target phase instead of hardcoded PI
+        const phaseError = Math.abs(phase - customTargetPhase);
 
         // Tuning factor: 1.0 = Perfect, 0.0 = Noise
         // The closer to targetPhase, the sharper the peaks.
@@ -90,10 +116,10 @@ export const SpectralTuner = () => {
                 amp += Math.cos(t * Math.log(p) - phase * 2);
             });
 
-            // Add "Guide" wave that perfectly peaks at Zeros ONLY if phase is ~PI
+            // Add "Guide" wave that perfectly peaks at Zeros ONLY if phase matches target
             // This represents the "Hidden Operator" that we are searching for
-            const correctPhaseOffset = Math.abs(phase - 3.14);
-            const coherence = Math.max(0, 1 - correctPhaseOffset); // 1 at PI, 0 far away
+            const correctPhaseOffset = Math.abs(phase - customTargetPhase);
+            const coherence = Math.max(0, 1 - correctPhaseOffset); // 1 at target, 0 far away
 
             let hiddenOperator = 0;
             zeros.forEach(z => {
@@ -128,7 +154,7 @@ export const SpectralTuner = () => {
         // Set quality for UI
         setTuningQuality(qualityMetric);
 
-    }, [phase, zeros]);
+    }, [phase, zeros, customTargetPhase]);
 
     return (
         <div className="flex flex-col md:flex-row gap-6">
@@ -198,6 +224,45 @@ export const SpectralTuner = () => {
                                 : "Desalineamiento de fase. El espectro es difuso ('Caos'). No existe un operador autoadjunto para esta fase."
                             }
                         </div>
+                    </div>
+
+                    {/* Target Phase Configuration (New Feature) */}
+                    <div className="mt-4 p-3 bg-indigo-900/20 border border-indigo-500/20 rounded">
+                        <div className="text-[10px] uppercase text-indigo-300/70 mb-2">Fase Objetivo (Configurable)</div>
+                        <div className="flex gap-2 flex-wrap mb-2">
+                            {[
+                                { value: Math.PI, label: "π" },
+                                { value: Math.PI / 2, label: "π/2" },
+                                { value: 2 * Math.PI, label: "2π" },
+                                { value: Math.PI * 1.5, label: "3π/2" },
+                            ].map(({ value, label }) => (
+                                <button
+                                    key={label}
+                                    onClick={() => setCustomTargetPhase(value)}
+                                    className={`px-2 py-1 text-xs rounded transition-colors ${
+                                        Math.abs(customTargetPhase - value) < 0.01
+                                            ? "bg-indigo-500/40 text-indigo-200 border border-indigo-400"
+                                            : "bg-indigo-500/10 text-indigo-300/70 border border-indigo-500/20 hover:bg-indigo-500/20"
+                                    }`}
+                                >
+                                    {label}
+                                </button>
+                            ))}
+                        </div>
+                        <Slider
+                            value={[customTargetPhase]}
+                            max={Math.PI * 2}
+                            step={0.01}
+                            onValueChange={(v) => setCustomTargetPhase(v[0])}
+                            className="py-1"
+                        />
+                        <div className="text-center text-[10px] font-mono text-indigo-300/50 mt-1">
+                            Objetivo: {customTargetPhase.toFixed(3)} rad
+                        </div>
+                        <p className="text-[9px] text-indigo-300/50 mt-2 italic">
+                            Diferentes teorías predicen diferentes fases de resonancia. 
+                            Explora alternativas al modelo Berry-Keating estándar.
+                        </p>
                     </div>
 
                     {/* Berry Phase Quantization Error (Yang 2025) */}
