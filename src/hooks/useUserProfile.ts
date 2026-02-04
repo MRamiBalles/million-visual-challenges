@@ -88,16 +88,52 @@ export const useUserProfile = (userId?: string) => {
         },
     });
 
-    // Upload avatar
+    // Upload avatar with validation
     const uploadAvatar = useMutation({
         mutationFn: async (file: File) => {
             if (!userId) throw new Error('No user ID provided');
 
-            const fileExt = file.name.split('.').pop();
+            // File size validation (max 5MB)
+            const MAX_FILE_SIZE = 5 * 1024 * 1024;
+            if (file.size > MAX_FILE_SIZE) {
+                throw new Error('File too large (max 5MB)');
+            }
+
+            // MIME type validation
+            const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            if (!ALLOWED_TYPES.includes(file.type)) {
+                throw new Error('Invalid file type. Allowed: JPEG, PNG, GIF, WEBP');
+            }
+
+            // Validate file extension matches MIME type
+            const fileExt = file.name.split('.').pop()?.toLowerCase();
+            const mimeToExt: Record<string, string[]> = {
+                'image/jpeg': ['jpg', 'jpeg'],
+                'image/png': ['png'],
+                'image/gif': ['gif'],
+                'image/webp': ['webp']
+            };
+            if (!fileExt || !mimeToExt[file.type]?.includes(fileExt)) {
+                throw new Error('File extension does not match content type');
+            }
+
             const fileName = `${userId}-${Date.now()}.${fileExt}`;
             const filePath = `avatars/${fileName}`;
 
-            // Upload file to Supabase Storage
+            // Clean up old avatar if exists
+            if (profile?.avatar_url) {
+                try {
+                    const urlParts = profile.avatar_url.split('/');
+                    const oldFileName = urlParts[urlParts.length - 1];
+                    if (oldFileName && oldFileName.startsWith(userId)) {
+                        await supabase.storage.from('user-uploads').remove([`avatars/${oldFileName}`]);
+                    }
+                } catch {
+                    // Ignore cleanup errors - old file may not exist
+                }
+            }
+
+            // Upload file to Storage
             const { error: uploadError } = await supabase.storage
                 .from('user-uploads')
                 .upload(filePath, file, { upsert: true });
