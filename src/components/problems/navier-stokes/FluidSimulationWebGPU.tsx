@@ -3,55 +3,66 @@ import { WebGPUFluid, FluidParams } from '@/simulation/navier-stokes/WebGPUFluid
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Play, Pause, RotateCcw, Droplets } from 'lucide-react';
+import FluidSimulationFallback from './FluidSimulationFallback';
 
 const FluidSimulationWebGPU: React.FC = () => {
     const canvasRef = React.useRef<HTMLCanvasElement>(null);
     const [engine, setEngine] = React.useState<WebGPUFluid | null>(null);
     const [isPlaying, setIsPlaying] = React.useState(true);
     const [fps, setFps] = React.useState(0);
-    const [particleCount] = React.useState(50000);
     const [sigma, setSigma] = React.useState(0);
     const [substeps, setSubsteps] = React.useState(2);
+    const [webGPUSupported, setWebGPUSupported] = React.useState<boolean | null>(null);
 
+    // Initialize WebGPU
     React.useEffect(() => {
         async function initWebGPU() {
             if (!navigator.gpu) {
-                console.error("WebGPU not supported");
+                setWebGPUSupported(false);
                 return;
             }
 
-            const adapter = await navigator.gpu.requestAdapter();
-            if (!adapter) return;
-            const device = await adapter.requestDevice();
-
-            const params: FluidParams = {
-                dt: 0.1,
-                gravity: -0.05,
-                particleCount: 50000,
-                gridRes: 64,
-            };
-
-            const fluidEngine = new WebGPUFluid(device, params);
-
-            if (canvasRef.current) {
-                const context = canvasRef.current.getContext('webgpu');
-                if (context) {
-                    context.configure({
-                        device,
-                        format: navigator.gpu.getPreferredCanvasFormat(),
-                        alphaMode: 'premultiplied',
-                    });
+            try {
+                const adapter = await navigator.gpu.requestAdapter();
+                if (!adapter) {
+                    setWebGPUSupported(false);
+                    return;
                 }
+                
+                const device = await adapter.requestDevice();
+
+                const params: FluidParams = {
+                    dt: 0.1,
+                    gravity: -0.05,
+                    particleCount: 50000,
+                    gridRes: 64,
+                };
+
+                const fluidEngine = new WebGPUFluid(device, params);
+
+                if (canvasRef.current) {
+                    const context = canvasRef.current.getContext('webgpu');
+                    if (context) {
+                        context.configure({
+                            device,
+                            format: navigator.gpu.getPreferredCanvasFormat(),
+                            alphaMode: 'premultiplied',
+                        });
+                    }
+                }
+
+                setEngine(fluidEngine);
+                setWebGPUSupported(true);
+            } catch (error) {
+                console.error("WebGPU initialization failed:", error);
+                setWebGPUSupported(false);
             }
-
-            setEngine(fluidEngine);
-
-            // Basic render logic setup...
         }
 
         initWebGPU();
     }, []);
 
+    // Animation loop
     React.useEffect(() => {
         let animationFrame: number;
         let lastTime = performance.now();
@@ -78,7 +89,7 @@ const FluidSimulationWebGPU: React.FC = () => {
 
         animationFrame = requestAnimationFrame(loop);
         return () => cancelAnimationFrame(animationFrame);
-    }, [engine, isPlaying]);
+    }, [engine, isPlaying, substeps]);
 
     const toggleSimulation = () => setIsPlaying(!isPlaying);
 
@@ -93,6 +104,11 @@ const FluidSimulationWebGPU: React.FC = () => {
             engine.reinitBifurcation();
         }
     };
+
+    // Show fallback for browsers without WebGPU support
+    if (webGPUSupported === false) {
+        return <FluidSimulationFallback particleCount={1000} showWebGPUWarning={true} />;
+    }
 
     return (
         <Card className="bg-slate-900 border-slate-800 overflow-hidden">
@@ -113,7 +129,7 @@ const FluidSimulationWebGPU: React.FC = () => {
                         </Button>
 
                         <div className="flex items-center gap-2 bg-slate-900 px-3 py-1.5 rounded-md border border-slate-800">
-                            <span className="text-xs text-slate-400 font-mono">$\sigma$:</span>
+                            <span className="text-xs text-slate-400 font-mono">σ:</span>
                             <input
                                 type="range"
                                 min="0"
@@ -145,7 +161,7 @@ const FluidSimulationWebGPU: React.FC = () => {
                             onClick={triggerBifurcation}
                             className="text-amber-400 border-amber-900/50 hover:bg-amber-900/20"
                         >
-                            Inyectar $\bar{"{"}v{"}"}$
+                            Inyectar v̄
                         </Button>
 
                         <Button
@@ -164,7 +180,12 @@ const FluidSimulationWebGPU: React.FC = () => {
                         ref={canvasRef}
                         className="w-full h-full cursor-crosshair"
                     />
-                    {!engine && (
+                    {webGPUSupported === null && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                            <p className="text-slate-400 animate-pulse">Verificando soporte WebGPU...</p>
+                        </div>
+                    )}
+                    {webGPUSupported && !engine && (
                         <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm">
                             <p className="text-slate-400 animate-pulse">Iniciando WebGPU...</p>
                         </div>
