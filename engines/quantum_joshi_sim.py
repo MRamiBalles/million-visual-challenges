@@ -48,7 +48,11 @@ def simulate_joshi_obstruction(instance_name, n, residual_gap):
     print(f"[QUANTUM] Obstrucción de Joshi: {'DETECTADA' if is_obstructed else 'BAJA'} | Congestión: {spectral_congestion:.2f}%")
 
 if __name__ == "__main__":
-    # Simulación para sko90 (Complejidad alta)
-    simulate_joshi_obstruction("sko90.dat", 90, 11.44)
-    # Simulación para nug5 (Complejidad baja)
-    simulate_joshi_obstruction("nug5.dat", 5, 41.38)
+    # Procesamiento por lotes de las instancias críticas (Joshi 2026)
+    instances = [
+        ("nug5.dat", 5, 41.38),
+        ("tai25b.dat", 25, 40.5),
+        ("sko90.dat", 90, 11.44)
+    ]
+    for inst, n, gap in instances:
+        simulate_joshi_obstruction(inst, n, gap)

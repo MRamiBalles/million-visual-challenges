@@ -47,6 +47,11 @@ def meta_audit(instance_name, n, residual_gap):
     print(f"[META] Certificado generado: {os.path.basename(output_path)} | Esfuerzo: {effort_score:.2f}")
 
 if __name__ == "__main__":
-    # Ejecución de prueba con datos conocidos de sko90
-    meta_audit("sko90.dat", 90, 11.44)
-    meta_audit("nug5.dat", 5, 41.38)
+    # Procesamiento por lotes de las instancias críticas
+    instances = [
+        ("nug5.dat", 5, 41.38),
+        ("tai25b.dat", 25, 40.5),
+        ("sko90.dat", 90, 11.44)
+    ]
+    for inst, n, gap in instances:
+        meta_audit(inst, n, gap)
