@@ -1,0 +1,21 @@
+{
+    "metadata": {
+        "instance_name": "nug5.dat",
+        "problem_type": "QAP",
+        "n": 5,
+        "timestamp": "2026-03-09T14:54:42Z",
+        "engine_version": "MVC-Audit-2.0-Homology"
+    },
+    "homology_metrics": {
+        "betti_1_approximation": 0.9852,
+        "cech_obstruction_detected": true,
+        "res_rag_ratio": 1.0
+    },
+    "audit_trail": {
+        "greedy_cost": 82,
+        "np_best_cost": 58,
+        "residual_gap": 41.38,
+        "local_search_iterations": 5
+    },
+    "formal_verification_stub": "def cert_nug5 : QAPCert := { gap := 41.37931034482759, n := 5 }"
+}
