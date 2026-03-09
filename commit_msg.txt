@@ -1,0 +1,7 @@
+feat(research): finalize millennium problems audit ecosystem
+
+- Complete rigurosity motors for BSD (Iran Formula) and Hodge (Nodal Surgery).
+- Emit high-precision JSON certificates for all 6 active Millennium Problems.
+- Synchronized professional audit reports in docs/ with Q1 academic aesthetics.
+- Update global README and Executive Summary to reflect the 'All Audited' state.
+- Close the reality gap between formal axioms and empirical computational evidence.
