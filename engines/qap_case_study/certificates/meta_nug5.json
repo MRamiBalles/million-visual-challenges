@@ -2,12 +2,12 @@
     "metadata": {
         "instance": "nug5.dat",
         "n": 5,
-        "timestamp": "2026-03-09T15:12:08Z"
+        "timestamp": "2026-03-09T16:28:13Z"
     },
     "meta_metrics": {
         "effort_score": 197.92,
         "verification_complexity": "SUPER_POLYNOMIAL",
-        "certification_time_ms": 198.3
+        "certification_time_ms": 198.13
     },
     "verdict": "META_CERTIFIED_HARD"
 }
