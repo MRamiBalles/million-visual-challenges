@@ -14,6 +14,7 @@ structure QAPCert where
   has_obstruction : Bool
   meta_effort : Real
   quantum_braiding_index : Real
+  spectral_gap : Real
 
 /-- Espacio de Configuración como Complejo Simplicial (Abstracción) -/
 axiom ConfigurationComplex : ComputationalProblem -> Type

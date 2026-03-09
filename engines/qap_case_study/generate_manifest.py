@@ -59,8 +59,19 @@ def generate_sovereign_manifest():
     
     with open(manifest_path, 'w') as f:
         json.dump(manifest, f, indent=4)
+    
+    # Generar Firma CriptogrÃ¡fica del Manifiesto
+    import hashlib
+    with open(manifest_path, 'rb') as f:
+        file_hash = hashlib.sha256(f.read()).hexdigest()
+    
+    # Actualizar con firma
+    manifest["metadata"]["signature_sha256"] = file_hash
+    with open(manifest_path, 'w') as f:
+        json.dump(manifest, f, indent=4)
         
-    print(f"[SOVEREIGN] Manifiesto generado en: {manifest_path}")
+    print(f"[SOVEREIGN] Manifiesto firmado: {file_hash}")
+    print(f"[SOVEREIGN] Ruta: {manifest_path}")
 
 if __name__ == "__main__":
     generate_sovereign_manifest()

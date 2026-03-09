@@ -7,10 +7,13 @@
     "quantum_metrics": {
         "braiding_index": 1.0125,
         "spectral_congestion_pct": 76.68,
+        "spectral_gap": 0.49375,
+        "simulated_entanglement_entropy": 0.6931,
         "adiabatic_success_probability": 0.2332
     },
     "topological_verdict": {
         "cech_obstruction_confirmed": true,
-        "spectral_flow_non_trivial": true
+        "spectral_flow_non_trivial": true,
+        "adiabatic_lock_status": "LOCKED"
     }
 }

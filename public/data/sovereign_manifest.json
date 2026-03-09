@@ -1,8 +1,9 @@
 {
     "metadata": {
         "version": "2026.1.0",
-        "last_updated": "2026-03-09T18:16:16.517209",
-        "sovereignty_level": "TOTAL"
+        "last_updated": "2026-03-09T18:22:59.179199",
+        "sovereignty_level": "TOTAL",
+        "signature_sha256": "5c483499602dcc57b7840ecc073ef2394e3a021fc154fdc18875cff651a4ab0e"
     },
     "certificates": {
         "nug5": {
@@ -15,11 +16,13 @@
             "meta": {
                 "effort_score": 197.92,
                 "verification_complexity": "SUPER_POLYNOMIAL",
-                "certification_time_ms": 198.95
+                "certification_time_ms": 198.07
             },
             "quantum": {
                 "braiding_index": 0.2069,
                 "spectral_congestion_pct": 20.4,
+                "spectral_gap": 0.89655,
+                "simulated_entanglement_entropy": 0.3326,
                 "adiabatic_success_probability": 0.796
             }
         },
@@ -33,11 +36,13 @@
             "meta": {
                 "effort_score": 4735.07,
                 "verification_complexity": "SUPER_POLYNOMIAL",
-                "certification_time_ms": 2000.33
+                "certification_time_ms": 2000.14
             },
             "quantum": {
                 "braiding_index": 1.0125,
                 "spectral_congestion_pct": 76.68,
+                "spectral_gap": 0.49375,
+                "simulated_entanglement_entropy": 0.6931,
                 "adiabatic_success_probability": 0.2332
             }
         },
@@ -51,11 +56,13 @@
             "meta": {
                 "effort_score": 14351.64,
                 "verification_complexity": "SUPER_POLYNOMIAL",
-                "certification_time_ms": 2000.32
+                "certification_time_ms": 2000.74
             },
             "quantum": {
                 "braiding_index": 1.0296,
                 "spectral_congestion_pct": 77.37,
+                "spectral_gap": 0.4852,
+                "simulated_entanglement_entropy": 0.6927,
                 "adiabatic_success_probability": 0.2263
             }
         }

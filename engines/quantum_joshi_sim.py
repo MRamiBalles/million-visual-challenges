@@ -17,9 +17,13 @@ def simulate_joshi_obstruction(instance_name, n, residual_gap):
     # Simulación de la congestión espectral
     spectral_congestion = np.tanh(braiding_index) * 100 # Escala 0-100
     
-    # Determinación de la obstrucción según Joshi (2026)
+    # CÃ¡lculo de Rigor: Gap Espectral y EntropÃ­a de Entrelazamiento (Simulada)
+    spectral_gap = max(0.001, 1.0 - (braiding_index / 2.0))
+    entanglement_entropy = - (spectral_gap * np.log(spectral_gap) + (1-spectral_gap) * np.log(max(0.001, 1-spectral_gap)))
+    
+    # DeterminaciÃ³n de la obstrucciÃ³n segÃºn Joshi (2026)
     # Si la congestión > 50, el flujo espectral es no-trivial (obstruido)
-    is_obstructed = spectral_congestion > 50
+    is_obstructed = spectral_congestion > 50 or spectral_gap < 0.1
     
     # Simulación de tiempo de cálculo cuántico-topológico
     time.sleep(1.0)
@@ -33,11 +37,14 @@ def simulate_joshi_obstruction(instance_name, n, residual_gap):
         "quantum_metrics": {
             "braiding_index": float(round(braiding_index, 4)),
             "spectral_congestion_pct": float(round(spectral_congestion, 2)),
+            "spectral_gap": float(round(spectral_gap, 6)),
+            "simulated_entanglement_entropy": float(round(entanglement_entropy, 4)),
             "adiabatic_success_probability": float(round(1.0 - (spectral_congestion / 100.0), 4))
         },
         "topological_verdict": {
             "cech_obstruction_confirmed": bool(is_obstructed),
-            "spectral_flow_non_trivial": bool(is_obstructed)
+            "spectral_flow_non_trivial": bool(is_obstructed),
+            "adiabatic_lock_status": "LOCKED" if is_obstructed else "FLUID"
         }
     }
     

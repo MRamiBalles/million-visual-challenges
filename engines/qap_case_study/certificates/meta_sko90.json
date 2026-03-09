@@ -2,12 +2,12 @@
     "metadata": {
         "instance": "sko90.dat",
         "n": 90,
-        "timestamp": "2026-03-09T16:51:59Z"
+        "timestamp": "2026-03-09T17:22:55Z"
     },
     "meta_metrics": {
         "effort_score": 14351.64,
         "verification_complexity": "SUPER_POLYNOMIAL",
-        "certification_time_ms": 2000.32
+        "certification_time_ms": 2000.74
     },
     "verdict": "META_CERTIFIED_HARD"
 }

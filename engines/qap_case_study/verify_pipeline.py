@@ -45,21 +45,26 @@ def validate_certificates():
             
             # Cargar Certificado Cuántico
             quantum_path = os.path.join(cert_dir, f"quantum_{inst_id}.json")
-            q_braiding = 0.0
+            quantum_braiding_index = 0.0
+            spectral_gap = 1.0 # Default value
             if os.path.exists(quantum_path):
                 with open(quantum_path, 'r') as qf:
-                    q_data = json.load(qf)
-                    q_braiding = q_data['quantum_metrics']['braiding_index']
+                    q_data = json.load(qf).get('quantum_metrics', {})
+                    quantum_braiding_index = q_data.get('braiding_index', 0.0)
+                    spectral_gap = q_data.get('spectral_gap', 1.0)
             
             if gap > 0 and obs:
-                print(f"[VALIDADO] {inst}: GAP={gap}% | META={meta_effort} | Q-BRAID={q_braiding}")
-                lean_snippet = f"def cert_{inst_id} : QAPCert := {{ " \
-                               f"instance_name := \"{inst}\", n := {n}, " \
-                               f"greedy_cost := {data['audit_trail']['greedy_cost']}, " \
-                               f"np_best_cost := {data['audit_trail']['np_best_cost']}, " \
-                               f"residual_gap := {gap}, betti_1_approx := {data['homology_metrics']['betti_1_approximation']}, " \
-                               f"has_obstruction := true, meta_effort := {meta_effort}, " \
-                               f"quantum_braiding_index := {q_braiding} }}\n"
+                print(f"[VALIDADO] {inst}: GAP={gap}% | META={meta_effort} | Q-BRAID={quantum_braiding_index} | SPECTRAL_GAP={spectral_gap}")
+                # Generar snippet de Lean 4 con los nuevos campos
+                lean_snippet = (
+                    f'def cert_{inst_id} : QAPCert := {{ '
+                    f'instance_name := "{inst}", n := {n}, '
+                    f'greedy_cost := {data["audit_trail"]["greedy_cost"]}, np_best_cost := {data["audit_trail"]["np_best_cost"]}, '
+                    f'residual_gap := {gap}, betti_1_approx := {data["homology_metrics"]["betti_1_approximation"]}, '
+                    f'has_obstruction := true, meta_effort := {meta_effort}, '
+                    f'quantum_braiding_index := {quantum_braiding_index}, '
+                    f'spectral_gap := {spectral_gap} }}\n'
+                )
                 lean_content.append(lean_snippet)
                 valid_count += 1
             else:
