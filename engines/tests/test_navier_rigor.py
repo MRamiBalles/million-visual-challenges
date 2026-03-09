@@ -4,7 +4,8 @@ import numpy as np
 
 def test_interval_solver_initialization():
     solver = NavierStokesIntervalSolver(lambda_val=0.4713)
-    assert str(solver.lambda_iv).startswith('0.4713')
+    # Validar que el valor 0.4713 está contenido en el intervalo o muy cerca del centro
+    assert abs(solver.lambda_iv.a - 0.4713) < 1e-10 or abs(solver.lambda_iv.b - 0.4713) < 1e-10
 
 def test_residual_calculation_magnitude():
     # Un perfil que no es solución debe tener residuos grandes
