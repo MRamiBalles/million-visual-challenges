@@ -1,0 +1,16 @@
+{
+    "metadata": {
+        "instance": "nug5.dat",
+        "engine": "Joshi-Quantum-Sim-2026",
+        "reference": "Joshi, P. S. (2026). Topological Obstructions for QAA."
+    },
+    "quantum_metrics": {
+        "braiding_index": 0.2069,
+        "spectral_congestion_pct": 20.4,
+        "adiabatic_success_probability": 0.796
+    },
+    "topological_verdict": {
+        "cech_obstruction_confirmed": false,
+        "spectral_flow_non_trivial": false
+    }
+}

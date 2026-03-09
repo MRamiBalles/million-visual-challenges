@@ -15,7 +15,7 @@
         "cost_np": 383795207,
         "gap": 40.5,
         "iters": 19,
-        "time_s": 0.11
+        "time_s": 0.17
     },
     {
         "instance": "sko90.dat",
@@ -24,6 +24,6 @@
         "cost_np": 117752,
         "gap": 11.44,
         "iters": 98,
-        "time_s": 7.75
+        "time_s": 11.76
     }
 ]

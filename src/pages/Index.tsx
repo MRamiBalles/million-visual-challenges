@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Brain, Infinity, Waves, Atom, Calculator, Network, CheckCircle2, Sparkles, LogOut } from "lucide-react";
+import { Brain, Infinity, Waves, Atom, Calculator, Network, CheckCircle2, Sparkles, LogOut, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import NotificationCenter from "@/components/NotificationCenter";
 
@@ -344,6 +344,59 @@ const Index = () => {
               </div>
             </Card>
           </motion.div>
+        </motion.div>
+      </section>
+
+      {/* Research Frontier Bulletin 2026 */}
+      <section className="container mx-auto px-6 py-12">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          className="relative overflow-hidden p-8 rounded-3xl border border-cyan-500/30 bg-slate-950 shadow-2xl shadow-cyan-500/10"
+        >
+          <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/10 blur-[80px] rounded-full translate-x-1/2 -translate-y-1/2" />
+
+          <div className="relative flex flex-col md:flex-row items-center gap-10">
+            <div className="flex-1 space-y-6">
+              <div className="flex items-center gap-2">
+                <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/50">RESEARCH BULLETIN 2026</Badge>
+                <span className="text-slate-500 font-mono text-xs uppercase tracking-widest">Sovereignty Phase</span>
+              </div>
+              <h2 className="text-3xl md:text-5xl font-extrabold tracking-tighter">
+                Gran Auditoría Unificada: <br />
+                <span className="text-white">La Soberanía del Certificado</span>
+              </h2>
+              <p className="text-slate-400 text-lg leading-relaxed max-w-xl">
+                Hemos fusionado la **Meta-Complejidad** y el **Trenzado de Joshi** en un marco homológico unificado.
+                Certificamos que la obstrucción de P vs NP es física, medible e ineludible.
+              </p>
+              <Button
+                className="bg-cyan-500 hover:bg-cyan-400 text-black font-bold h-12 px-8 rounded-xl shadow-lg shadow-cyan-500/20"
+                onClick={() => navigate("/pvsnp")}
+              >
+                <ShieldCheck className="w-5 h-5 mr-2" />
+                Explorar Poster Científico 2026
+              </Button>
+            </div>
+
+            <div className="hidden lg:flex flex-1 justify-center">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 rounded-xl border border-white/5 bg-white/5 backdrop-blur-sm">
+                  <div className="text-xs text-slate-500 uppercase mb-1">Braiding Index</div>
+                  <div className="text-2xl font-bold text-amber-400 font-mono">1.0296</div>
+                </div>
+                <div className="p-4 rounded-xl border border-white/5 bg-white/5 backdrop-blur-sm">
+                  <div className="text-xs text-slate-500 uppercase mb-1">Meta Effort</div>
+                  <div className="text-2xl font-bold text-purple-400 font-mono">14,351</div>
+                </div>
+                <div className="col-span-2 p-4 rounded-xl border border-cyan-500/30 bg-cyan-500/5 backdrop-blur-sm flex items-center justify-between">
+                  <div className="text-xs text-cyan-400 font-mono">STATUS: RIGOR_VALIDATED</div>
+                  <CheckCircle2 className="w-4 h-4 text-cyan-400" />
+                </div>
+              </div>
+            </div>
+          </div>
         </motion.div>
       </section>
 

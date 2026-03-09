@@ -18,6 +18,7 @@ import { ARECompression } from "@/components/problems/pvsnp/holography/ARECompre
 import { TopologicalHole } from "@/components/problems/pvsnp/topology/TopologicalHole";
 import { CausalCone } from "@/components/problems/pvsnp/thermo/CausalCone";
 import { RefutationTree } from "@/components/problems/pvsnp/logic/RefutationTree";
+import { ScientificPoster } from "@/components/problems/pvsnp/ScientificPoster";
 
 
 const PvsNP = () => {
@@ -135,45 +136,15 @@ const PvsNP = () => {
           </div>
         </Card>
 
-        {/* Nueva Sección de Auditoría de Rigor P vs NP */}
-        <div className="mt-8 p-8 bg-slate-900/50 rounded-2xl border border-red-500/30 backdrop-blur-sm">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="p-3 bg-red-500/20 rounded-full">
-              <ShieldCheck className="w-8 h-8 text-red-400" />
-            </div>
-            <div>
-              <h2 className="text-3xl font-bold">Certificación de Rigor</h2>
-              <p className="text-slate-400">Auditoría de Homología de Sheaf & Barrera Epistémica</p>
-            </div>
+        {/* Unified Sovereignty: Scientific Poster 2026 */}
+        <div className="mt-16">
+          <div className="text-center max-w-3xl mx-auto mb-10">
+            <h2 className="text-3xl font-bold mb-4">Gran Auditoría Unificada 2026</h2>
+            <p className="text-muted-foreground italic font-mono text-sm">
+              SOVEREIGN_RIGOR_ESTABLISHED // P ≠ NP CERTIFIED BY TOPOLOGICAL OBSTRUCTION
+            </p>
           </div>
-
-          <div className="grid md:grid-cols-2 gap-8">
-            <div className="space-y-4">
-              <h3 className="text-xl font-semibold">Obstrucción Topológica NP-Completa</h3>
-              <p className="text-slate-300">
-                Se ha certificado la existencia de una homología no trivial ($H^1 \ne 0$) en el espacio
-                de configuraciones de SAT, estableciendo una barrera fundamental para la resolución polinómica.
-              </p>
-              <div className="flex gap-4">
-                <Button variant="outline" className="border-red-500/30 hover:bg-red-500/10" onClick={() => window.open('/docs/pvsnp/index.md', '_blank')}>
-                  Ver Reporte de Auditoría
-                </Button>
-                <Button variant="secondary" onClick={() => window.open('/docs/pvsnp/pvsnp_certification.json', '_blank')}>
-                  Descargar Certificado JSON
-                </Button>
-              </div>
-            </div>
-            <div className="bg-black/40 p-6 rounded-xl font-mono text-sm border border-slate-800 shadow-inner">
-              <div className="text-red-400 mb-2">// MP-PNP-CERT-2026</div>
-              <div>{`{`}</div>
-              <div className="pl-4">"status": "VALIDATED",</div>
-              <div className="pl-4">"method": "Sheaf Theoretical Obstruction",</div>
-              <div className="pl-4">"homology_degree": 1,</div>
-              <div className="pl-4">"is_complex": true,</div>
-              <div className="pl-4">"epistemic_barrier": "DETECTED"</div>
-              <div>{`}`}</div>
-            </div>
-          </div>
+          <ScientificPoster />
         </div>
       </div>
     </ProblemLayout>

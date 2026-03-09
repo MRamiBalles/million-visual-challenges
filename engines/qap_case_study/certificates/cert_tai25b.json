@@ -1,0 +1,21 @@
+{
+    "metadata": {
+        "instance_name": "tai25b.dat",
+        "problem_type": "QAP",
+        "n": 25,
+        "timestamp": "2026-03-09T16:51:43Z",
+        "engine_version": "MVC-Audit-2.0-Homology"
+    },
+    "homology_metrics": {
+        "betti_1_approximation": 0.9643,
+        "cech_obstruction_detected": true,
+        "res_rag_ratio": 1.0
+    },
+    "audit_trail": {
+        "greedy_cost": 539239577,
+        "np_best_cost": 383795207,
+        "residual_gap": 40.5,
+        "local_search_iterations": 19
+    },
+    "formal_verification_stub": "def cert_tai25b : QAPCert := { gap := 40.501904965165444, n := 25 }"
+}

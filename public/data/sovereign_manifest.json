@@ -1,0 +1,63 @@
+{
+    "metadata": {
+        "version": "2026.1.0",
+        "last_updated": "2026-03-09T18:16:16.517209",
+        "sovereignty_level": "TOTAL"
+    },
+    "certificates": {
+        "nug5": {
+            "instance": "nug5",
+            "base": {
+                "gap": 41.38,
+                "betti": 0.9852,
+                "obstructed": true
+            },
+            "meta": {
+                "effort_score": 197.92,
+                "verification_complexity": "SUPER_POLYNOMIAL",
+                "certification_time_ms": 198.95
+            },
+            "quantum": {
+                "braiding_index": 0.2069,
+                "spectral_congestion_pct": 20.4,
+                "adiabatic_success_probability": 0.796
+            }
+        },
+        "tai25b": {
+            "instance": "tai25b",
+            "base": {
+                "gap": 40.5,
+                "betti": 0.9643,
+                "obstructed": true
+            },
+            "meta": {
+                "effort_score": 4735.07,
+                "verification_complexity": "SUPER_POLYNOMIAL",
+                "certification_time_ms": 2000.33
+            },
+            "quantum": {
+                "braiding_index": 1.0125,
+                "spectral_congestion_pct": 76.68,
+                "adiabatic_success_probability": 0.2332
+            }
+        },
+        "sko90": {
+            "instance": "sko90",
+            "base": {
+                "gap": 11.44,
+                "betti": 0.2725,
+                "obstructed": true
+            },
+            "meta": {
+                "effort_score": 14351.64,
+                "verification_complexity": "SUPER_POLYNOMIAL",
+                "certification_time_ms": 2000.32
+            },
+            "quantum": {
+                "braiding_index": 1.0296,
+                "spectral_congestion_pct": 77.37,
+                "adiabatic_success_probability": 0.2263
+            }
+        }
+    }
+}
