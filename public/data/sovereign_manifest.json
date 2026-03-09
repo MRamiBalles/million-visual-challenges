@@ -1,9 +1,9 @@
 {
     "metadata": {
         "version": "2026.1.0",
-        "last_updated": "2026-03-09T18:22:59.179199",
+        "last_updated": "2026-03-09T18:26:48.678473",
         "sovereignty_level": "TOTAL",
-        "signature_sha256": "5c483499602dcc57b7840ecc073ef2394e3a021fc154fdc18875cff651a4ab0e"
+        "signature_sha256": "bc3bc20a3789b42b83e82118051f1688dae7ef2f75693d85f8ed3f67373a082d"
     },
     "certificates": {
         "nug5": {
@@ -16,7 +16,7 @@
             "meta": {
                 "effort_score": 197.92,
                 "verification_complexity": "SUPER_POLYNOMIAL",
-                "certification_time_ms": 198.07
+                "certification_time_ms": 198.14
             },
             "quantum": {
                 "braiding_index": 0.2069,
@@ -36,7 +36,7 @@
             "meta": {
                 "effort_score": 4735.07,
                 "verification_complexity": "SUPER_POLYNOMIAL",
-                "certification_time_ms": 2000.14
+                "certification_time_ms": 2000.34
             },
             "quantum": {
                 "braiding_index": 1.0125,
@@ -56,7 +56,7 @@
             "meta": {
                 "effort_score": 14351.64,
                 "verification_complexity": "SUPER_POLYNOMIAL",
-                "certification_time_ms": 2000.74
+                "certification_time_ms": 2000.14
             },
             "quantum": {
                 "braiding_index": 1.0296,

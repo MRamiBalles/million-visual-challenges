@@ -2,12 +2,12 @@
     "metadata": {
         "instance": "tai25b.dat",
         "n": 25,
-        "timestamp": "2026-03-09T17:22:53Z"
+        "timestamp": "2026-03-09T17:26:43Z"
     },
     "meta_metrics": {
         "effort_score": 4735.07,
         "verification_complexity": "SUPER_POLYNOMIAL",
-        "certification_time_ms": 2000.14
+        "certification_time_ms": 2000.34
     },
     "verdict": "META_CERTIFIED_HARD"
 }

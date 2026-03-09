@@ -171,6 +171,16 @@ export const ScientificPoster = () => {
                                     description="Quantized spectral congestion in adiabatic evolution."
                                     colorClass="amber"
                                 />
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div className="p-3 rounded-lg border border-white/5 bg-white/5">
+                                        <div className="text-[10px] text-slate-500 uppercase">Spectral Gap</div>
+                                        <div className="text-sm font-bold text-amber-200">{cert.quantum.spectral_gap?.toFixed(6) || "N/A"}</div>
+                                    </div>
+                                    <div className="p-3 rounded-lg border border-white/5 bg-white/5">
+                                        <div className="text-[10px] text-slate-500 uppercase">Entropy (S)</div>
+                                        <div className="text-sm font-bold text-amber-200">{cert.quantum.simulated_entanglement_entropy?.toFixed(4) || "N/A"}</div>
+                                    </div>
+                                </div>
                                 <div className="p-4 rounded-xl border border-amber-500/20 bg-amber-500/5 text-xs font-mono">
                                     <span className="text-amber-400">SOVEREIGNTY:</span> {cert.quantum.braiding_index > 0.5 ? "ADIABATIC_LOCK" : "FLUID_FLOW"}
                                 </div>
@@ -181,13 +191,19 @@ export const ScientificPoster = () => {
                 </AnimatePresence>
 
                 {/* Bottom Footer Section */}
-                <div className="pt-8 border-t border-white/10 flex justify-between items-center text-xs font-mono text-slate-500">
+                <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 text-xs font-mono text-slate-500">
                     <div className="flex gap-8">
                         <div className="flex items-center gap-1 underline underline-offset-4 cursor-pointer hover:text-cyan-400">
                             VerifiedCertificates.lean
                         </div>
                         <div className="flex items-center gap-1 underline underline-offset-4 cursor-pointer hover:text-cyan-400" onClick={() => window.open('/public/data/sovereign_manifest.json')}>
                             sovereign_manifest.json
+                        </div>
+                    </div>
+                    <div className="text-right">
+                        <div className="text-[10px] text-slate-600 uppercase mb-1">Manifest Signature (SHA-256)</div>
+                        <div className="text-cyan-500/50 bg-cyan-500/5 px-2 py-1 rounded border border-cyan-500/20 truncate max-w-[300px]">
+                            {data.metadata.signature_sha256}
                         </div>
                     </div>
                     <div className="tracking-widest uppercase">
