@@ -287,7 +287,7 @@ const NavierStokes = () => {
                                 <h3 className="text-xl font-semibold">Residuo de Euler Certificado</h3>
                                 <p className="text-slate-300">
                                     El perfil de blow-up ha sido validado mediante aritmética de intervalos,
-                                    asegurando que el error residual $||\mathcal{R}|| < 10^{-15}$.
+                                    asegurando que el error residual {'||𝓡|| < 10⁻¹⁵'}.
                                 </p>
                                 <div className="flex gap-4">
                                     <Button variant="outline" onClick={() => window.open('/docs/navier_stokes/index.md', '_blank')}>

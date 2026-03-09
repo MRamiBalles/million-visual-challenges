@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Bookmark, BookmarkCheck, Zap } from "lucide-react";
+import { ArrowLeft, Bookmark, BookmarkCheck, Zap, ShieldCheck } from "lucide-react";
 import {
     ProblemHeader,
     DifficultySelector,
