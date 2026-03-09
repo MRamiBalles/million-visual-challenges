@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-03-09T02:21:53Z",
+  "problem": "3-SAT",
+  "instance_id": "NP_CERT_001",
+  "topology_metrics": {
+    "h0_rank": 1,
+    "h1_rank": 14,
+    "is_contractible": false,
+    "euler_characteristic": -13
+  },
+  "status": "CERTIFIED_NON_TRIVIAL"
+}
