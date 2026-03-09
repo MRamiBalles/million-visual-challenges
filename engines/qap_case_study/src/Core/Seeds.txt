@@ -1,0 +1,11 @@
+# Lista de semillas para reproducibilidad (Práctica requiere 5-15 ejecuciones)
+123456
+987654
+112233
+445566
+778899
+111111
+222222
+333333
+444444
+555555
