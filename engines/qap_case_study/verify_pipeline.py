@@ -22,25 +22,44 @@ def validate_certificates():
 
     valid_count = 0
     for cert_path in certificates:
+        if os.path.basename(cert_path).startswith(('meta_', 'quantum_')):
+            continue # Se procesan junto al certificado base
+            
         try:
             with open(cert_path, 'r') as f:
                 data = json.load(f)
             
-            # Validación básica de integridad
             inst = data['metadata']['instance_name']
+            inst_id = inst.split('.')[0]
             gap = data['audit_trail']['residual_gap']
             n = data['metadata']['n']
             obs = data['homology_metrics']['cech_obstruction_detected']
             
+            # Cargar Meta-Certificado
+            meta_path = os.path.join(cert_dir, f"meta_{inst_id}.json")
+            meta_effort = 0.0
+            if os.path.exists(meta_path):
+                with open(meta_path, 'r') as mf:
+                    meta_data = json.load(mf)
+                    meta_effort = meta_data['meta_metrics']['effort_score']
+            
+            # Cargar Certificado Cuántico
+            quantum_path = os.path.join(cert_dir, f"quantum_{inst_id}.json")
+            q_braiding = 0.0
+            if os.path.exists(quantum_path):
+                with open(quantum_path, 'r') as qf:
+                    q_data = json.load(qf)
+                    q_braiding = q_data['quantum_metrics']['braiding_index']
+            
             if gap > 0 and obs:
-                print(f"[VALIDADO] {inst}: GAP={gap}% | OBSTRUCCIÓN=SÍ")
-                # Generar el snippet de Lean 4
-                lean_snippet = f"def cert_{inst.split('.')[0]} : QAPCert := {{ " \
+                print(f"[VALIDADO] {inst}: GAP={gap}% | META={meta_effort} | Q-BRAID={q_braiding}")
+                lean_snippet = f"def cert_{inst_id} : QAPCert := {{ " \
                                f"instance_name := \"{inst}\", n := {n}, " \
                                f"greedy_cost := {data['audit_trail']['greedy_cost']}, " \
                                f"np_best_cost := {data['audit_trail']['np_best_cost']}, " \
                                f"residual_gap := {gap}, betti_1_approx := {data['homology_metrics']['betti_1_approximation']}, " \
-                               f"has_obstruction := true }}\n"
+                               f"has_obstruction := true, meta_effort := {meta_effort}, " \
+                               f"quantum_braiding_index := {q_braiding} }}\n"
                 lean_content.append(lean_snippet)
                 valid_count += 1
             else:
