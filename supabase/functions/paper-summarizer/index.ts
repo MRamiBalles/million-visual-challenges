@@ -77,8 +77,8 @@ serve(async (req) => {
         // Validate and sanitize title (max 500 chars)
         const MAX_TITLE_LENGTH = 500
         if (title.length > MAX_TITLE_LENGTH) {
-            return new Response(JSON.stringify({ 
-                error: `Title too long (max ${MAX_TITLE_LENGTH} characters)` 
+            return new Response(JSON.stringify({
+                error: `Title too long (max ${MAX_TITLE_LENGTH} characters)`
             }), {
                 status: 400,
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -89,14 +89,14 @@ serve(async (req) => {
         // Validate and sanitize abstract (max 5000 chars)
         const MAX_ABSTRACT_LENGTH = 5000
         if (abstract && typeof abstract === 'string' && abstract.length > MAX_ABSTRACT_LENGTH) {
-            return new Response(JSON.stringify({ 
-                error: `Abstract too long (max ${MAX_ABSTRACT_LENGTH} characters)` 
+            return new Response(JSON.stringify({
+                error: `Abstract too long (max ${MAX_ABSTRACT_LENGTH} characters)`
             }), {
                 status: 400,
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             })
         }
-        const sanitizedAbstract = abstract 
+        const sanitizedAbstract = abstract
             ? abstract.trim().replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
             : ''
 
@@ -106,6 +106,30 @@ serve(async (req) => {
             hasTitle: !!sanitizedTitle,
             hasAbstract: !!sanitizedAbstract
         })
+
+        // VERIFICATION: Ensure the user owns the paper before allowing an AI summary update.
+        // We use the user's supabase client (RLS-enabled) to see if they have permission to access/own the record.
+        const { data: paper, error: fetchError } = await supabase
+            .from("research_papers")
+            .select("added_by")
+            .eq("id", paperId)
+            .single()
+
+        if (fetchError || !paper) {
+            console.error(`[paper-summarizer] Ownership check failed for paper ${paperId}:`, fetchError)
+            return new Response(JSON.stringify({ error: "Paper not found or access denied" }), {
+                status: 404,
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            })
+        }
+
+        if (paper.added_by !== user.id) {
+            console.warn(`[paper-summarizer] User ${user.id} attempted to summarize paper ${paperId} owned by ${paper.added_by}`)
+            return new Response(JSON.stringify({ error: "Unauthorized: You can only summarize papers you have added yourself" }), {
+                status: 403,
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            })
+        }
 
         // Rate limiting - returns info about current usage
         const limitInfo = await checkRateLimit(user.id, "paper-summarizer", 5)
