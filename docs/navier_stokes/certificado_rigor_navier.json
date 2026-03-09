@@ -1,0 +1,10 @@
+{
+    "audit_target": "Navier-Stokes Blow-up Profile",
+    "data_source": "d:/million-visual-challenges-2/src/data/navier_stokes_singularity.json",
+    "verification_results": {
+        "is_verified": false,
+        "max_residual": "[42.30393937260000000000000000000000000000000000000022376, 42.30393937260000000000000000000000000000000000000022376]",
+        "lambda_used": "[0.4713242199999999999999999999999999999999999999999997387, 0.4713242200000000000000000000000000000000000000000004069]",
+        "precision_dps": 50
+    }
+}
