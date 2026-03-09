@@ -13,21 +13,24 @@ def refine_profile():
     profile = data["profile"]
     y_raw = np.array([p["y_coord"] for p in profile])
     omega_raw = np.array([p["vorticity"] for p in profile])
+    u_raw = np.array([p.get("velocity", 0.0) for p in profile])
     
-    # Crear interpolación cúbica
-    cs = CubicSpline(y_raw, omega_raw, bc_type='natural')
+    # Crear interpolaciones cúbicas
+    cs_omega = CubicSpline(y_raw, omega_raw, bc_type='natural')
+    cs_u = CubicSpline(y_raw, u_raw, bc_type='natural')
     
     # Generar 200 puntos (alta resolución)
     y_new = np.linspace(y_raw.min(), y_raw.max(), 200)
-    omega_new = cs(y_new)
+    omega_new = cs_omega(y_new)
+    u_new = cs_u(y_new)
     
     # Reconstruir la lista de perfil
     new_profile = []
-    for yi, oi in zip(y_new, omega_new):
+    for yi, oi, ui in zip(y_new, omega_new, u_new):
         new_profile.append({
             "y_coord": float(yi),
             "vorticity": float(oi),
-            "velocity": float(yi) # Dummy velocity for now
+            "velocity": float(ui)
         })
     
     # Actualizar metadata

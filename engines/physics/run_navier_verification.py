@@ -22,6 +22,7 @@ def main():
     
     y = [p["y_coord"] for p in profile]
     omega = [p["vorticity"] for p in profile]
+    u = [p.get("velocity", 0.0) for p in profile]
     lambda_val = metadata.get("lambda_param", 0.4713)
     
     print(f"🔬 Iniciando Validación de Rigor: Navier-Stokes")
@@ -30,7 +31,7 @@ def main():
     print(f"   Puntos de Control: {len(y)}")
     
     solver = NavierStokesIntervalSolver(lambda_val=lambda_val)
-    certificate = solver.verify_profile({"y": y, "Omega": omega})
+    certificate = solver.verify_profile({"y": y, "Omega": omega, "U": u})
     
     print("\n📜 CERTIFICADO DE RIGOR EMITIDO:")
     print(json.dumps(certificate, indent=4))
