@@ -1,0 +1,29 @@
+[
+    {
+        "instance": "nug5.dat",
+        "n": 5,
+        "cost_p": 82,
+        "cost_np": 58,
+        "gap": 41.38,
+        "iters": 5,
+        "time_s": 0.0
+    },
+    {
+        "instance": "tai25b.dat",
+        "n": 25,
+        "cost_p": 539239577,
+        "cost_np": 383795207,
+        "gap": 40.5,
+        "iters": 19,
+        "time_s": 0.11
+    },
+    {
+        "instance": "sko90.dat",
+        "n": 90,
+        "cost_p": 131228,
+        "cost_np": 117752,
+        "gap": 11.44,
+        "iters": 98,
+        "time_s": 7.63
+    }
+]

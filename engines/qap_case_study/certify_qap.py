@@ -15,127 +15,172 @@ class QAPAuditor:
             print(f"Error: Archivo {path} no encontrado.")
             return False
         
-        with open(path, 'r') as f:
-            lines = f.readlines()
-            # Limpiar líneas de comentarios o vacías si las hay
-            content = [line.strip() for line in lines if line.strip()]
-            
-            self.n = int(content[0])
-            all_numbers = []
-            for line in content[1:]:
-                all_numbers.extend(map(int, line.split()))
-            
-            # Matriz de Flujo
-            self.flow = np.array(all_numbers[:self.n*self.n]).reshape((self.n, self.n))
-            # Matriz de Distancia
-            self.dist = np.array(all_numbers[self.n*self.n:]).reshape((self.n, self.n))
-        return True
+        try:
+            with open(path, 'r') as f:
+                lines = f.readlines()
+                content = []
+                for line in lines:
+                    parts = line.split('#')[0].split()
+                    content.extend(parts)
+                
+                if not content: return False
+                
+                self.n = int(content[0])
+                all_numbers = list(map(int, content[1:]))
+                
+                self.flow = np.array(all_numbers[:self.n*self.n]).reshape((self.n, self.n))
+                self.dist = np.array(all_numbers[self.n*self.n:2*self.n*self.n]).reshape((self.n, self.n))
+            return True
+        except Exception as e:
+            print(f"Error cargando {path}: {e}")
+            return False
 
     def evaluate(self, solution):
         self.num_evals += 1
-        cost = 0
-        for i in range(self.n):
-            for j in range(self.n):
-                if i != j:
-                    cost += self.flow[i][j] * self.dist[solution[i]][solution[j]]
+        sol = np.array(solution)
+        cost = np.sum(self.flow * self.dist[sol][:, sol])
         return cost
 
     def greedy_potential(self):
-        # 1. Potenciales de flujo
         flow_pot = np.sum(self.flow, axis=1) + np.sum(self.flow, axis=0)
-        # 2. Potenciales de distancia
         dist_pot = np.sum(self.dist, axis=1) + np.sum(self.dist, axis=0)
-        
-        # 3. Ordenar
-        flow_indices = np.argsort(-flow_pot) # Mayor flujo primero
-        dist_indices = np.argsort(dist_pot)  # Menor distancia (céntrica) primero
-        
-        # 4. Asignar
-        solution = [0] * self.n
+        flow_indices = np.argsort(-flow_pot)
+        dist_indices = np.argsort(dist_pot)
+        solution = np.zeros(self.n, dtype=int)
         for i in range(self.n):
             solution[flow_indices[i]] = dist_indices[i]
-        
-        return solution
+        return solution.tolist()
 
-    def local_search_best(self, initial_solution):
-        solution = list(initial_solution)
+    def local_search_best(self, initial_solution, max_iters=5000):
+        solution = np.array(initial_solution)
         current_cost = self.evaluate(solution)
         improved = True
+        iters = 0
         
-        while improved:
+        # Pre-extracción para mayor velocidad
+        while improved and iters < max_iters:
             improved = False
+            iters += 1
             best_delta = 0
             best_move = None
             
+            # Vectorización del vecindario
+            # Para cada r, podemos calcular todos los deltas de s en un paso vectorial
             for r in range(self.n):
-                for s in range(r + 1, self.n):
-                    # Cálculo de Delta (simplificado para Python, optimizar si n > 100)
-                    delta = self._calculate_delta(r, s, solution)
-                    if delta < best_delta:
-                        best_delta = delta
-                        best_move = (r, s)
+                # Calculamos deltas para todos los s > r
+                deltas = self._calculate_vector_deltas(r, solution)
+                
+                # Buscamos el mejor en este lote
+                min_idx = np.argmin(deltas)
+                if deltas[min_idx] < best_delta:
+                    best_delta = deltas[min_idx]
+                    best_move = (r, r + 1 + min_idx)
             
             if best_move:
                 r, s = best_move
                 solution[r], solution[s] = solution[s], solution[r]
                 current_cost += best_delta
                 improved = True
+            
+            if iters % 10 == 0:
+                print(f"    Iteración {iters}, Coste: {current_cost}", end="\r")
                 
-        return solution, current_cost
+        return solution.tolist(), current_cost, iters
 
-    def _calculate_delta(self, r, s, solution):
-        # Delta O(n)
-        u_r = solution[r]
-        u_s = solution[s]
-        delta = 0
-        for k in range(self.n):
-            if k != r and k != s:
-                u_k = solution[k]
-                # Restar antigua contribución
-                delta -= (self.flow[r][k] * self.dist[u_r][u_k] + self.flow[k][r] * self.dist[u_k][u_r] +
-                          self.flow[s][k] * self.dist[u_s][u_k] + self.flow[k][s] * self.dist[u_k][u_s])
-                # Sumar nueva contribución
-                delta += (self.flow[r][k] * self.dist[u_s][u_k] + self.flow[k][r] * self.dist[u_k][u_s] +
-                          self.flow[s][k] * self.dist[u_r][u_k] + self.flow[k][s] * self.dist[u_k][u_r])
+    def _calculate_vector_deltas(self, r, solution):
+        # Implementación vectorizada de Delta para un r fijo contra todos los s > r
+        n = self.n
+        s_range = np.arange(r+1, n)
+        if len(s_range) == 0: return np.array([0])
         
-        # Interacción r <-> s
-        delta -= (self.flow[r][s] * self.dist[u_r][u_s] + self.flow[s][r] * self.dist[u_s][u_r])
-        delta += (self.flow[r][s] * self.dist[u_s][u_r] + self.flow[s][r] * self.dist[u_r][u_s])
-        return delta
+        u_r = solution[r]
+        sol_idx = solution
+        
+        # Preparamos los deltas
+        deltas = np.zeros(len(s_range))
+        
+        # Delta(r, s) = Sum_{k!=r,s} [ (F_{rk} - F_{sk})(D_{Ts,Tk} - D_{Tr,Tk}) + (F_{kr} - F_{ks})(D_{Tk,Ts} - D_{Tk,Tr}) ]
+        # Esta es una versión simplificada pero potente para vectorizar
+        for i, s in enumerate(s_range):
+            u_s = solution[s]
+            # Usamos lógica optimizada O(n) pero con slices de numpy
+            # Excluimos r y s del cálculo
+            mask = np.ones(n, dtype=bool)
+            mask[r] = False
+            mask[s] = False
+            
+            k_indices = np.where(mask)[0]
+            u_k = sol_idx[k_indices]
+            
+            # Cálculo directo
+            term1 = (self.flow[r, k_indices] - self.flow[s, k_indices]) * (self.dist[u_s, u_k] - self.dist[u_r, u_k])
+            term2 = (self.flow[k_indices, r] - self.flow[k_indices, s]) * (self.dist[u_k, u_s] - self.dist[u_k, u_r])
+            
+            d_val = np.sum(term1 + term2)
+            
+            # Interacción r <-> s
+            d_val -= (self.flow[r,s]*self.dist[u_r,u_s] + self.flow[s,r]*self.dist[u_s,u_r])
+            d_val += (self.flow[r,s]*self.dist[u_s,u_r] + self.flow[s,r]*self.dist[u_r,u_s])
+            
+            deltas[i] = d_val
+            
+        return deltas
 
-def run_audit(instance_name):
-    auditor = QAPAuditor()
-    data_path = f"d:/million-visual-challenges-2/engines/qap_case_study/data/{instance_name.lower()}.dat"
+def run_full_audit():
+    data_dir = "d:/million-visual-challenges-2/engines/qap_case_study/data/"
+    instances = ["nug5.dat", "tai25b.dat", "sko90.dat"]
     
-    if not auditor.load_instance(data_path):
-        return
+    results = []
+    
+    print("\n" + "="*60)
+    print("   PROFUNDIZACION DE RIGOR QAP (P vs NP Framework)      ")
+    print("="*60)
+    
+    for inst in instances:
+        path = os.path.join(data_dir, inst)
+        if not os.path.exists(path): continue
+        
+        auditor = QAPAuditor()
+        if not auditor.load_instance(path): continue
+            
+        print(f"\n> Auditando Escala: {inst} (N={auditor.n})")
+        
+        # P-Class (Greedy)
+        t0 = time.time()
+        sol_p = auditor.greedy_potential()
+        cost_p = auditor.evaluate(sol_p)
+        time_p = (time.time() - t0) * 1000
+        
+        # NP-Class (Local Search con convergencia profunda)
+        np.random.seed(42)
+        sol_ini = np.random.permutation(auditor.n).tolist()
+        t1 = time.time()
+        sol_np, cost_np, iters = auditor.local_search_best(sol_ini, max_iters=10000)
+        time_np = (time.time() - t1) * 1000
+        
+        gap = ((cost_p - cost_np) / cost_np * 100) if cost_np != 0 else 0
+        
+        print(f"\n  [P]  Coste: {cost_p:12}")
+        print(f"  [NP] Coste: {cost_np:12} (en {iters} iteraciones)")
+        print(f"  GAP FINAL: {gap:.2f}%")
+        print(f"  Tiempo LS: {time_np/1000:.2f}s")
+        
+        results.append({
+            "instance": inst,
+            "n": auditor.n,
+            "cost_p": int(cost_p),
+            "cost_np": int(cost_np),
+            "gap": round(gap, 2),
+            "iters": iters,
+            "time_s": round(time_np/1000, 2)
+        })
 
-    print(f"\n--- AUDITORIA PYTHON QAP: {instance_name} (N={auditor.n}) ---")
-    
-    # Greedy (P)
-    start = time.time()
-    sol_greedy = auditor.greedy_potential()
-    cost_greedy = auditor.evaluate(sol_greedy)
-    time_greedy = (time.time() - start) * 1000
-    print(f"Greedy (P) Coste: {cost_greedy} | Tiempo: {time_greedy:.2f}ms")
-    
-    # Local Search (NP)
-    np.random.seed(42)
-    sol_ini = np.random.permutation(auditor.n)
-    start = time.time()
-    sol_ls, cost_ls = auditor.local_search_best(sol_ini)
-    time_ls = (time.time() - start) * 1000
-    print(f"LS Best (NP) Coste: {cost_ls} | Tiempo: {time_ls:.2f}ms")
-    
-    # Gap
-    gap = ((cost_greedy - cost_ls) / cost_ls) * 100 if cost_ls != 0 else 0
-    print(f"OBSTRUCCIÓN DETECTADA (GAP): {gap:.2f}%")
-    
-    if gap > 15:
-        print("RESULTADO: Alta rugosidad. Evidencia empírica de obstrucción topológica.")
-    else:
-        print("RESULTADO: Paisaje suave.")
+    with open("d:/million-visual-challenges-2/engines/qap_case_study/audit_results_deep.json", "w") as f:
+        json.dump(results, f, indent=4)
+        
+    print("\n" + "="*60)
+    print("AUDITORIA PROFUNDA COMPLETADA.")
+    print("="*60)
 
 if __name__ == "__main__":
-    run_audit("tai25b")
-    run_audit("nug5")
+    run_full_audit()
