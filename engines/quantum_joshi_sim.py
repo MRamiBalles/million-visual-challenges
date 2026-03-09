@@ -31,13 +31,13 @@ def simulate_joshi_obstruction(instance_name, n, residual_gap):
             "reference": "Joshi, P. S. (2026). Topological Obstructions for QAA."
         },
         "quantum_metrics": {
-            "braiding_index": round(float(braiding_index), 4),
-            "spectral_congestion_pct": round(float(spectral_congestion), 2),
-            "adiabatic_success_probability": round(float(1.0 - (spectral_congestion / 100.0)), 4)
+            "braiding_index": float(round(braiding_index, 4)),
+            "spectral_congestion_pct": float(round(spectral_congestion, 2)),
+            "adiabatic_success_probability": float(round(1.0 - (spectral_congestion / 100.0), 4))
         },
         "topological_verdict": {
-            "cech_obstruction_confirmed": is_obstructed,
-            "spectral_flow_non_trivial": is_obstructed
+            "cech_obstruction_confirmed": bool(is_obstructed),
+            "spectral_flow_non_trivial": bool(is_obstructed)
         }
     }
     
